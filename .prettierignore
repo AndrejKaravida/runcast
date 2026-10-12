@@ -1,0 +1,7 @@
+node_modules/
+dist/
+supabase/.temp/
+supabase/.branches/
+playwright-report/
+test-results/
+package-lock.json

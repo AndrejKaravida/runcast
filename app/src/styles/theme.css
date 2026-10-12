@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-bg: #0b0f1a;
+  --color-surface: #121a2b;
+  --color-surface-elevated: #1b2439;
+  --color-border: #232f47;
+
+  --color-primary: #ff6b4a;
+  --color-primary-pressed: #e85535;
+  --color-primary-soft: rgba(255, 107, 74, 0.14);
+
+  --color-rain: #4da6ff;
+  --color-rain-pressed: #3d8fdf;
+  --color-rain-soft: rgba(77, 166, 255, 0.14);
+
+  --color-success: #3ddc97;
+  --color-success-soft: rgba(61, 220, 151, 0.14);
+
+  --color-warning: #ffc24d;
+  --color-warning-soft: rgba(255, 194, 77, 0.16);
+
+  --color-danger: #ff5470;
+  --color-danger-soft: rgba(255, 84, 112, 0.14);
+
+  --color-text: #f5f7fb;
+  --color-text-secondary: #a5b0c6;
+  --color-text-muted: #8391ab;
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+
+  --tracking-display: -0.02em;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-bg text-text font-sans antialiased;
+    font-optical-sizing: auto;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.015em;
+  }
+
+  ::selection {
+    background: var(--color-primary-soft);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    [class*='backdrop-blur'] {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      background-color: var(--color-bg) !important;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    :root {
+      --color-border: #3a4a6b;
+      --color-text-secondary: #c6cfdf;
+      --color-text-muted: #b6c1d6;
+    }
+
+    [class*='backdrop-blur'] {
+      background-color: var(--color-bg) !important;
+    }
+  }
+}
