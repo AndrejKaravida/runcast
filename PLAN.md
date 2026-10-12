@@ -102,17 +102,16 @@ isključene (`supabase/config.toml`).
 - Build config: `npm run build -w app`, output `app/dist`, root `/`.
 - Cloudflare MCP (OAuth) je aktiviran za buduće operacije; `wrangler` CLI ulogovan za ručne deploye.
 
-### Šta je ostalo ručno (zahteva tvoj nalog)
+### Šta je ostalo ručno (sve opciono)
 
-1. **Supabase auth URL-ovi (obavezno, 1 min):** Supabase dashboard → Authentication → URL
-   Configuration →
-   - Site URL: `https://runcast-2ju.pages.dev`
-   - Redirect URLs: dodaj `https://runcast-2ju.pages.dev/**`
-     Bez ovoga reset lozinke ne radi na produkciji. (MCP nema alat za auth config.)
-2. **Backup (opciono):** `SUPABASE_DB_URL` kao **session pooler** string
+Auth URL konfiguracija je **završena**: Site URL = `https://runcast-2ju.pages.dev`, Redirect URLs =
+`https://runcast-2ju.pages.dev/**` — ceo lanac (registracija → potvrda mejla → login → reset lozinke)
+je zatvoren.
+
+1. **Backup (opciono):** `SUPABASE_DB_URL` kao **session pooler** string
    `postgresql://postgres.<ref>:<pw>@aws-0-eu-central-1.pooler.supabase.com:5432/postgres?sslmode=require`
    (ne direktni host — IPv6-only; ne port 6543). Backup pokriva `public` šemu, ne `auth` korisnike.
-3. **Napomene:** Supabase free projekat se pauzira posle 7 dana bez aktivnosti (keepalive ping je već
+2. **Napomene:** Supabase free projekat se pauzira posle 7 dana bez aktivnosti (keepalive ping je već
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
 
