@@ -92,34 +92,27 @@ isključene (`supabase/config.toml`).
   na 320) — bez horizontalnog overflow-a; ispravljeni kontrast, dugmad koja se prelamaju,
   truncate za duge nazive, 44px touch targeti.
 
-### Deploy frontenda — Cloudflare Pages (u toku)
+### Deploy frontenda — Cloudflare Pages (ZAVRŠENO)
 
-Stanje: Cloudflare MCP (OAuth) je aktiviran; Pages projekat `runcast` je kreiran sa env varijablama
-(`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `NODE_VERSION=24`) i prvi deploy je objavljen
-(`https://runcast-2ju.pages.dev`, verifikovani `_headers` i SPA fallback). Auto-deploy na push
-zahteva **Git integraciju**, a Cloudflare ne dozvoljava dodavanje Git integracije na postojeći
-Direct Upload projekat — zato se projekat kreira iznova vezan na repo:
-
-1. Instaliraj Cloudflare Pages GitHub App: https://github.com/apps/cloudflare-pages → Install →
-   „Only select repositories" → `runcast`.
-2. Zatim (agent/MCP): obriši stari projekat, kreiraj `runcast` sa `source: github`, podesi
-   `build_config` (`npm run build -w app`, `app/dist`, root `/`) + env varijable, push-uj commit da
-   se pokrene prvi build, verifikuj produkciju.
-3. Posle prvog builda: Supabase dashboard → Authentication → URL Configuration → Site URL = dobijeni
-   `*.pages.dev` domen + `Redirect URLs += https://<domen>/**` (bez toga reset lozinke ne radi na
-   produkciji). MCP nema alat za auth config — korak je ručni (ili Management API uz PAT).
-
-Alternativa (ako se ne koristi Git integracija): `vercel.json` je u repou — Vercel import je
-zero-config; ili ručni deploy preko `npx wrangler pages deploy app/dist --project-name runcast`.
+- Pages projekat **`runcast`** je vezan na GitHub repo (`main`) — **svaki push automatski pokreće
+  build i deploy** (verifikovano: push → build → deploy za ~2 min).
+- Produkcija: **https://runcast-2ju.pages.dev** — 200, `_headers` (nosniff/referrer/permissions) i
+  SPA fallback rade, env varijable (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `NODE_VERSION=24`)
+  ugrađene u bundle (provereno grep-om nad `index-*.js`).
+- Build config: `npm run build -w app`, output `app/dist`, root `/`.
+- Cloudflare MCP (OAuth) je aktiviran za buduće operacije; `wrangler` CLI ulogovan za ručne deploye.
 
 ### Šta je ostalo ručno (zahteva tvoj nalog)
 
-1. **Cloudflare Pages GitHub App instalacija:** korak 1 iznad (jedini obavezni klik za auto-deploy).
-2. **Auth URL-ovi za produkciju:** korak 3 iznad.
-3. **Backup (opciono):** `SUPABASE_DB_URL` kao **session pooler** string
+1. **Supabase auth URL-ovi (obavezno, 1 min):** Supabase dashboard → Authentication → URL
+   Configuration →
+   - Site URL: `https://runcast-2ju.pages.dev`
+   - Redirect URLs: dodaj `https://runcast-2ju.pages.dev/**`
+     Bez ovoga reset lozinke ne radi na produkciji. (MCP nema alat za auth config.)
+2. **Backup (opciono):** `SUPABASE_DB_URL` kao **session pooler** string
    `postgresql://postgres.<ref>:<pw>@aws-0-eu-central-1.pooler.supabase.com:5432/postgres?sslmode=require`
    (ne direktni host — IPv6-only; ne port 6543). Backup pokriva `public` šemu, ne `auth` korisnike.
-4. **Napomene:** Supabase free projekat se pauzira posle 7 dana bez aktivnosti (keepalive ping je već
+3. **Napomene:** Supabase free projekat se pauzira posle 7 dana bez aktivnosti (keepalive ping je već
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
 
