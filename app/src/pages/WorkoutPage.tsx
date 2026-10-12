@@ -1,5 +1,16 @@
 import { useState } from 'react';
-import { formatDuration, formatPace, runWindowHours, type RunWindow } from '@runcast/shared';
+import {
+  describeWorkout,
+  formatDuration,
+  formatPace,
+  isGuidedRunType,
+  runWindowHours,
+  type PaceZone,
+  type PlanPaces,
+  type PlanPhase,
+  type RunWindow,
+  type WorkoutType,
+} from '@runcast/shared';
 import { ArrowLeft, CheckCircle2, SkipForward } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
@@ -11,8 +22,9 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { WeatherSummaryCard } from '@/components/weather/WeatherSummaryCard';
 import { LogWorkoutModal } from '@/components/workouts/LogWorkoutModal';
 import { PaceZoneBadge } from '@/components/workouts/PaceZoneBadge';
-import { useRunLogs, useSkipWorkout } from '@/features/logs/queries';
-import { useWorkout } from '@/features/plans/queries';
+import { WhyCard } from '@/components/workouts/WhyCard';
+import { useCompleteWorkout, useRunLogs, useSkipWorkout } from '@/features/logs/queries';
+import { useActivePlan, useWorkout } from '@/features/plans/queries';
 import { useProfile } from '@/features/profile/queries';
 import { useWeather } from '@/features/weather/queries';
 import { statusTone, typeLabel, workoutSteps } from '@/features/workouts/utils';
@@ -23,10 +35,12 @@ export function WorkoutPage() {
   const { id } = useParams();
   const today = todayIso();
   const { data: workout, isLoading } = useWorkout(id);
+  const { data: plan } = useActivePlan();
   const { data: profile } = useProfile();
   const { data: logs = [] } = useRunLogs();
   const weather = useWeather();
   const skipWorkout = useSkipWorkout();
+  const completeWorkout = useCompleteWorkout();
   const [logOpen, setLogOpen] = useState(false);
   const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
 
@@ -62,7 +76,17 @@ export function WorkoutPage() {
 
   const steps = workoutSteps(workout);
   const log = logs.find((entry) => entry.workout_id === workout.id) ?? null;
-  const showWeather = workout.workout_date >= today && workout.type !== 'REST';
+  const isStrength = workout.type === 'STRENGTH';
+  const showWeather = workout.workout_date >= today && workout.type !== 'REST' && !isStrength;
+  const explanation = describeWorkout(
+    {
+      type: workout.type as WorkoutType,
+      phase: workout.phase as PlanPhase,
+      paceZone: workout.pace_zone as PaceZone | null,
+      distanceKm: workout.distance_km,
+    },
+    { paces: (plan?.paces ?? null) as unknown as PlanPaces | null },
+  );
 
   return (
     <div className="mx-auto w-full max-w-[560px] space-y-4 px-4 py-6">
@@ -79,14 +103,19 @@ export function WorkoutPage() {
           <PaceZoneBadge zone={workout.pace_zone} />
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <AppBadge tone="neutral">{typeLabel(workout.type)}</AppBadge>
+          <AppBadge tone="neutral">{isStrength ? 'Snaga' : typeLabel(workout.type)}</AppBadge>
           <AppBadge tone={statusTone(workout.status)}>
             {workout.status === 'DONE' ? 'Urađeno' : workout.status === 'SKIPPED' ? 'Preskočeno' : 'Planirano'}
           </AppBadge>
           <AppBadge tone="neutral">Faza: {workout.phase}</AppBadge>
           {workout.distance_km > 0 ? <AppBadge tone="neutral">{workout.distance_km} km</AppBadge> : null}
+          {isStrength && workout.duration_sec ? (
+            <AppBadge tone="neutral">{formatDuration(workout.duration_sec)}</AppBadge>
+          ) : null}
         </div>
       </AppCard>
+
+      <WhyCard explanation={explanation} />
 
       {steps.length > 0 ? (
         <AppCard className="space-y-2">
@@ -95,7 +124,11 @@ export function WorkoutPage() {
             {steps.map((step, index) => (
               <li key={`${step.label}-${index}`} className="flex items-center justify-between gap-3 py-2 text-sm">
                 <span>{step.label}</span>
-                {step.pace ? <span className="shrink-0 text-text-muted">{step.pace} /km</span> : null}
+                {step.pace ? (
+                  <span className="shrink-0 text-text-muted">{step.pace} /km</span>
+                ) : step.durationSec ? (
+                  <span className="shrink-0 text-text-muted">{formatDuration(step.durationSec)}</span>
+                ) : null}
               </li>
             ))}
           </ul>
@@ -131,10 +164,28 @@ export function WorkoutPage() {
       ) : null}
 
       {workout.status === 'PLANNED' && workout.type !== 'REST' ? (
-        <div className="flex gap-3">
-          <AppButton className="flex-1" onClick={() => setLogOpen(true)}>
-            <CheckCircle2 className="h-4 w-4" aria-hidden /> Urađeno
-          </AppButton>
+        <div className="flex flex-wrap gap-3">
+          {!isStrength && isGuidedRunType(workout.type) && steps.length > 0 ? (
+            <Link to={`/run/${workout.id}`} className="flex-1" data-testid="start-guided">
+              <AppButton variant="secondary" className="w-full">
+                Vođeno trčanje
+              </AppButton>
+            </Link>
+          ) : null}
+          {isStrength ? (
+            <AppButton
+              className="flex-1"
+              loading={completeWorkout.isPending}
+              data-testid="complete-strength"
+              onClick={() => void completeWorkout.mutateAsync(workout.id)}
+            >
+              <CheckCircle2 className="h-4 w-4" aria-hidden /> Završi trening
+            </AppButton>
+          ) : (
+            <AppButton className="flex-1" onClick={() => setLogOpen(true)}>
+              <CheckCircle2 className="h-4 w-4" aria-hidden /> Urađeno
+            </AppButton>
+          )}
           <AppButton variant="ghost" className="flex-1" onClick={() => setSkipConfirmOpen(true)}>
             <SkipForward className="h-4 w-4" aria-hidden /> Preskoči
           </AppButton>

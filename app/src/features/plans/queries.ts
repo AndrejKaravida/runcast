@@ -1,9 +1,37 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { generatePlan, type PlanAnchor, type PlanConfig, type VolumeBand } from '@runcast/shared';
+import {
+  clampScaleFactor,
+  generatePlan,
+  type PlanAnchor,
+  type PlanConfig,
+  type VolumeBand,
+  type WorkoutStep,
+} from '@runcast/shared';
 import { useAuth } from '@/auth/AuthProvider';
 import { addDaysIso, todayIso } from '@/lib/dates';
 import { supabase } from '@/lib/supabase';
 import type { Json, PlansRow, WorkoutsRow } from '@/types';
+
+const SCALE_TYPES = ['EASY', 'LONG', 'TEMPO', 'INTERVALS', 'REPETITIONS'];
+
+function round1(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+function fmtKm(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1).replace('.', ',');
+}
+
+function scaleTitle(title: string, distanceKm: number): string {
+  return title.replace(/\d+(?:[.,]\d+)?\s*km\s*$/, `${fmtKm(distanceKm)} km`);
+}
+
+function scaleSteps(steps: NonNullable<Json>, factor: number): NonNullable<Json> {
+  if (!Array.isArray(steps)) return steps;
+  return (steps as unknown as WorkoutStep[]).map((step) =>
+    typeof step.distanceKm === 'number' ? { ...step, distanceKm: round1(step.distanceKm * factor) } : step,
+  ) as unknown as NonNullable<Json>;
+}
 
 export interface GeneratePlanInput {
   race: { name: string | null; raceDate: string; distanceKm: number; goalTimeSec: number | null } | null;
@@ -145,6 +173,50 @@ export function useSwapWorkouts() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workouts'] });
+    },
+  });
+}
+
+export function useScaleWeek() {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  const userId = session?.user.id as string;
+  return useMutation({
+    mutationFn: async ({ weekStart, factor }: { weekStart: string; factor: number }): Promise<number> => {
+      const safeFactor = clampScaleFactor(factor);
+      if (safeFactor === 1) return 0;
+      const today = todayIso();
+      const { data, error } = await supabase
+        .from('workouts')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('workout_date', weekStart)
+        .lte('workout_date', addDaysIso(weekStart, 6));
+      if (error) throw error;
+      const targets = (data ?? []).filter(
+        (workout) =>
+          workout.status === 'PLANNED' && SCALE_TYPES.includes(workout.type) && workout.workout_date >= today,
+      );
+      let updated = 0;
+      for (const workout of targets) {
+        const distanceKm = Math.max(2, round1(workout.distance_km * safeFactor));
+        const { error: updateError } = await supabase
+          .from('workouts')
+          .update({
+            distance_km: distanceKm,
+            title: scaleTitle(workout.title, distanceKm),
+            steps: scaleSteps(workout.steps, safeFactor),
+          })
+          .eq('id', workout.id)
+          .eq('user_id', userId);
+        if (updateError) throw updateError;
+        updated += 1;
+      }
+      return updated;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workouts'] });
+      queryClient.invalidateQueries({ queryKey: ['workout'] });
     },
   });
 }

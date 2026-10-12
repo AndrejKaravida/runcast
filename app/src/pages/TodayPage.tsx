@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import {
   assessWorkoutWeather,
+  formatDuration,
+  isGuidedRunType,
   pickSwapCandidate,
   runWindowHours,
   type RunWindow,
@@ -23,7 +25,7 @@ import { NextWorkoutCard } from '@/components/workouts/NextWorkoutCard';
 import { PaceZoneBadge } from '@/components/workouts/PaceZoneBadge';
 import { RecentActivityCard } from '@/components/workouts/RecentActivityCard';
 import { WeekStrip } from '@/components/workouts/WeekStrip';
-import { useRunLogs } from '@/features/logs/queries';
+import { useCompleteWorkout, useRunLogs } from '@/features/logs/queries';
 import { nextWorkout, runStreak, weekProgress } from '@/features/plans/progress';
 import { useActivePlan, useSwapWorkouts, useWorkoutsRange } from '@/features/plans/queries';
 import { useProfile } from '@/features/profile/queries';
@@ -57,6 +59,7 @@ export function TodayPage() {
   const { data: logs = [] } = useRunLogs();
   const weather = useWeather();
   const swapWorkouts = useSwapWorkouts();
+  const completeWorkout = useCompleteWorkout();
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
 
@@ -128,8 +131,9 @@ export function TodayPage() {
   const daysToRace = raceInfo ? dayDiff(today, plan.race_date) : null;
   const planWeek = Math.min(Math.floor(dayDiff(plan.start_date, today) / 7) + 1, plan.weeks);
   const verdict = assessment ? assessmentText(assessment) : null;
+  const isStrength = todayWorkout?.type === 'STRENGTH';
   const showVerdict = Boolean(
-    verdict && !bannerDismissed && todayWorkout?.status === 'PLANNED' && todayWorkout.type !== 'REST',
+    verdict && !bannerDismissed && !isStrength && todayWorkout?.status === 'PLANNED' && todayWorkout.type !== 'REST',
   );
   const isTrainingDay = Boolean(todayWorkout && todayWorkout.type !== 'REST' && todayWorkout.status === 'PLANNED');
   const weatherDate = isTrainingDay ? today : addDaysIso(today, 1);
@@ -162,8 +166,11 @@ export function TodayPage() {
                 {todayWorkout.title}
               </p>
               <p className="mt-0.5 text-sm text-text-secondary">
-                {typeLabel(todayWorkout.type)}
+                {todayWorkout.type === 'STRENGTH' ? 'Snaga' : typeLabel(todayWorkout.type)}
                 {todayWorkout.distance_km > 0 ? ` · ${todayWorkout.distance_km} km` : ''}
+                {todayWorkout.type === 'STRENGTH' && todayWorkout.duration_sec
+                  ? ` · ${formatDuration(todayWorkout.duration_sec)}`
+                  : ''}
               </p>
             </div>
             <PaceZoneBadge zone={todayWorkout.pace_zone} />
@@ -205,22 +212,47 @@ export function TodayPage() {
                 .map((step, index) => (
                   <li key={`${step.label}-${index}`} className="flex items-center justify-between gap-2">
                     <span>{step.label}</span>
-                    {step.pace ? <span className="text-text-muted">{step.pace} /km</span> : null}
+                    {step.pace ? (
+                      <span className="text-text-muted">{step.pace} /km</span>
+                    ) : step.durationSec ? (
+                      <span className="shrink-0 text-text-muted">{formatDuration(step.durationSec)}</span>
+                    ) : null}
                   </li>
                 ))}
             </ul>
           ) : null}
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Link to={`/workout/${todayWorkout.id}`} className="flex-1">
               <AppButton variant="secondary" className="w-full" size="sm">
                 Detalj treninga
               </AppButton>
             </Link>
+            {isGuidedRunType(todayWorkout.type) &&
+            todayWorkout.status === 'PLANNED' &&
+            workoutSteps(todayWorkout).length > 0 ? (
+              <Link to={`/run/${todayWorkout.id}`} className="flex-1" data-testid="start-guided">
+                <AppButton variant="secondary" className="w-full" size="sm">
+                  Vođeno
+                </AppButton>
+              </Link>
+            ) : null}
             {todayWorkout.status === 'PLANNED' && todayWorkout.type !== 'REST' ? (
-              <AppButton size="sm" className="flex-1" data-testid="log-done" onClick={() => setLogOpen(true)}>
-                <CheckCircle2 className="h-4 w-4" aria-hidden /> Urađeno
-              </AppButton>
+              isStrength ? (
+                <AppButton
+                  size="sm"
+                  className="flex-1"
+                  loading={completeWorkout.isPending}
+                  data-testid="complete-strength"
+                  onClick={() => void completeWorkout.mutateAsync(todayWorkout.id)}
+                >
+                  <CheckCircle2 className="h-4 w-4" aria-hidden /> Završi trening
+                </AppButton>
+              ) : (
+                <AppButton size="sm" className="flex-1" data-testid="log-done" onClick={() => setLogOpen(true)}>
+                  <CheckCircle2 className="h-4 w-4" aria-hidden /> Urađeno
+                </AppButton>
+              )
             ) : null}
           </div>
         </AppCard>

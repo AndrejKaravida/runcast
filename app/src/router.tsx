@@ -44,6 +44,10 @@ export const router = createBrowserRouter([
             path: '/workout/:id',
             lazy: async () => ({ Component: (await import('@/pages/WorkoutPage')).WorkoutPage }),
           },
+          {
+            path: '/run/:id',
+            lazy: async () => ({ Component: (await import('@/pages/GuidedRunPage')).GuidedRunPage }),
+          },
         ],
       },
     ],

@@ -13,8 +13,9 @@ i predlaže zamenu treninga unutar iste nedelje kada uslovi nisu dobri.
 | 13   | Home dashboard sa widgetima (nedeljni progres, niz, countdown, sledeći trening, aktivnosti)   | ✅     |
 | 14   | Apple-style design pass → `docs/plans/design-apple.md`                                        | ✅     |
 | 15   | E2E proširen na 7 scenarija                                                                   | ✅     |
+| 16   | v1.1: 5 Runna-inspirisanih feature-a (vidi sekciju ispod) → `docs/features/*`                 | ✅     |
 
-Testovi: **64 unit** (shared) + **7 E2E** (Playwright kroz pravi UI) + typecheck/lint/build.
+Testovi: **125 unit** (shared) + **13 E2E** (Playwright kroz pravi UI) + typecheck/lint/build.
 
 ## Struktura
 
@@ -114,6 +115,22 @@ je zatvoren.
 2. **Napomene:** Supabase free projekat se pauzira posle 7 dana bez aktivnosti (keepalive ping je već
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
+
+## v1.1 — 5 Runna-inspirisanih feature-a
+
+Svaki feature je prošao faze istraživanje → plan → arhitektura → implementacija → testovi;
+dokumentacija u `docs/features/0N-*/` (+ `docs/features/CONTRACTS.md` sa zajedničkim pravilima).
+
+| #   | Feature                       | Šta radi                                                                                                                                                              | Ključni fajlovi                                            |
+| --- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| F2  | **Snaga & mobilnost u planu** | 2 strength sesije nedeljno (fazno prilagođene, bez pliometrije za početnike), zamenjuju REST dane; taper/race-week pravila; „Završi trening" bez run log-a            | `shared/strength.ts`, migracija `strength_workout_type`    |
+| F1  | **Vođeno trčanje**            | Audio (TTS + beep) vođenje korak-po-korak kroz trening, monotonic clock otporan na throttling, wake lock, opcioni GPS, auto-log na kraju; `?timeScale` test hook      | `shared/guided.ts`, `GuidedRunPage`, `components/guided/*` |
+| F5  | **„Zašto ovaj trening"**      | Za svaki tip × fazu: svrha, izvođenje, česta greška, effort (RPE) cue — na detalju treninga                                                                           | `shared/explain.ts`, `WhyCard`                             |
+| F3  | **Prediktor + lični rekordi** | Predviđeni 5K/10K/HM/M iz VDOT-a (bisection), auto-PB iz logova (±2% tolerancija), feasibility hint u onboardingu                                                     | `shared/predict.ts`, `PredictorCard`, `PersonalBestsCard`  |
+| F4  | **Adaptivni trener**          | Nedeljni recap + rule-based uvidi (propušteni treninzi, RPE drift, adherencija) sa one-tap skaliranjem sledeće nedelje (guardrails: nikad RACE, floor 2 km, 0.6–1.15) | `shared/coach.ts`, `CoachInsightsCard`, `useScaleWeek`     |
+
+Napomena: `races.distance_km` je `numeric(4,2)` (42.195 → 42.20) — prediktor koristi toleranciju
+0.01 km; bez šeme menjanja.
 
 ## Bezbednost (stanje)
 

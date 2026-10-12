@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import {
+  formatDuration,
   pacesFromVdot,
   parseTimeToSeconds,
+  predictRaceTimes,
   vdotFromPerformance,
   type RunWindow,
   type VolumeBand,
@@ -126,7 +128,17 @@ export function OnboardingPage() {
     if (!anchor) return null;
     const vdot = vdotFromPerformance(anchor.distanceKm, anchor.timeSec);
     const paces = pacesFromVdot(vdot);
-    return { vdot: Math.round(vdot * 10) / 10, paces };
+    const feasibility =
+      recentPair && goalPair
+        ? (() => {
+            const [predicted] = predictRaceTimes(vdot, [goalPair.distanceKm]);
+            return {
+              predictedSec: predicted.timeSec,
+              ambitious: (goalPair.timeSec - predicted.timeSec) / predicted.timeSec < -0.03,
+            };
+          })()
+        : null;
+    return { vdot: Math.round(vdot * 10) / 10, paces, feasibility };
   }, [goalTimeSec, recentTimeSec, state.recentDistanceKm, state.distanceKm]);
 
   function validateStep(): boolean {
@@ -328,6 +340,13 @@ export function OnboardingPage() {
                   {Math.floor(preview.paces.thresholdSecPerKm / 60)}:
                   {String(preview.paces.thresholdSecPerKm % 60).padStart(2, '0')} /km
                 </p>
+                {preview.feasibility ? (
+                  <p className="mt-1 text-text-secondary">
+                    {preview.feasibility.ambitious
+                      ? `Cilj je ambiciozan za trenutnu formu (predviđeno ${formatDuration(preview.feasibility.predictedSec)}).`
+                      : `Cilj je realan za trenutnu formu (predviđeno ${formatDuration(preview.feasibility.predictedSec)}).`}
+                  </p>
+                ) : null}
               </div>
             ) : (
               <p className="text-sm text-text-muted">Bez rezultata generišemo bazni plan — samo lagani treninzi.</p>

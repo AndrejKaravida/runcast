@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { parseTimeToSeconds, runLogSchema } from '@runcast/shared';
+import { formatDuration, parseTimeToSeconds, runLogSchema } from '@runcast/shared';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
 import { AppModal } from '@/components/ui/AppModal';
@@ -7,25 +7,40 @@ import { AppTextarea } from '@/components/ui/AppTextarea';
 import { useLogWorkout } from '@/features/logs/queries';
 import type { WorkoutsRow } from '@/types';
 
+interface LogWorkoutPrefill {
+  distanceKm?: number;
+  durationSec?: number;
+}
+
 interface LogWorkoutModalProps {
   workout: WorkoutsRow | null;
   open: boolean;
   onClose: () => void;
+  prefill?: LogWorkoutPrefill;
 }
 
-export function LogWorkoutModal({ workout, open, onClose }: LogWorkoutModalProps) {
+export function LogWorkoutModal({ workout, open, onClose, prefill }: LogWorkoutModalProps) {
   if (!workout) return null;
   return (
     <AppModal open={open} onClose={onClose} title="Zabeleži trening">
-      <LogForm key={`${workout.id}-${open}`} workout={workout} onClose={onClose} />
+      <LogForm key={`${workout.id}-${open}`} workout={workout} prefill={prefill} onClose={onClose} />
     </AppModal>
   );
 }
 
-function LogForm({ workout, onClose }: { workout: WorkoutsRow; onClose: () => void }) {
+function LogForm({
+  workout,
+  prefill,
+  onClose,
+}: {
+  workout: WorkoutsRow;
+  prefill?: LogWorkoutPrefill;
+  onClose: () => void;
+}) {
   const logWorkout = useLogWorkout();
-  const [distance, setDistance] = useState(workout.distance_km ? String(workout.distance_km) : '');
-  const [duration, setDuration] = useState('');
+  const initialDistance = prefill?.distanceKm ?? (workout.distance_km ? workout.distance_km : null);
+  const [distance, setDistance] = useState(initialDistance ? String(initialDistance) : '');
+  const [duration, setDuration] = useState(prefill?.durationSec ? formatDuration(prefill.durationSec) : '');
   const [rpe, setRpe] = useState(5);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);

@@ -1,4 +1,5 @@
 import type {
+  Experience,
   PaceZone,
   PlanConfig,
   PlanDraft,
@@ -8,6 +9,7 @@ import type {
   WorkoutDraft,
   WorkoutStep,
 } from './types';
+import { strengthWorkoutsForWeek } from './strength';
 import { formatPace, pacesFromVdot, vdotFromPerformance } from './vdot';
 
 const MS_PER_DAY = 86_400_000;
@@ -47,6 +49,7 @@ interface WeekBuildParams {
   weekStart: string;
   planStart: string;
   weekIndex: number;
+  phaseWeek: number;
   km: number;
   phase: PlanPhase;
   qualities: QualityType[];
@@ -55,7 +58,8 @@ interface WeekBuildParams {
   raceDate: string;
   raceDistanceKm: number;
   isRaceWeek: boolean;
-  daysPerWeek: number;
+  daysPerWeek: 3 | 4 | 5 | 6;
+  experience: Experience;
   longCap: number;
   longFinish: boolean;
 }
@@ -293,6 +297,22 @@ function raceWorkout(date: string, distanceKm: number, paces: PlanPaces | null, 
 
 function buildWeek(params: WeekBuildParams): WorkoutDraft[] {
   const layout = params.isRaceWeek ? raceWeekLayout(params.raceDate, params.daysPerWeek) : params.layout;
+  const strengthByDate = new Map<string, WorkoutDraft>();
+  if (!params.isRaceWeek && layout.longRunDay >= 0) {
+    const drafts = strengthWorkoutsForWeek({
+      weekStart: params.weekStart,
+      weekIndex: params.weekIndex,
+      phaseWeek: params.phaseWeek,
+      phase: params.phase,
+      daysPerWeek: params.daysPerWeek,
+      longRunDay: layout.longRunDay,
+      runDays: [...layout.qualityDays, ...layout.easyDays, layout.longRunDay],
+      experience: params.experience,
+      isRaceWeek: params.isRaceWeek,
+      daysToRace: dayDiff(params.weekStart, params.raceDate),
+    });
+    for (const draft of drafts) strengthByDate.set(draft.date, draft);
+  }
   const easyCount = layout.easyDays.length;
   const longKm = round1(clamp(params.km * 0.32, 5, params.longCap));
   const qualityList = params.paces
@@ -352,7 +372,7 @@ function buildWeek(params: WeekBuildParams): WorkoutDraft[] {
       workouts.push(easyWorkout(date, distanceKm, params.paces, params.phase, params.weekIndex));
       continue;
     }
-    workouts.push(restWorkout(date, params.phase, params.weekIndex));
+    workouts.push(strengthByDate.get(date) ?? restWorkout(date, params.phase, params.weekIndex));
   }
 
   return workouts;
@@ -379,14 +399,19 @@ export function generatePlan(config: PlanConfig): PlanDraft {
     });
     const layout = buildLayout(config.daysPerWeek, config.longRunDay, 0);
     const workouts: WorkoutDraft[] = [];
+    let phaseWeek = 0;
+    let previousPhase: PlanPhase | null = null;
     for (let i = 0; i < weeks; i++) {
       const isRaceWeek = i === weeks - 1;
       const phase: PlanPhase = i >= weeks - 3 ? 'TAPER' : 'BASE';
+      phaseWeek = phase === previousPhase ? phaseWeek + 1 : 0;
+      previousPhase = phase;
       workouts.push(
         ...buildWeek({
           weekStart: weekStartAt(i),
           planStart: config.startDate,
           weekIndex: i,
+          phaseWeek,
           km: weeksKm[i],
           phase,
           qualities: [],
@@ -396,6 +421,7 @@ export function generatePlan(config: PlanConfig): PlanDraft {
           raceDistanceKm,
           isRaceWeek,
           daysPerWeek: config.daysPerWeek,
+          experience: config.experience,
           longCap: 28,
           longFinish: false,
         }),
@@ -415,9 +441,13 @@ export function generatePlan(config: PlanConfig): PlanDraft {
   });
 
   const workouts: WorkoutDraft[] = [];
+  let phaseWeek = 0;
+  let previousPhase: PlanPhase | null = null;
   for (let i = 0; i < weeks; i++) {
     const templateIndex = i - extraBase;
     const phase = i < extraBase ? 'BASE' : phaseOf(templateIndex, template);
+    phaseWeek = phase === previousPhase ? phaseWeek + 1 : 0;
+    previousPhase = phase;
     const buildWeekNumber = templateIndex - template.base;
     const qualities = qualityForWeek(phase, buildWeekNumber, config.daysPerWeek);
     const layout = buildLayout(config.daysPerWeek, config.longRunDay, qualities.length);
@@ -428,6 +458,7 @@ export function generatePlan(config: PlanConfig): PlanDraft {
         weekStart: weekStartAt(i),
         planStart: config.startDate,
         weekIndex: i,
+        phaseWeek,
         km: weeksKm[i],
         phase: isRaceWeek ? 'TAPER' : phase,
         qualities,
@@ -437,6 +468,7 @@ export function generatePlan(config: PlanConfig): PlanDraft {
         raceDistanceKm,
         isRaceWeek,
         daysPerWeek: config.daysPerWeek,
+        experience: config.experience,
         longCap: 32,
         longFinish,
       }),

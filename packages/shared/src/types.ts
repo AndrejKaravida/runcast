@@ -1,7 +1,7 @@
 export type RunWindow = 'morning' | 'evening' | 'flexible';
 export type Experience = 'first' | 'experienced';
 export type VolumeBand = 'lt20' | '20-40' | '40-60' | 'gt60';
-export type WorkoutType = 'EASY' | 'LONG' | 'TEMPO' | 'INTERVALS' | 'REPETITIONS' | 'REST' | 'RACE';
+export type WorkoutType = 'EASY' | 'LONG' | 'TEMPO' | 'INTERVALS' | 'REPETITIONS' | 'REST' | 'RACE' | 'STRENGTH';
 export type PaceZone = 'E' | 'M' | 'T' | 'I' | 'R';
 export type WorkoutStatus = 'PLANNED' | 'DONE' | 'SKIPPED';
 export type PlanPhase = 'BASE' | 'BUILD' | 'PEAK' | 'TAPER' | 'RACE';

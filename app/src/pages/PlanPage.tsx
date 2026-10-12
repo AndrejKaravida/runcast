@@ -28,6 +28,7 @@ const LEGEND = [
   { label: 'Kvalitet', dot: 'bg-primary' },
   { label: 'Dugi trk', dot: 'bg-rain' },
   { label: 'Lagano', dot: 'bg-text-muted' },
+  { label: 'Snaga', dot: 'bg-warning' },
   { label: 'Urađeno', dot: 'bg-success' },
   { label: 'Preskočeno', dot: 'bg-danger' },
 ];
@@ -35,6 +36,7 @@ const LEGEND = [
 function dotClass(workout: WorkoutsRow): string {
   if (workout.status === 'DONE') return TONE_DOT_CLASSES.success;
   if (workout.status === 'SKIPPED') return TONE_DOT_CLASSES.danger;
+  if (workout.type === 'STRENGTH') return TONE_DOT_CLASSES.warning;
   return TONE_DOT_CLASSES[typeTone(workout.type)];
 }
 
@@ -49,7 +51,7 @@ function WeekRow({ workout }: { workout: WorkoutsRow }) {
       <div className="min-w-0">
         <p className="truncate text-sm font-medium">{workout.title}</p>
         <p className="text-xs text-text-muted">
-          {formatDateShort(workout.workout_date)} · {typeLabel(workout.type)}
+          {formatDateShort(workout.workout_date)} · {workout.type === 'STRENGTH' ? 'Snaga' : typeLabel(workout.type)}
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-2">

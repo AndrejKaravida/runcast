@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { formatDuration, formatPace } from '@runcast/shared';
+import { formatDuration, formatPace, type PlanAnchor, type PlanPaces } from '@runcast/shared';
 import { Link } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
@@ -7,6 +7,9 @@ import { AppCard } from '@/components/ui/AppCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { QueryError } from '@/components/ui/QueryError';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { CoachInsightsCard } from '@/components/workouts/CoachInsightsCard';
+import { PersonalBestsCard } from '@/components/workouts/PersonalBestsCard';
+import { PredictorCard } from '@/components/workouts/PredictorCard';
 import { useRunLogs } from '@/features/logs/queries';
 import { adherencePct, loggedKm, runStreak, weeklyKmSeries } from '@/features/plans/progress';
 import { useActivePlan, useWorkoutsRange } from '@/features/plans/queries';
@@ -50,6 +53,8 @@ export function StatsPage() {
   }
 
   const daysToRace = dayDiff(today, plan.race_date);
+  const paces = plan.paces as unknown as PlanPaces | null;
+  const anchor = plan.anchor as unknown as PlanAnchor | null;
   const tiles = [
     { label: 'Pređeno', value: `${stats.doneKm} km` },
     { label: 'Realizacija', value: `${stats.completion}%` },
@@ -67,6 +72,11 @@ export function StatsPage() {
           </AppCard>
         ))}
       </div>
+
+      <CoachInsightsCard workouts={workouts} logs={logs} today={today} raceDate={plan.race_date} />
+
+      <PredictorCard paces={paces} anchor={anchor} raceDistanceKm={plan.races?.distance_km ?? null} />
+      <PersonalBestsCard logs={logs} />
 
       <AppCard className="space-y-3">
         <p className="text-sm font-semibold">Nedeljni kilometri</p>

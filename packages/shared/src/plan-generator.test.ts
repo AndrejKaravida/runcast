@@ -3,6 +3,7 @@ import { generatePlan } from './plan-generator';
 import type { PlanConfig, WorkoutDraft } from './types';
 
 const QUALITY_TYPES = ['TEMPO', 'INTERVALS', 'REPETITIONS'];
+const RUN_TYPES = ['EASY', 'LONG', 'TEMPO', 'INTERVALS', 'REPETITIONS', 'RACE'];
 const MS_PER_DAY = 86_400_000;
 
 function parseIso(iso: string): number {
@@ -119,7 +120,9 @@ describe('generatePlan', () => {
   it('respects three runs per week and a shifted long run day', () => {
     const plan = generatePlan({ ...fullConfig, daysPerWeek: 3, longRunDay: 0 });
     for (let week = 0; week < plan.weeks; week++) {
-      const count = plan.workouts.filter((workout) => workout.weekIndex === week && workout.type !== 'REST').length;
+      const count = plan.workouts.filter(
+        (workout) => workout.weekIndex === week && RUN_TYPES.includes(workout.type),
+      ).length;
       expect(count).toBe(3);
     }
     for (const workout of plan.workouts) {

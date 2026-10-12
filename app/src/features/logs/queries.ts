@@ -63,6 +63,23 @@ export function useSkipWorkout() {
   });
 }
 
+export function useCompleteWorkout() {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  const userId = session?.user.id as string;
+  return useMutation({
+    mutationFn: async (workoutId: string) => {
+      const { error } = await supabase
+        .from('workouts')
+        .update({ status: 'DONE' })
+        .eq('id', workoutId)
+        .eq('user_id', userId);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidateWorkoutData(queryClient),
+  });
+}
+
 export function useRunLogs() {
   const { session } = useAuth();
   const userId = session?.user.id;
