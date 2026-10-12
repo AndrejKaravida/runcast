@@ -11,11 +11,11 @@ interface AppBadgeProps {
 
 const toneClasses: Record<Tone, string> = {
   neutral: 'bg-surface-elevated text-text-secondary',
-  primary: 'bg-primary-soft text-primary',
-  success: 'bg-success-soft text-success',
-  warning: 'bg-warning-soft text-warning',
-  danger: 'bg-danger-soft text-danger',
-  rain: 'bg-rain-soft text-rain',
+  primary: 'bg-primary-soft text-primary-ink',
+  success: 'bg-success-soft text-success-ink',
+  warning: 'bg-warning-soft text-warning-ink',
+  danger: 'bg-danger-soft text-danger-ink',
+  rain: 'bg-rain-soft text-rain-ink',
 };
 
 export function AppBadge({ tone = 'neutral', className, children }: AppBadgeProps) {

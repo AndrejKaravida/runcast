@@ -72,8 +72,8 @@ test('adaptivni trener: RPE insajt skalira sledeću nedelju', async ({ page }) =
 
   await page.goto('/stats');
   await expect(page.getByTestId('coach-card')).toBeVisible();
-  await expect(page.getByText(/RPE je visok/)).toBeVisible();
-  await page.getByRole('button', { name: 'Smanji 10%' }).click();
+  await expect(page.getByText(/Telo traži predah/)).toBeVisible();
+  await page.getByRole('button', { name: 'Olakšaj 10%' }).click();
   await expect(page.getByText(/je prilagođena\./)).toBeVisible();
 
   await page.goto('/plan');

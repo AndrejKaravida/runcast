@@ -37,7 +37,7 @@ test('vođeno trčanje — deterministički tok sa timeScale', async ({ page }) 
   await assertNoHorizontalOverflow(page, 'guided idle 320');
 
   await page.getByTestId('guided-start').click();
-  await expect(page.getByTestId('guided-cue')).toContainText('Sledi', { timeout: 15_000 });
+  await expect(page.getByTestId('guided-cue')).toContainText('Sada', { timeout: 15_000 });
   const elapsedBefore = await page.getByTestId('guided-elapsed').textContent();
   await expect
     .poll(() => page.getByTestId('guided-elapsed').textContent(), { timeout: 15_000 })
@@ -55,14 +55,14 @@ test('vođeno trčanje — deterministički tok sa timeScale', async ({ page }) 
   await expect(mute).toHaveAttribute('aria-pressed', 'false');
   await mute.click();
   await expect(mute).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByTestId('guided-cue')).toContainText('Sledi');
+  await expect(page.getByTestId('guided-cue')).toContainText('Sada');
 
   await expect(page.getByTestId('guided-back')).toBeDisabled();
   await page.getByTestId('guided-next').click();
   await expect(page.getByTestId('guided-cue')).toContainText('Ponavljanje 1 od 4');
   await expect(page.getByTestId('guided-back')).toBeEnabled();
   await page.getByTestId('guided-back').click();
-  await expect(page.getByTestId('guided-cue')).toContainText('Sledi');
+  await expect(page.getByTestId('guided-cue')).toContainText('Sada');
 
   await page.getByTestId('guided-finish').click();
   await expect(page.getByText('Završiti pre kraja?')).toBeVisible();

@@ -25,7 +25,7 @@ export function AppTextarea({ label, error, id, className, ...rest }: AppTextare
         )}
         {...rest}
       />
-      {error ? <p className="mt-1 text-xs text-danger">{error}</p> : null}
+      {error ? <p className="mt-1 text-xs text-danger-ink">{error}</p> : null}
     </div>
   );
 }

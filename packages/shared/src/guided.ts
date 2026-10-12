@@ -191,7 +191,7 @@ export function cueTextFor(kind: GuidedCueKind, context: GuidedCueContext = {}):
     case 'START':
       return 'Krećemo!';
     case 'SEGMENT_START':
-      return `Sledi: ${context.label ?? 'korak'}.`;
+      return `Sada: ${context.label ?? 'korak'}.`;
     case 'REPEAT':
       return `Ponavljanje ${context.repeatIndex ?? 1} od ${context.repeatTotal ?? 1}.`;
     case 'PACE':
@@ -199,15 +199,15 @@ export function cueTextFor(kind: GuidedCueKind, context: GuidedCueContext = {}):
     case 'SEGMENT_END':
       return 'Korak završen.';
     case 'HALFWAY':
-      return 'Polovina treninga.';
+      return 'Pola je — drži ritam.';
     case 'PAUSE':
-      return 'Pauza.';
+      return 'Pauza — diši.';
     case 'RESUME':
-      return 'Nastavljamo.';
+      return 'Idemo dalje.';
     case 'SKIP':
       return `Prelazimo na: ${context.label ?? 'sledeći korak'}.`;
     case 'FINISH':
-      return `Trening završen. Vreme ${formatDuration(context.elapsedSec ?? 0)}.`;
+      return `Gotovo! ${formatDuration(context.elapsedSec ?? 0)} u nogama.`;
     case 'DISTANCE':
       return `GPS distanca: ${formatKilometers(context.distanceKm ?? 0)} kilometara.`;
   }

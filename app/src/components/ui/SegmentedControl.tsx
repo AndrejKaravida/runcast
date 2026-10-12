@@ -45,7 +45,7 @@ export function SegmentedControl<Value extends string | number>({
           onClick={() => onChange(option.value)}
           className={clsx(
             'select-none rounded-lg px-2 py-2 text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-[0.97]',
-            option.value === value ? 'bg-primary text-bg' : 'text-text-secondary hover:text-text',
+            option.value === value ? 'bg-primary text-on-accent' : 'text-text-secondary hover:text-text',
           )}
         >
           {option.label}

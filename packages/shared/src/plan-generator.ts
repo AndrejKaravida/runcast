@@ -14,12 +14,56 @@ import { formatPace, pacesFromVdot, vdotFromPerformance } from './vdot';
 
 const MS_PER_DAY = 86_400_000;
 
-const BAND_VOLUME: Record<VolumeBand, { start: number; peak: number }> = {
-  lt20: { start: 15, peak: 40 },
-  '20-40': { start: 28, peak: 60 },
-  '40-60': { start: 38, peak: 78 },
-  gt60: { start: 50, peak: 95 },
+type RaceKind = 'M' | 'HM' | '10K' | '5K';
+
+const RACE_VOLUME: Record<RaceKind, Record<VolumeBand, { start: number; peak: number }>> = {
+  M: {
+    lt20: { start: 20, peak: 55 },
+    '20-40': { start: 28, peak: 62 },
+    '40-60': { start: 42, peak: 82 },
+    gt60: { start: 60, peak: 100 },
+  },
+  HM: {
+    lt20: { start: 15, peak: 36 },
+    '20-40': { start: 25, peak: 48 },
+    '40-60': { start: 38, peak: 60 },
+    gt60: { start: 50, peak: 72 },
+  },
+  '10K': {
+    lt20: { start: 15, peak: 30 },
+    '20-40': { start: 25, peak: 40 },
+    '40-60': { start: 36, peak: 52 },
+    gt60: { start: 48, peak: 65 },
+  },
+  '5K': {
+    lt20: { start: 12, peak: 24 },
+    '20-40': { start: 20, peak: 32 },
+    '40-60': { start: 30, peak: 48 },
+    gt60: { start: 42, peak: 55 },
+  },
 };
+
+const RACE_LONG_PEAK: Record<RaceKind, Record<VolumeBand, number>> = {
+  M: { lt20: 30, '20-40': 32, '40-60': 32, gt60: 34 },
+  HM: { lt20: 18, '20-40': 19, '40-60': 21, gt60: 21 },
+  '10K': { lt20: 11, '20-40': 12, '40-60': 15, gt60: 18 },
+  '5K': { lt20: 8, '20-40': 10, '40-60': 14, gt60: 14 },
+};
+
+const RACE_PEAK_SHARE: Record<RaceKind, Record<VolumeBand, number>> = {
+  M: { lt20: 0.55, '20-40': 0.52, '40-60': 0.39, gt60: 0.34 },
+  HM: { lt20: 0.5, '20-40': 0.4, '40-60': 0.35, gt60: 0.29 },
+  '10K': { lt20: 0.37, '20-40': 0.3, '40-60': 0.29, gt60: 0.28 },
+  '5K': { lt20: 0.33, '20-40': 0.31, '40-60': 0.29, gt60: 0.26 },
+};
+
+const BASE_LONG_PEAK: Record<RaceKind, number> = { M: 18, HM: 18, '10K': 12, '5K': 10 };
+
+const FIRST_PEAK_KM = 60;
+const FIRST_LONG_KM = 30;
+const MIN_LONG_KM = 5;
+const TAPER_VOLUME_FACTORS = [0.8, 0.6, 0.4];
+const TAPER_LONG_FACTORS = [0.7, 0.5];
 
 const TEMPLATES: Record<number, { base: number; build: number; peak: number; taper: number }> = {
   18: { base: 5, build: 8, peak: 2, taper: 3 },
@@ -28,7 +72,12 @@ const TEMPLATES: Record<number, { base: number; build: number; peak: number; tap
   12: { base: 2, build: 5, peak: 2, taper: 3 },
 };
 
-const TAPER_FACTORS = [0.85, 0.7, 0.45];
+function raceKindFor(distanceKm: number): RaceKind {
+  if (distanceKm >= 40) return 'M';
+  if (distanceKm >= 15) return 'HM';
+  if (distanceKm >= 7.5) return '10K';
+  return '5K';
+}
 
 type QualityType = 'TEMPO' | 'INTERVALS' | 'REPETITIONS';
 
@@ -60,7 +109,7 @@ interface WeekBuildParams {
   isRaceWeek: boolean;
   daysPerWeek: 3 | 4 | 5 | 6;
   experience: Experience;
-  longCap: number;
+  longKm: number;
   longFinish: boolean;
 }
 
@@ -86,10 +135,6 @@ function weekdayOf(iso: string): number {
 
 function round1(value: number): number {
   return Math.round(value * 10) / 10;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
 }
 
 function fmtKm(value: number): string {
@@ -129,28 +174,66 @@ function qualityForWeek(phase: PlanPhase, buildWeekNumber: number, daysPerWeek: 
   return twoPerWeek ? ['TEMPO', 'REPETITIONS'] : ['INTERVALS'];
 }
 
-function rampWeeks(params: { totalWeeks: number; startKm: number; peakKm: number; daysPerWeek: number }): number[] {
-  const { totalWeeks, startKm, peakKm, daysPerWeek } = params;
-  const nonTaper = Math.max(totalWeeks - 3, 1);
+interface SeriesParams {
+  weeks: number;
+  startKm: number;
+  peakKm: number;
+  longPeak: number;
+  sharePeak: number;
+  daysPerWeek: number;
+}
+
+function buildSeries(params: SeriesParams): { weeksKm: number[]; longKm: number[] } {
+  const { weeks, startKm, peakKm, longPeak, sharePeak, daysPerWeek } = params;
+  const nonTaper = Math.max(weeks - 3, 1);
+  const peakIndex = Math.max(weeks - 4, 0);
   const maxStep = Math.max(daysPerWeek, 10);
-  const result: number[] = [];
-  let lastGrowthValue = startKm;
-  for (let i = 0; i < totalWeeks; i++) {
-    if (i >= nonTaper) {
-      const taperFactor = TAPER_FACTORS[i - nonTaper] ?? TAPER_FACTORS[2];
-      result.push(round1(Math.max(...result, startKm) * taperFactor));
+  const shareStart = sharePeak - 0.08;
+  const longStart = startKm * shareStart;
+
+  const isCutback = (index: number): boolean => index > 0 && index < nonTaper && index !== peakIndex && index % 4 === 3;
+  const growthSteps = (index: number): number => {
+    let count = 0;
+    for (let week = 0; week < index; week++) {
+      if (week < nonTaper && !isCutback(week)) count += 1;
+    }
+    return count;
+  };
+
+  const stepsToPeak = growthSteps(peakIndex);
+  const cappedLongPeak = stepsToPeak > 0 ? Math.min(longPeak, longStart + maxStep * stepsToPeak) : longStart;
+  const deltaLong = stepsToPeak > 0 ? (cappedLongPeak - longStart) / stepsToPeak : 0;
+  const deltaShare = stepsToPeak > 0 ? (sharePeak - shareStart) / stepsToPeak : 0;
+
+  const weeksKm: number[] = [];
+  const longKm: number[] = [];
+  let lastGrowthKm = startKm;
+
+  for (let week = 0; week < nonTaper; week++) {
+    const progress = Math.min(growthSteps(week), stepsToPeak);
+    const share = shareStart + deltaShare * progress;
+    const lineLong = Math.min(longStart + deltaLong * progress, cappedLongPeak);
+    const weekKm = Math.min(lineLong / share, peakKm, lastGrowthKm + maxStep);
+    const longValue = Math.min(lineLong, weekKm * sharePeak);
+    if (isCutback(week)) {
+      weeksKm.push(round1(weekKm * 0.75));
+      longKm.push(round1(longValue * 0.75));
       continue;
     }
-    const line = nonTaper <= 1 ? startKm : startKm + ((peakKm - startKm) * i) / (nonTaper - 1);
-    const clampable = Math.min(line, peakKm, lastGrowthValue + maxStep);
-    if (i > 0 && i % 4 === 3) {
-      result.push(round1(clampable * 0.75));
-      continue;
-    }
-    lastGrowthValue = clampable;
-    result.push(round1(clampable));
+    lastGrowthKm = weekKm;
+    weeksKm.push(round1(weekKm));
+    longKm.push(round1(longValue));
   }
-  return result;
+
+  const peakWeek = Math.max(...weeksKm, startKm);
+  const peakLong = Math.max(...longKm, MIN_LONG_KM);
+  for (let week = nonTaper; week < weeks; week++) {
+    const taperIndex = week - nonTaper;
+    weeksKm.push(round1(peakWeek * (TAPER_VOLUME_FACTORS[taperIndex] ?? 0.4)));
+    longKm.push(round1(peakLong * (TAPER_LONG_FACTORS[taperIndex] ?? 0)));
+  }
+
+  return { weeksKm, longKm };
 }
 
 function phaseOf(
@@ -314,7 +397,7 @@ function buildWeek(params: WeekBuildParams): WorkoutDraft[] {
     for (const draft of drafts) strengthByDate.set(draft.date, draft);
   }
   const easyCount = layout.easyDays.length;
-  const longKm = round1(clamp(params.km * 0.32, 5, params.longCap));
+  const longKm = round1(Math.max(params.longKm, MIN_LONG_KM));
   const qualityList = params.paces
     ? params.qualities.map((type) => buildQuality(type, params.paces as PlanPaces, params.phase))
     : [];
@@ -386,17 +469,23 @@ export function generatePlan(config: PlanConfig): PlanDraft {
   const raceDistanceKm = config.distanceKm ?? 42.195;
   const weekStartAt = (index: number): string => addDays(config.raceDate, -6 - 7 * (weeks - 1 - index));
   const anchor = config.anchor;
-  const band = BAND_VOLUME[config.volumeBand];
-  const peakCap = config.experience === 'first' ? Math.min(band.peak, 55) : band.peak;
+  const raceKind = raceKindFor(raceDistanceKm);
+  const volume = RACE_VOLUME[raceKind][config.volumeBand];
+  const baseMode = anchor === null || weeks < 12;
+  const longPeak = baseMode
+    ? Math.min(BASE_LONG_PEAK[raceKind], RACE_LONG_PEAK[raceKind][config.volumeBand])
+    : RACE_LONG_PEAK[raceKind][config.volumeBand];
+  const series = buildSeries({
+    weeks,
+    startKm: volume.start,
+    peakKm: config.experience === 'first' ? Math.min(volume.peak, FIRST_PEAK_KM) : volume.peak,
+    longPeak: config.experience === 'first' ? Math.min(longPeak, FIRST_LONG_KM) : longPeak,
+    sharePeak: RACE_PEAK_SHARE[raceKind][config.volumeBand],
+    daysPerWeek: config.daysPerWeek,
+  });
   const paces = anchor ? pacesFromVdot(vdotFromPerformance(anchor.distanceKm, anchor.timeSec)) : null;
 
-  if (anchor === null || weeks < 12) {
-    const weeksKm = rampWeeks({
-      totalWeeks: weeks,
-      startKm: band.start,
-      peakKm: peakCap,
-      daysPerWeek: config.daysPerWeek,
-    });
+  if (baseMode) {
     const layout = buildLayout(config.daysPerWeek, config.longRunDay, 0);
     const workouts: WorkoutDraft[] = [];
     let phaseWeek = 0;
@@ -412,7 +501,7 @@ export function generatePlan(config: PlanConfig): PlanDraft {
           planStart: config.startDate,
           weekIndex: i,
           phaseWeek,
-          km: weeksKm[i],
+          km: series.weeksKm[i],
           phase,
           qualities: [],
           layout,
@@ -422,7 +511,7 @@ export function generatePlan(config: PlanConfig): PlanDraft {
           isRaceWeek,
           daysPerWeek: config.daysPerWeek,
           experience: config.experience,
-          longCap: 28,
+          longKm: series.longKm[i],
           longFinish: false,
         }),
       );
@@ -433,12 +522,6 @@ export function generatePlan(config: PlanConfig): PlanDraft {
   const templateKey = [18, 16, 14, 12].find((key) => key <= Math.min(weeks, 18)) ?? 12;
   const template = TEMPLATES[templateKey];
   const extraBase = weeks - templateKey;
-  const weeksKm = rampWeeks({
-    totalWeeks: weeks,
-    startKm: band.start,
-    peakKm: peakCap,
-    daysPerWeek: config.daysPerWeek,
-  });
 
   const workouts: WorkoutDraft[] = [];
   let phaseWeek = 0;
@@ -459,7 +542,7 @@ export function generatePlan(config: PlanConfig): PlanDraft {
         planStart: config.startDate,
         weekIndex: i,
         phaseWeek,
-        km: weeksKm[i],
+        km: series.weeksKm[i],
         phase: isRaceWeek ? 'TAPER' : phase,
         qualities,
         layout,
@@ -469,7 +552,7 @@ export function generatePlan(config: PlanConfig): PlanDraft {
         isRaceWeek,
         daysPerWeek: config.daysPerWeek,
         experience: config.experience,
-        longCap: 32,
+        longKm: series.longKm[i],
         longFinish,
       }),
     );

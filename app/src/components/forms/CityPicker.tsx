@@ -80,11 +80,11 @@ export function CityPicker({ city, onSelect, onManualInput }: CityPickerProps) {
         </ul>
       ) : null}
       {city ? (
-        <p className="flex items-center gap-2 text-sm text-success">
+        <p className="flex items-center gap-2 text-sm text-success-ink">
           <CheckCircle2 className="h-4 w-4" aria-hidden /> {city}
         </p>
       ) : null}
-      {error ? <p className="text-xs text-danger">{error}</p> : null}
+      {error ? <p className="text-xs text-danger-ink">{error}</p> : null}
     </div>
   );
 }

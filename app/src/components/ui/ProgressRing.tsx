@@ -1,13 +1,16 @@
 import type { ReactNode } from 'react';
 
+type RingTone = 'primary' | 'success' | 'warning' | 'danger' | 'rain';
+
 interface ProgressRingProps {
   value: number;
   size?: number;
   stroke?: number;
+  tone?: RingTone;
   children?: ReactNode;
 }
 
-export function ProgressRing({ value, size = 72, stroke = 7, children }: ProgressRingProps) {
+export function ProgressRing({ value, size = 72, stroke = 7, tone = 'primary', children }: ProgressRingProps) {
   const clamped = Math.min(Math.max(value, 0), 1);
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -20,7 +23,7 @@ export function ProgressRing({ value, size = 72, stroke = 7, children }: Progres
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="var(--color-surface-elevated)"
+          stroke="var(--color-ring-track)"
           strokeWidth={stroke}
         />
         <circle
@@ -28,7 +31,7 @@ export function ProgressRing({ value, size = 72, stroke = 7, children }: Progres
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="var(--color-primary)"
+          stroke={`var(--color-${tone}-ink)`}
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}

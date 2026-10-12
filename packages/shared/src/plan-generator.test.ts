@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { generatePlan } from './plan-generator';
-import type { PlanConfig, WorkoutDraft } from './types';
+import type { PlanConfig, VolumeBand, WorkoutDraft } from './types';
 
 const QUALITY_TYPES = ['TEMPO', 'INTERVALS', 'REPETITIONS'];
 const RUN_TYPES = ['EASY', 'LONG', 'TEMPO', 'INTERVALS', 'REPETITIONS', 'RACE'];
@@ -46,6 +46,14 @@ function qualityPerWeek(workouts: WorkoutDraft[]): Map<number, WorkoutDraft[]> {
   for (const workout of workouts) {
     if (!QUALITY_TYPES.includes(workout.type)) continue;
     map.set(workout.weekIndex, [...(map.get(workout.weekIndex) ?? []), workout]);
+  }
+  return map;
+}
+
+function longKmByWeek(workouts: WorkoutDraft[]): Map<number, number> {
+  const map = new Map<number, number>();
+  for (const workout of workouts) {
+    if (workout.type === 'LONG') map.set(workout.weekIndex, workout.distanceKm);
   }
   return map;
 }
@@ -109,12 +117,12 @@ describe('generatePlan', () => {
     const plan = generatePlan(fullConfig);
     const weeks = weekKms(plan.workouts);
     const peak = Math.max(...weeks.slice(0, 15));
-    expect(weeks[15]).toBeGreaterThan(peak * 0.6);
-    expect(weeks[15]).toBeLessThan(peak * 0.95);
-    expect(weeks[16]).toBeGreaterThan(peak * 0.5);
-    expect(weeks[16]).toBeLessThan(peak * 0.8);
+    expect(weeks[15]).toBeGreaterThan(peak * 0.75);
+    expect(weeks[15]).toBeLessThan(peak * 0.85);
+    expect(weeks[16]).toBeGreaterThan(peak * 0.55);
+    expect(weeks[16]).toBeLessThan(peak * 0.65);
     expect(weeks[17]).toBeLessThan(weeks[16]);
-    expect(weeks[17]).toBeLessThan(peak * 0.6);
+    expect(weeks[17]).toBeLessThan(peak * 0.5);
   });
 
   it('respects three runs per week and a shifted long run day', () => {
@@ -219,6 +227,103 @@ describe('generatePlan weekday alignment', () => {
     expect(race?.type).toBe('RACE');
     expect(race?.distanceKm).toBe(21.0975);
     expect(race?.steps[0].label).toContain('21,1');
+  });
+});
+
+describe('generatePlan long-run-first calibration', () => {
+  function calibratedPlan(partial: Partial<PlanConfig>) {
+    return generatePlan({
+      ...fullConfig,
+      anchor: { kind: 'goal', distanceKm: 42.195, timeSec: 13500 },
+      daysPerWeek: 4,
+      longRunDay: 0,
+      experience: 'experienced',
+      volumeBand: 'lt20',
+      ...partial,
+    });
+  }
+
+  it('elevates an lt20 marathon plan to a 30 km long run and a 50+ km peak week', () => {
+    const plan = calibratedPlan({ experience: 'first' });
+    const weeks = weekKms(plan.workouts);
+    const longs = [...longKmByWeek(plan.workouts).values()];
+    expect(Math.max(...longs)).toBeGreaterThanOrEqual(28);
+    expect(Math.max(...weeks)).toBeGreaterThanOrEqual(50);
+  });
+
+  it('respects the first-time caps of 60 km weekly and 30 km long', () => {
+    for (const volumeBand of ['20-40', '40-60'] as const) {
+      const plan = calibratedPlan({ experience: 'first', volumeBand });
+      const weeks = weekKms(plan.workouts);
+      const longs = [...longKmByWeek(plan.workouts).values()];
+      expect(Math.max(...weeks)).toBeLessThanOrEqual(60.5);
+      expect(Math.max(...longs)).toBeLessThanOrEqual(30);
+    }
+  });
+
+  it('reaches at least a 30 km long run for a 20-40 marathon runner', () => {
+    const plan = calibratedPlan({ volumeBand: '20-40' });
+    const longs = [...longKmByWeek(plan.workouts).values()];
+    expect(Math.max(...longs)).toBeGreaterThanOrEqual(30);
+  });
+
+  it('keeps half marathon long runs in the 18-21 km range', () => {
+    for (const volumeBand of ['lt20', '20-40', '40-60', 'gt60'] as const) {
+      const plan = calibratedPlan({
+        volumeBand,
+        distanceKm: 21.0975,
+        anchor: { kind: 'goal', distanceKm: 21.0975, timeSec: 6300 },
+      });
+      const longs = [...longKmByWeek(plan.workouts).values()];
+      expect(Math.max(...longs)).toBeGreaterThanOrEqual(18);
+      expect(Math.max(...longs)).toBeLessThanOrEqual(21);
+    }
+  });
+
+  it('scales long runs by race distance for 5K and 10K plans', () => {
+    const targets: Record<VolumeBand, { fiveK: number; tenK: number }> = {
+      lt20: { fiveK: 8, tenK: 11 },
+      '20-40': { fiveK: 10, tenK: 12 },
+      '40-60': { fiveK: 14, tenK: 15 },
+      gt60: { fiveK: 14, tenK: 18 },
+    };
+    for (const volumeBand of Object.keys(targets) as VolumeBand[]) {
+      for (const distanceKm of [5, 10] as const) {
+        const plan = calibratedPlan({ volumeBand, distanceKm });
+        const peak = Math.max(...longKmByWeek(plan.workouts).values());
+        const target = distanceKm === 5 ? targets[volumeBand].fiveK : targets[volumeBand].tenK;
+        expect(peak).toBeGreaterThanOrEqual(target - 0.5);
+        expect(peak).toBeLessThanOrEqual(target + 0.5);
+      }
+    }
+    const fiveK = calibratedPlan({ distanceKm: 5 });
+    expect(Math.max(...weekKms(fiveK.workouts))).toBeLessThanOrEqual(26);
+  });
+
+  it('peaks the long run three weeks before the race and skips race week', () => {
+    const plan = calibratedPlan({});
+    const longs = longKmByWeek(plan.workouts);
+    const peak = Math.max(...longs.values());
+    expect(longs.get(plan.weeks - 4)).toBe(peak);
+    expect(longs.get(plan.weeks - 3)).toBeCloseTo(peak * 0.7, 0);
+    expect(longs.get(plan.weeks - 2)).toBeCloseTo(peak * 0.5, 0);
+    expect(longs.has(plan.weeks - 1)).toBe(false);
+  });
+
+  it('caps anchor-free base plans at 18 km long runs', () => {
+    const plan = generatePlan({ ...fullConfig, raceDate: '2026-03-15', anchor: null });
+    const longs = [...longKmByWeek(plan.workouts).values()];
+    expect(Math.max(...longs)).toBeGreaterThanOrEqual(16);
+    expect(Math.max(...longs)).toBeLessThanOrEqual(18);
+  });
+
+  it('never lets the long run exceed 58% of the peak weekly volume', () => {
+    for (const volumeBand of ['lt20', '20-40', '40-60', 'gt60'] as const) {
+      const plan = calibratedPlan({ volumeBand });
+      const peakWeek = Math.max(...weekKms(plan.workouts));
+      const peakLong = Math.max(...longKmByWeek(plan.workouts).values());
+      expect(peakLong / peakWeek).toBeLessThanOrEqual(0.58);
+    }
   });
 });
 

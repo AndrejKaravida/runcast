@@ -26,7 +26,7 @@ export function AppInput({ label, error, hint, id, className, ...rest }: AppInpu
         )}
         {...rest}
       />
-      {error ? <p className="mt-1 text-xs text-danger">{error}</p> : null}
+      {error ? <p className="mt-1 text-xs text-danger-ink">{error}</p> : null}
       {!error && hint ? <p className="mt-1 text-xs text-text-muted">{hint}</p> : null}
     </div>
   );

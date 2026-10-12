@@ -61,7 +61,7 @@ export function AppModal({ open, onClose, title, children, className }: AppModal
       {open ? (
         <motion.div
           key="scrim"
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-scrim backdrop-blur-sm sm:items-center sm:p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -88,7 +88,7 @@ export function AppModal({ open, onClose, title, children, className }: AppModal
             exit={reduceMotion ? { opacity: 0 } : { y: '100%' }}
             transition={{ type: 'spring', bounce: 0, duration: 0.35 }}
             className={clsx(
-              'relative max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-t-2xl border border-border bg-surface p-5 outline-none sm:rounded-2xl',
+              'relative max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-t-2xl border border-border bg-surface p-5 shadow-card outline-none sm:rounded-2xl',
               className,
             )}
             onClick={(event) => event.stopPropagation()}

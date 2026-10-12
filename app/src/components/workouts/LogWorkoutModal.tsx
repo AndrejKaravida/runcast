@@ -93,7 +93,7 @@ function LogForm({
           htmlFor="log-rpe"
         >
           <span>Težina (RPE)</span>
-          <span className="text-primary">{rpe}</span>
+          <span className="text-primary-ink">{rpe}</span>
         </label>
         <input
           id="log-rpe"
@@ -113,7 +113,7 @@ function LogForm({
         onChange={(event) => setNotes(event.target.value)}
       />
       {error ? (
-        <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>
+        <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">{error}</p>
       ) : null}
       <div className="flex gap-3">
         <AppButton type="button" variant="secondary" className="flex-1" onClick={onClose}>

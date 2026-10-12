@@ -5,17 +5,20 @@ i predlaže zamenu treninga unutar iste nedelje kada uslovi nisu dobri.
 
 ## Status
 
-| Faza | Sadržaj                                                                                       | Status |
-| ---- | --------------------------------------------------------------------------------------------- | ------ |
-| 0–10 | v1: shared paket, Supabase šema, auth, onboarding, plan, danas, logovanje, E2E, deploy config | ✅     |
-| 11   | Audit svih delova app-a (5 subagenata) → `docs/plans/01..05-*.md`                             | ✅     |
-| 12   | P0/P1 ispravke po auditima (vidi „Ispravke" ispod)                                            | ✅     |
-| 13   | Home dashboard sa widgetima (nedeljni progres, niz, countdown, sledeći trening, aktivnosti)   | ✅     |
-| 14   | Apple-style design pass → `docs/plans/design-apple.md`                                        | ✅     |
-| 15   | E2E proširen na 7 scenarija                                                                   | ✅     |
-| 16   | v1.1: 5 Runna-inspirisanih feature-a (vidi sekciju ispod) → `docs/features/*`                 | ✅     |
+| Faza | Sadržaj                                                                                                               | Status |
+| ---- | --------------------------------------------------------------------------------------------------------------------- | ------ |
+| 0–10 | v1: shared paket, Supabase šema, auth, onboarding, plan, danas, logovanje, E2E, deploy config                         | ✅     |
+| 11   | Audit svih delova app-a (5 subagenata) → `docs/plans/01..05-*.md`                                                     | ✅     |
+| 12   | P0/P1 ispravke po auditima (vidi „Ispravke" ispod)                                                                    | ✅     |
+| 13   | Home dashboard sa widgetima (nedeljni progres, niz, countdown, sledeći trening, aktivnosti)                           | ✅     |
+| 14   | Apple-style design pass → `docs/plans/design-apple.md`                                                                | ✅     |
+| 15   | E2E proširen na 7 scenarija                                                                                           | ✅     |
+| 16   | v1.1: 5 Runna-inspirisanih feature-a (vidi sekciju ispod) → `docs/features/*`                                         | ✅     |
+| 17   | v1.2/T1: dizajn refresh po referencama (Runna/Strava/NRC/Garmin) + light/dark tema sa toggle-om → `docs/design/01-03` | ✅     |
+| 18   | v1.2/T2: plan generator recalibracija (long-run-first, realni volumeni) → `docs/design/04`                            | ✅     |
+| 19   | v1.2/T3: 3 nove feature (race-day strategija, fueling, ICS export) → `docs/features/06-08`                            | ✅     |
 
-Testovi: **125 unit** (shared) + **13 E2E** (Playwright kroz pravi UI) + typecheck/lint/build.
+Testovi: **166 unit** (shared) + **25 E2E** (Playwright kroz pravi UI) + typecheck/lint/build.
 
 ## Struktura
 
@@ -115,6 +118,34 @@ je zatvoren.
 2. **Napomene:** Supabase free projekat se pauzira posle 7 dana bez aktivnosti (keepalive ping je već
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
+
+## v1.2 — dizajn refresh, plan recalibracija, 3 nove feature
+
+**T1 — Dizajn + light/dark:** 3 audita (`docs/design/01-pages-audit.md`, `02-system-tone-audit.md`,
+`03-theming.md`) → redizajn svih strana po referencama (Runna/Strava/NRC/Garmin/Apple Fitness),
+novi primitivi (ListRow/SectionHeader/StatRow/StatTile/WorkoutTypeIcon), tipografska skala
+(`--text-hero/stat/label` + `num`/`section-label`), prepis ~30 UI stringova u topliji coaching ton,
+**light/dark tema** sa sistemskom preferencijom, brzim header toggle-om i Settings sekcijom „Izgled"
+(theme-init.js bez FOUC, bez CSP izmena). Usput popravljen i polomljen izgled „Nedeljni kilometri"
+chart-a za nove korisnike.
+
+**T2 — Plan generator (long-run-first):** realni volumeni po uzoru na Higdon/Pfitzinger/Runna —
+lt20+maraton sada 20 → 55 km/ned sa long run-om do **30 km** (ranije 15 → 40 / 12,8 km); 20-40 → 62;
+40-60 → 82; gt60 → 100; long run ciljevi po distanci (M 30-34, HM 18-21, 10K 10-12, 5K 6-8);
+`first` cap 60 km/ned & 30 km long; cutback svake 4. nedelje, pik long run-a 3 nedelje pre trke,
+taper 0,80/0,60/0,40. Bezbednosni invarianti (rast ≤ max(danа,10) km/ned) ostaju.
+
+**T3 — 3 nove feature:**
+
+- **Race-day strategija** (`/race-day`): plan tempa sa 5 km splits tabelom (even/negative split
+  toggle), weather-aware napomena za dan trke, interaktivna checklist-a (localStorage).
+- **Fueling & hidratacija**: FuelingCard na detalju treninga (pre/tokom/posle, gel raspored,
+  hidratacija po temperaturi) + audio/visual gel cue-ovi u vođenom trčanju (dugi trkovi),
+  toggle u Settings.
+- **Kalendar sync**: „Izvezi plan (.ics)" u Settings (svi non-REST treninzi, floating local times,
+  stabilni UID-ovi) + „Dodaj u Google kalendar" po treningu.
+
+Bundle: glavni chunk smanjen 567 → 353 kB (111 kB gzip) zahvaljujući redizajnu i lazy rutama.
 
 ## v1.1 — 5 Runna-inspirisanih feature-a
 

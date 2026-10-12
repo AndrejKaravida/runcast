@@ -1,18 +1,21 @@
 import { useState } from 'react';
-import { formatDuration, parseTimeToSeconds, type RunWindow, type VolumeBand } from '@runcast/shared';
-import { LogOut, RefreshCw } from 'lucide-react';
+import { formatDuration, parseTimeToSeconds, type PlanPaces, type RunWindow, type VolumeBand } from '@runcast/shared';
+import { Download, LogOut, RefreshCw } from 'lucide-react';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppInput } from '@/components/ui/AppInput';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { SectionHeader } from '@/components/ui/SectionHeader';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { CityPicker } from '@/components/forms/CityPicker';
+import { useExportPlanIcs } from '@/features/plans/export';
 import { useActivePlan, useGeneratePlan, type GeneratePlanInput } from '@/features/plans/queries';
 import { useProfile, useUpdateProfile } from '@/features/profile/queries';
 import { useAuth } from '@/auth/AuthProvider';
-import { formatDateShort, todayIso } from '@/lib/dates';
+import { dayDiff, formatDateShort, todayIso } from '@/lib/dates';
 import { authErrorMessage } from '@/lib/auth-errors';
 import type { ProfilesRow } from '@/types';
 
@@ -80,12 +83,14 @@ export function SettingsPage() {
   const { data: plan } = useActivePlan();
   const updateProfile = useUpdateProfile();
   const generatePlan = useGeneratePlan();
+  const exportPlan = useExportPlanIcs();
 
   const [formOverride, setFormOverride] = useState<ProfileForm | null>(null);
   const [planForm, setPlanForm] = useState<PlanForm | null>(null);
   const [pendingInput, setPendingInput] = useState<GeneratePlanInput | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [fuelingOn, setFuelingOn] = useState(() => localStorage.getItem('runcast.fueling') !== 'off');
 
   const form = formOverride ?? (profile ? profileFormFrom(profile) : null);
 
@@ -170,9 +175,9 @@ export function SettingsPage() {
     try {
       await generatePlan.mutateAsync(input);
       setPlanForm(null);
-      setNotice('Novi plan je generisan, a stari zamenjen.');
+      setNotice('Novi plan je spreman, stari je arhiviran.');
     } catch {
-      setError('Generisanje nije uspelo — pokušaj ponovo');
+      setError('Plan nije uspeo da se napravi — hajde ponovo.');
     }
   }
 
@@ -187,119 +192,171 @@ export function SettingsPage() {
     void runGenerate(input);
   }
 
+  async function handleExportPlan() {
+    if (!plan) return;
+    setError(null);
+    setNotice(null);
+    try {
+      await exportPlan.mutateAsync({
+        planId: plan.id,
+        runWindow: (profile?.run_window as RunWindow | undefined) ?? 'morning',
+        paces: (plan.paces ?? null) as unknown as PlanPaces | null,
+      });
+      setNotice('Plan je izvezen.');
+    } catch {
+      setError('Izvoz nije uspeo — hajde ponovo.');
+    }
+  }
+
+  const daysToRace = plan ? dayDiff(todayIso(), plan.race_date) : null;
+
   return (
-    <div className="space-y-4">
-      <AppCard className="space-y-2">
-        <p className="text-sm font-semibold">Nalog</p>
-        <p className="break-all text-sm text-text-secondary">{session?.user.email}</p>
-        <AppButton
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            void signOut();
-          }}
-        >
-          <LogOut className="h-4 w-4" aria-hidden /> Odjavi se
-        </AppButton>
-      </AppCard>
+    <div className="space-y-6">
+      <section className="space-y-2">
+        <SectionHeader label="Izgled" />
+        <AppCard>
+          <ThemeToggle />
+        </AppCard>
+      </section>
 
       {form ? (
-        <AppCard className="space-y-4">
-          <p className="text-sm font-semibold">Profil</p>
-          <AppInput
-            label="Ime"
-            value={form.displayName}
-            onChange={(event) => setForm({ ...form, displayName: event.target.value })}
-          />
-          <CityPicker
-            city={form.city}
-            onSelect={(place) => setForm({ ...form, city: place.name, lat: place.lat, lon: place.lon })}
-            onManualInput={() => {
-              if (form.lat !== null || form.lon !== null) setForm({ ...form, lat: null, lon: null });
-            }}
-          />
-          <div className="grid grid-cols-3 gap-3">
+        <section className="space-y-2">
+          <SectionHeader label="Profil" />
+          <AppCard className="space-y-4">
             <AppInput
-              label="Visina (cm)"
-              type="number"
-              value={form.heightCm}
-              onChange={(event) => setForm({ ...form, heightCm: event.target.value })}
+              label="Ime"
+              value={form.displayName}
+              onChange={(event) => setForm({ ...form, displayName: event.target.value })}
             />
-            <AppInput
-              label="Težina (kg)"
-              type="number"
-              value={form.weightKg}
-              onChange={(event) => setForm({ ...form, weightKg: event.target.value })}
+            <CityPicker
+              city={form.city}
+              onSelect={(place) => setForm({ ...form, city: place.name, lat: place.lat, lon: place.lon })}
+              onManualInput={() => {
+                if (form.lat !== null || form.lon !== null) setForm({ ...form, lat: null, lon: null });
+              }}
             />
-            <AppInput
-              label="Rođenje"
-              type="number"
-              value={form.birthYear}
-              onChange={(event) => setForm({ ...form, birthYear: event.target.value })}
-            />
-          </div>
-          <AppSelect
-            label="Pol"
-            value={form.sex}
-            onChange={(event) => setForm({ ...form, sex: event.target.value as ProfileForm['sex'] })}
-          >
-            <option value="">—</option>
-            <option value="male">Muški</option>
-            <option value="female">Ženski</option>
-            <option value="other">Drugo</option>
-          </AppSelect>
-          <div>
-            <p className="mb-1.5 text-sm font-medium text-text-secondary">Deo dana za trening</p>
-            <SegmentedControl
-              value={form.runWindow}
-              onChange={(value) => setForm({ ...form, runWindow: value })}
-              options={[
-                { value: 'morning', label: 'Jutro' },
-                { value: 'evening', label: 'Veče' },
-                { value: 'flexible', label: 'Fleksibilno' },
-              ]}
-            />
-          </div>
-          <div>
-            <p className="mb-1.5 text-sm font-medium text-text-secondary">Osvežavanje prognoze</p>
-            <SegmentedControl
-              value={form.weatherRefreshMinutes}
-              onChange={(value) => setForm({ ...form, weatherRefreshMinutes: value })}
-              options={REFRESH_OPTIONS}
-            />
-            <button
-              type="button"
-              onClick={() => setForm({ ...form, weatherRefreshMinutes: null })}
-              className={`mt-2 rounded-lg px-3 py-1.5 text-xs font-medium ${
-                form.weatherRefreshMinutes === null
-                  ? 'bg-rain-soft text-rain'
-                  : 'bg-surface-elevated text-text-muted hover:text-text-secondary'
-              }`}
+            <div className="grid grid-cols-3 gap-3">
+              <AppInput
+                label="Visina (cm)"
+                type="number"
+                value={form.heightCm}
+                onChange={(event) => setForm({ ...form, heightCm: event.target.value })}
+              />
+              <AppInput
+                label="Težina (kg)"
+                type="number"
+                value={form.weightKg}
+                onChange={(event) => setForm({ ...form, weightKg: event.target.value })}
+              />
+              <AppInput
+                label="Rođenje"
+                type="number"
+                value={form.birthYear}
+                onChange={(event) => setForm({ ...form, birthYear: event.target.value })}
+              />
+            </div>
+            <AppSelect
+              label="Pol"
+              value={form.sex}
+              onChange={(event) => setForm({ ...form, sex: event.target.value as ProfileForm['sex'] })}
             >
-              Samo na otvaranje
-            </button>
-          </div>
-          <AppButton onClick={() => void handleSaveProfile()} loading={updateProfile.isPending}>
-            Sačuvaj profil
-          </AppButton>
-        </AppCard>
+              <option value="">—</option>
+              <option value="male">Muški</option>
+              <option value="female">Ženski</option>
+              <option value="other">Drugo</option>
+            </AppSelect>
+          </AppCard>
+        </section>
       ) : null}
 
-      <AppCard className="space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold">Plan</p>
-          {plan ? <AppBadge tone="primary">{plan.weeks} nedelja</AppBadge> : null}
-        </div>
+      {form ? (
+        <section className="space-y-2">
+          <SectionHeader label="Trening" />
+          <AppCard className="space-y-4">
+            <div>
+              <p className="section-label mb-1.5">Deo dana za trening</p>
+              <SegmentedControl
+                value={form.runWindow}
+                onChange={(value) => setForm({ ...form, runWindow: value })}
+                options={[
+                  { value: 'morning', label: 'Jutro' },
+                  { value: 'evening', label: 'Veče' },
+                  { value: 'flexible', label: 'Fleksibilno' },
+                ]}
+              />
+            </div>
+            <div>
+              <p className="section-label mb-1.5">Podsetnici za gorivo</p>
+              <SegmentedControl
+                value={fuelingOn ? 'on' : 'off'}
+                onChange={(value) => {
+                  setFuelingOn(value === 'on');
+                  localStorage.setItem('runcast.fueling', value);
+                }}
+                options={[
+                  { value: 'on', label: 'Uključeno' },
+                  { value: 'off', label: 'Isključeno' },
+                ]}
+              />
+            </div>
+            <div>
+              <p className="section-label mb-1.5">Osvežavanje prognoze</p>
+              <SegmentedControl
+                value={form.weatherRefreshMinutes}
+                onChange={(value) => setForm({ ...form, weatherRefreshMinutes: value })}
+                options={REFRESH_OPTIONS}
+              />
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, weatherRefreshMinutes: null })}
+                className={`mt-2 rounded-lg px-3 py-1.5 text-caption font-medium ${
+                  form.weatherRefreshMinutes === null
+                    ? 'bg-rain-soft text-rain-ink'
+                    : 'bg-surface-elevated text-text-muted hover:text-text-secondary'
+                }`}
+              >
+                Samo na otvaranje
+              </button>
+            </div>
+            <AppButton onClick={() => void handleSaveProfile()} loading={updateProfile.isPending}>
+              Sačuvaj profil
+            </AppButton>
+          </AppCard>
+        </section>
+      ) : null}
+
+      <section className="space-y-2">
+        <SectionHeader label="Plan" action={plan ? <AppBadge tone="primary">{plan.weeks} nedelja</AppBadge> : null} />
         {plan ? (
-          <p className="text-sm text-text-secondary">
-            Cilj: {formatDateShort(plan.race_date)} · {plan.days_per_week} dana nedeljno · faze: baza → izgradnja → vrh
-            → taper
-          </p>
+          <AppCard className="space-y-2 border-primary/40 bg-gradient-to-b from-primary-soft to-transparent">
+            <p className="section-label">Ciljna trka</p>
+            <p className="text-sm font-medium">{plan.races?.name ?? 'Trka bez naziva'}</p>
+            {daysToRace !== null && daysToRace >= 0 ? (
+              <p className="flex items-baseline gap-2">
+                <span className="num text-hero font-bold text-primary-ink">{daysToRace}</span>
+                <span className="text-sm text-text-secondary">dana do trke</span>
+              </p>
+            ) : null}
+            <p className="num text-caption text-text-muted">
+              {formatDateShort(plan.race_date)} · {plan.days_per_week} dana nedeljno · faze: baza → izgradnja → vrh →
+              taper
+            </p>
+            <AppButton
+              variant="secondary"
+              className="w-full"
+              loading={exportPlan.isPending}
+              onClick={() => void handleExportPlan()}
+            >
+              <Download className="h-4 w-4" aria-hidden /> Izvezi plan (.ics)
+            </AppButton>
+          </AppCard>
         ) : (
-          <p className="text-sm text-text-muted">Nema aktivnog plana.</p>
+          <AppCard>
+            <p className="text-sm text-text-muted">Još nemamo plan.</p>
+          </AppCard>
         )}
         {planForm ? (
-          <div className="space-y-3 rounded-xl border border-border bg-surface-elevated p-3">
+          <AppCard className="space-y-3">
             <p className="text-sm font-medium">Novi plan (stari se arhivira)</p>
             <AppInput
               label="Datum trke / ciljni datum"
@@ -338,7 +395,7 @@ export function SettingsPage() {
               onChange={(event) => setPlanForm({ ...planForm, recentTime: event.target.value })}
             />
             <div>
-              <p className="mb-1.5 text-sm font-medium text-text-secondary">Dani nedeljno</p>
+              <p className="section-label mb-1.5">Dani nedeljno</p>
               <SegmentedControl
                 value={planForm.daysPerWeek}
                 onChange={(value) => setPlanForm({ ...planForm, daysPerWeek: value })}
@@ -362,7 +419,7 @@ export function SettingsPage() {
               ))}
             </AppSelect>
             <div>
-              <p className="mb-1.5 text-sm font-medium text-text-secondary">Iskustvo</p>
+              <p className="section-label mb-1.5">Iskustvo</p>
               <SegmentedControl
                 value={planForm.experience}
                 onChange={(value) => setPlanForm({ ...planForm, experience: value })}
@@ -380,19 +437,38 @@ export function SettingsPage() {
                 <RefreshCw className="h-4 w-4" aria-hidden /> Generiši
               </AppButton>
             </div>
-          </div>
+          </AppCard>
         ) : (
-          <AppButton variant="secondary" onClick={() => setPlanForm(buildPlanForm())}>
+          <AppButton variant="secondary" className="w-full" onClick={() => setPlanForm(buildPlanForm())}>
             <RefreshCw className="h-4 w-4" aria-hidden /> Generiši novi plan
           </AppButton>
         )}
-      </AppCard>
+      </section>
+
+      <section className="space-y-2">
+        <SectionHeader label="Nalog" />
+        <AppCard className="space-y-2">
+          <p className="break-all text-caption text-text-muted">{session?.user.email}</p>
+          <AppButton
+            variant="danger"
+            size="sm"
+            className="self-start"
+            onClick={() => {
+              void signOut();
+            }}
+          >
+            <LogOut className="h-4 w-4" aria-hidden /> Odjavi se
+          </AppButton>
+        </AppCard>
+      </section>
 
       {notice ? (
-        <p className="rounded-xl border border-success/40 bg-success-soft px-3 py-2 text-sm text-success">{notice}</p>
+        <p className="rounded-xl border border-success/40 bg-success-soft px-3 py-2 text-sm text-success-ink">
+          {notice}
+        </p>
       ) : null}
       {error ? (
-        <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>
+        <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">{error}</p>
       ) : null}
 
       <ConfirmDialog

@@ -7,12 +7,12 @@ interface QueryErrorProps {
 }
 
 export function QueryError({
-  message = 'Podaci trenutno ne mogu da se učitaju. Proveri vezu i pokušaj ponovo.',
+  message = 'Veza je trenutno slaba. Proveri internet i pokušaj ponovo.',
   onRetry,
 }: QueryErrorProps) {
   return (
     <EmptyState
-      title="Greška pri učitavanju"
+      title="Ne mogu da učitam podatke"
       description={message}
       action={
         onRetry ? (

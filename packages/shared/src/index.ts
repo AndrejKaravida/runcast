@@ -9,3 +9,6 @@ export * from './plan-generator';
 export * from './strength';
 export * from './weather';
 export * from './weather-rules';
+export * from './raceday';
+export * from './fueling';
+export * from './ics';

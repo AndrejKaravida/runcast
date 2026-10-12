@@ -12,6 +12,7 @@ export default defineConfig({
     baseURL: 'http://localhost:5173',
     trace: 'retain-on-failure',
     locale: 'sr-Latn-RS',
+    colorScheme: 'dark',
   },
   webServer: {
     command: 'npm run dev',

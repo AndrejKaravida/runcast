@@ -1,11 +1,11 @@
 export function PaceZoneBadge({ zone }: { zone: string | null }) {
   if (!zone) return null;
   const styles: Record<string, string> = {
-    E: 'bg-success-soft text-success',
-    M: 'bg-rain-soft text-rain',
-    T: 'bg-primary-soft text-primary',
-    I: 'bg-warning-soft text-warning',
-    R: 'bg-danger-soft text-danger',
+    E: 'bg-success-soft text-success-ink',
+    M: 'bg-rain-soft text-rain-ink',
+    T: 'bg-primary-soft text-primary-ink',
+    I: 'bg-warning-soft text-warning-ink',
+    R: 'bg-danger-soft text-danger-ink',
   };
   return (
     <span

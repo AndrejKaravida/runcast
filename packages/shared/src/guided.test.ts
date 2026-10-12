@@ -140,11 +140,11 @@ describe('guided timeline', () => {
 
   it('renders Serbian cue texts', () => {
     expect(cueTextFor('START')).toBe('Krećemo!');
-    expect(cueTextFor('SEGMENT_START', { label: 'Tempo 20 min' })).toBe('Sledi: Tempo 20 min.');
+    expect(cueTextFor('SEGMENT_START', { label: 'Tempo 20 min' })).toBe('Sada: Tempo 20 min.');
     expect(cueTextFor('REPEAT', { repeatIndex: 2, repeatTotal: 4 })).toBe('Ponavljanje 2 od 4.');
     expect(cueTextFor('PACE', { paceLabel: '4:48' })).toBe('Tempo 4:48 po kilometru.');
-    expect(cueTextFor('HALFWAY')).toBe('Polovina treninga.');
-    expect(cueTextFor('FINISH', { elapsedSec: 3661 })).toBe('Trening završen. Vreme 1:01:01.');
+    expect(cueTextFor('HALFWAY')).toBe('Pola je — drži ritam.');
+    expect(cueTextFor('FINISH', { elapsedSec: 3661 })).toBe('Gotovo! 1:01:01 u nogama.');
     expect(cueTextFor('DISTANCE', { distanceKm: 5.25 })).toBe('GPS distanca: 5,25 kilometara.');
   });
 });

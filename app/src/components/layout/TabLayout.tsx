@@ -1,6 +1,7 @@
 import { clsx } from 'clsx';
 import { BarChart3, CalendarDays, House, Settings } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router';
+import { ThemeQuickToggle } from '@/components/ui/ThemeToggle';
 
 const tabs = [
   { to: '/today', label: 'Danas', icon: House },
@@ -13,10 +14,11 @@ export function TabLayout() {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[720px] flex-col bg-bg">
       <header className="sticky top-0 z-40 bg-bg/85 backdrop-blur-xl backdrop-saturate-150">
-        <div className="mx-auto w-full max-w-[720px] px-4 py-3">
+        <div className="mx-auto flex w-full max-w-[720px] items-center justify-between px-4 py-3">
           <span className="text-base font-bold tracking-tight">
-            Run<span className="text-primary">Cast</span>
+            Run<span className="text-primary-ink">Cast</span>
           </span>
+          <ThemeQuickToggle />
         </div>
         <div className="pointer-events-none absolute inset-x-0 -bottom-4 h-4 bg-gradient-to-b from-bg/80 to-transparent" />
       </header>
@@ -33,7 +35,7 @@ export function TabLayout() {
               className={({ isActive }) =>
                 clsx(
                   'flex select-none flex-col items-center gap-1 py-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/60 active:scale-[0.97]',
-                  isActive ? 'text-primary' : 'text-text-secondary hover:text-text',
+                  isActive ? 'text-primary-ink' : 'text-text-secondary hover:text-text',
                 )
               }
             >

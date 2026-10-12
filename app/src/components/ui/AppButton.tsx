@@ -15,10 +15,10 @@ interface AppButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
 }
 
 const variantClasses: Record<Variant, string> = {
-  primary: 'bg-primary text-bg hover:bg-primary-pressed',
+  primary: 'bg-primary text-on-accent hover:bg-primary-pressed',
   secondary: 'border border-border bg-surface-elevated text-text hover:bg-surface',
   ghost: 'bg-transparent text-text-secondary hover:bg-surface hover:text-text',
-  danger: 'border border-danger/40 bg-danger-soft text-danger hover:bg-danger/20',
+  danger: 'border border-danger/40 bg-danger-soft text-danger-ink hover:bg-danger/20',
 };
 
 const sizeClasses: Record<Size, string> = {

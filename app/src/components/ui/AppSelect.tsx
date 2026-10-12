@@ -35,7 +35,7 @@ export function AppSelect({ label, error, id, className, children, ...rest }: Ap
           aria-hidden
         />
       </div>
-      {error ? <p className="mt-1 text-xs text-danger">{error}</p> : null}
+      {error ? <p className="mt-1 text-xs text-danger-ink">{error}</p> : null}
     </div>
   );
 }

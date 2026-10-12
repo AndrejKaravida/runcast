@@ -27,7 +27,7 @@ export function WhyCard({ explanation }: WhyCardProps) {
         ))}
       </ul>
       {cue ? <p className="text-xs text-text-muted">{cue}</p> : null}
-      <div className="rounded-xl bg-warning-soft p-3 text-xs text-warning">
+      <div className="rounded-xl bg-warning-soft p-3 text-xs text-warning-ink">
         <p className="font-semibold">Česta greška</p>
         <p className="mt-0.5">{explanation.mistake}</p>
       </div>

@@ -5,11 +5,13 @@ import {
   isGuidedRunType,
   pickSwapCandidate,
   runWindowHours,
+  type PlanPaces,
   type RunWindow,
   type WorkoutStatus,
   type WorkoutType,
 } from '@runcast/shared';
-import { CalendarDays, CheckCircle2, Flame } from 'lucide-react';
+import { clsx } from 'clsx';
+import { ArrowRight, CalendarDays, CheckCircle2, Flame } from 'lucide-react';
 import { Link } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
@@ -17,7 +19,9 @@ import { AppCard } from '@/components/ui/AppCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { QueryError } from '@/components/ui/QueryError';
+import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { StatRow } from '@/components/ui/StatRow';
 import { WeatherSummaryCard } from '@/components/weather/WeatherSummaryCard';
 import { assessmentText } from '@/components/weather/weather-utils';
 import { LogWorkoutModal } from '@/components/workouts/LogWorkoutModal';
@@ -25,12 +29,21 @@ import { NextWorkoutCard } from '@/components/workouts/NextWorkoutCard';
 import { PaceZoneBadge } from '@/components/workouts/PaceZoneBadge';
 import { RecentActivityCard } from '@/components/workouts/RecentActivityCard';
 import { WeekStrip } from '@/components/workouts/WeekStrip';
+import { WorkoutTypeIcon } from '@/components/workouts/WorkoutTypeIcon';
 import { useCompleteWorkout, useRunLogs } from '@/features/logs/queries';
 import { nextWorkout, runStreak, weekProgress } from '@/features/plans/progress';
 import { useActivePlan, useSwapWorkouts, useWorkoutsRange } from '@/features/plans/queries';
 import { useProfile } from '@/features/profile/queries';
 import { useWeather } from '@/features/weather/queries';
-import { statusTone, typeLabel, workoutSteps } from '@/features/workouts/utils';
+import {
+  heroStats,
+  phaseBarClass,
+  statusTone,
+  TONE_TEXT_CLASSES,
+  typeLabel,
+  typeTone,
+  workoutSteps,
+} from '@/features/workouts/utils';
 import {
   addDaysIso,
   dayDiff,
@@ -42,10 +55,23 @@ import {
 } from '@/lib/dates';
 
 const verdictToneClasses = {
-  rain: 'border-rain/40 bg-rain-soft',
-  warning: 'border-warning/40 bg-warning-soft',
-  danger: 'border-danger/40 bg-danger-soft',
+  rain: 'border-rain-ink bg-rain-soft',
+  warning: 'border-warning-ink bg-warning-soft',
+  danger: 'border-danger-ink bg-danger-soft',
 } as const;
+
+function greeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Dobro jutro';
+  if (hour < 18) return 'Dobar dan';
+  return 'Dobro veče';
+}
+
+function streakClasses(streak: number): string {
+  if (streak >= 7) return 'bg-warning-soft text-warning-ink';
+  if (streak >= 3) return 'bg-primary-soft text-primary-ink';
+  return 'bg-surface-elevated text-text-muted';
+}
 
 export function TodayPage() {
   const { data: profile } = useProfile();
@@ -116,8 +142,8 @@ export function TodayPage() {
   if (!plan) {
     return (
       <EmptyState
-        title="Nema aktivnog plana"
-        description="Napravi plan u podešavanjima — izaberi trku, tempo i raspored."
+        title="Još nemamo plan"
+        description="Hajde da napravimo tvoj plan — trka, tempo i dani koje imaš."
         action={
           <Link to="/settings">
             <AppButton size="sm">Otvori podešavanja</AppButton>
@@ -140,46 +166,105 @@ export function TodayPage() {
   const showNextWorkout = Boolean(
     upcoming && (!todayWorkout || todayWorkout.type === 'REST' || todayWorkout.status !== 'PLANNED'),
   );
+  const firstName = profile?.display_name?.trim().split(/\s+/)[0] ?? null;
+  const stats = todayWorkout ? heroStats(todayWorkout, (plan.paces ?? null) as unknown as PlanPaces | null) : [];
+
+  const raceChipClickable = Boolean(raceInfo && daysToRace !== null && daysToRace >= 0);
+  const raceChipContent = raceInfo ? (
+    <>
+      <p className="section-label">Ciljna trka</p>
+      <p className="text-sm font-medium">{raceInfo.name ?? 'Trka bez naziva'}</p>
+      {daysToRace !== null && daysToRace >= 0 ? (
+        <p className="flex items-baseline gap-2">
+          <span className="num value-swap text-hero font-bold text-primary-ink">{daysToRace}</span>
+          <span className="text-sm text-text-secondary">dana do trke</span>
+        </p>
+      ) : (
+        <Link to="/settings" className="block text-sm font-medium text-primary-ink hover:text-primary-ink-hover">
+          Trka je prošla — napravi novi plan
+        </Link>
+      )}
+      <p className="num text-caption text-text-muted">
+        {formatDateShort(raceInfo.race_date)} · {raceInfo.distance_km} km
+      </p>
+      <div className="space-y-1 pt-1">
+        <div className="h-1.5 overflow-hidden rounded-full bg-surface-elevated">
+          <div
+            className="h-full rounded-full bg-primary"
+            style={{ width: `${Math.min(100, (planWeek / plan.weeks) * 100)}%` }}
+          />
+        </div>
+        <p className="num text-caption text-text-muted">
+          Nedelja {planWeek} / {plan.weeks}
+        </p>
+      </div>
+    </>
+  ) : (
+    <>
+      <p className="section-label">Plan</p>
+      <p className="num text-stat font-semibold">
+        Nedelja {planWeek} / {plan.weeks}
+      </p>
+    </>
+  );
 
   return (
     <div className="space-y-4">
-      {todayWorkout ? (
-        <AppCard
-          data-testid="today-hero"
-          className={todayWorkout.type === 'REST' ? 'space-y-3' : 'space-y-3 border-primary/30'}
+      <div className="flex items-center justify-between gap-3">
+        <p className="min-w-0 truncate text-lg font-semibold">
+          {greeting()}
+          {firstName ? `, ${firstName}` : ''}
+        </p>
+        <span
+          className={clsx(
+            'inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-caption font-medium',
+            streakClasses(streak),
+          )}
         >
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-              Danas · {formatDateLong(today)}
+          <Flame className="h-4 w-4" aria-hidden />
+          <span className="num font-semibold">{streak}</span>
+          <span className="whitespace-nowrap">dana u nizu</span>
+        </span>
+      </div>
+
+      {todayWorkout ? (
+        <AppCard data-testid="today-hero" className="space-y-4 overflow-hidden">
+          <div className={clsx('-mx-4 -mt-4 h-1', phaseBarClass(todayWorkout.phase))} aria-hidden />
+          <div className="flex items-center justify-between gap-3">
+            <p className="section-label flex min-w-0 items-center gap-1.5">
+              <WorkoutTypeIcon
+                type={todayWorkout.type}
+                className={clsx('h-4 w-4 shrink-0', TONE_TEXT_CLASSES[typeTone(todayWorkout.type)])}
+              />
+              <span className="truncate">Danas · {formatDateLong(today)}</span>
             </p>
-            <AppBadge tone={statusTone(todayWorkout.status)}>
-              {todayWorkout.status === 'DONE'
-                ? 'Urađeno'
-                : todayWorkout.status === 'SKIPPED'
-                  ? 'Preskočeno'
-                  : 'Planirano'}
-            </AppBadge>
+            {todayWorkout.status !== 'PLANNED' ? (
+              <AppBadge tone={statusTone(todayWorkout.status)}>
+                {todayWorkout.status === 'DONE' ? 'Urađeno' : 'Preskočeno'}
+              </AppBadge>
+            ) : null}
           </div>
+
           <div className="flex items-start justify-between gap-3">
-            <div>
-              <p data-testid="today-workout-title" className="text-lg font-semibold">
-                {todayWorkout.title}
-              </p>
-              <p className="mt-0.5 text-sm text-text-secondary">
-                {todayWorkout.type === 'STRENGTH' ? 'Snaga' : typeLabel(todayWorkout.type)}
-                {todayWorkout.distance_km > 0 ? ` · ${todayWorkout.distance_km} km` : ''}
-                {todayWorkout.type === 'STRENGTH' && todayWorkout.duration_sec
-                  ? ` · ${formatDuration(todayWorkout.duration_sec)}`
-                  : ''}
-              </p>
-            </div>
+            <p data-testid="today-workout-title" className="text-2xl font-semibold tracking-display">
+              {todayWorkout.title}
+            </p>
             <PaceZoneBadge zone={todayWorkout.pace_zone} />
           </div>
 
+          <p className="num text-sm text-text-secondary">
+            {typeLabel(todayWorkout.type)}
+            {todayWorkout.distance_km > 0 ? ` · ${todayWorkout.distance_km} km` : ''}
+            {todayWorkout.duration_sec ? ` · ${formatDuration(todayWorkout.duration_sec)}` : ''}
+          </p>
+
           {showVerdict && verdict ? (
-            <div data-testid="rain-banner" className={`rounded-xl border p-3 ${verdictToneClasses[verdict.tone]}`}>
+            <div
+              data-testid="rain-banner"
+              className={clsx('rounded-xl border-l-2 p-3', verdictToneClasses[verdict.tone])}
+            >
               <p className="text-sm font-semibold">{verdict.title}</p>
-              <p className="mt-0.5 text-xs text-text-secondary">
+              <p className="mt-0.5 text-caption text-text-secondary">
                 {verdict.description}
                 {candidate ? ` Najbliži slobodan termin: ${formatDateShort(candidate.workout_date)}.` : ''}
               </p>
@@ -199,119 +284,99 @@ export function TodayPage() {
                   </AppButton>
                 ) : null}
                 <AppButton type="button" size="sm" variant="ghost" onClick={() => setBannerDismissed(true)}>
-                  Ostavi kako je
+                  Ostajem po planu
                 </AppButton>
               </div>
             </div>
           ) : null}
 
-          {workoutSteps(todayWorkout).length > 0 && todayWorkout.type !== 'REST' ? (
-            <ul className="space-y-1 rounded-xl bg-surface-elevated p-3 text-sm text-text-secondary">
-              {workoutSteps(todayWorkout)
-                .slice(0, 3)
-                .map((step, index) => (
-                  <li key={`${step.label}-${index}`} className="flex items-center justify-between gap-2">
-                    <span>{step.label}</span>
-                    {step.pace ? (
-                      <span className="text-text-muted">{step.pace} /km</span>
-                    ) : step.durationSec ? (
-                      <span className="shrink-0 text-text-muted">{formatDuration(step.durationSec)}</span>
-                    ) : null}
-                  </li>
-                ))}
-            </ul>
-          ) : null}
+          {stats.length >= 2 ? <StatRow items={stats} className="rounded-xl bg-surface-elevated py-1" /> : null}
 
-          <div className="flex flex-wrap gap-2">
-            <Link to={`/workout/${todayWorkout.id}`} className="flex-1">
-              <AppButton variant="secondary" className="w-full" size="sm">
-                Detalj treninga
-              </AppButton>
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              {todayWorkout.status === 'PLANNED' && todayWorkout.type !== 'REST' ? (
+                isStrength ? (
+                  <AppButton
+                    size="lg"
+                    className="flex-1"
+                    loading={completeWorkout.isPending}
+                    data-testid="complete-strength"
+                    onClick={() => void completeWorkout.mutateAsync(todayWorkout.id)}
+                  >
+                    <CheckCircle2 className="h-5 w-5" aria-hidden /> Završi trening
+                  </AppButton>
+                ) : (
+                  <AppButton size="lg" className="flex-1" data-testid="log-done" onClick={() => setLogOpen(true)}>
+                    <CheckCircle2 className="h-5 w-5" aria-hidden /> Urađeno
+                  </AppButton>
+                )
+              ) : null}
+              {isGuidedRunType(todayWorkout.type) &&
+              todayWorkout.status === 'PLANNED' &&
+              workoutSteps(todayWorkout).length > 0 ? (
+                <Link to={`/run/${todayWorkout.id}`} className="flex-1" data-testid="start-guided">
+                  <AppButton variant="secondary" size="lg" className="w-full">
+                    Vođeno
+                  </AppButton>
+                </Link>
+              ) : null}
+            </div>
+            <Link
+              to={`/workout/${todayWorkout.id}`}
+              className="block text-center text-sm font-medium text-primary-ink hover:text-primary-ink-hover"
+            >
+              Pogledaj trening
             </Link>
-            {isGuidedRunType(todayWorkout.type) &&
-            todayWorkout.status === 'PLANNED' &&
-            workoutSteps(todayWorkout).length > 0 ? (
-              <Link to={`/run/${todayWorkout.id}`} className="flex-1" data-testid="start-guided">
-                <AppButton variant="secondary" className="w-full" size="sm">
-                  Vođeno
-                </AppButton>
-              </Link>
-            ) : null}
-            {todayWorkout.status === 'PLANNED' && todayWorkout.type !== 'REST' ? (
-              isStrength ? (
-                <AppButton
-                  size="sm"
-                  className="flex-1"
-                  loading={completeWorkout.isPending}
-                  data-testid="complete-strength"
-                  onClick={() => void completeWorkout.mutateAsync(todayWorkout.id)}
-                >
-                  <CheckCircle2 className="h-4 w-4" aria-hidden /> Završi trening
-                </AppButton>
-              ) : (
-                <AppButton size="sm" className="flex-1" data-testid="log-done" onClick={() => setLogOpen(true)}>
-                  <CheckCircle2 className="h-4 w-4" aria-hidden /> Urađeno
-                </AppButton>
-              )
-            ) : null}
           </div>
         </AppCard>
       ) : (
         <EmptyState
-          title="Za danas nema treninga u planu"
-          description="Pogledaj kalendar za ostatak nedelje."
+          title="Danas je slobodan dan"
+          description="Baci pogled na kalendar — sledeći trening te čeka."
           icon={<CalendarDays className="h-6 w-6" />}
         />
       )}
 
-      <div className="grid grid-cols-2 gap-3" data-testid="race-chip">
-        <div className="rounded-2xl border border-border bg-surface p-3">
-          <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-text-muted">
-            {raceInfo?.name ?? (raceInfo ? 'Ciljna trka' : 'Plan')}
-          </p>
-          {raceInfo ? (
-            daysToRace !== null && daysToRace >= 0 ? (
-              <p className="mt-0.5 text-sm font-medium">
-                <span className="text-xl font-bold text-primary">{daysToRace}</span> dana do trke
-              </p>
-            ) : (
-              <Link to="/settings" className="mt-0.5 block text-sm font-medium text-primary hover:text-primary-pressed">
-                Trka je prošla — napravi novi plan
-              </Link>
-            )
-          ) : (
-            <p className="mt-0.5 text-sm font-medium">
-              Nedelja {planWeek}/{plan.weeks}
+      {raceChipClickable ? (
+        <Link to="/race-day" data-testid="race-chip" className="block">
+          <AppCard className="space-y-2 border-primary/40 bg-gradient-to-b from-primary-soft to-transparent">
+            {raceChipContent}
+            <p className="flex items-center gap-1 pt-1 text-sm font-medium text-primary-ink">
+              Dan trke <ArrowRight className="h-4 w-4" aria-hidden />
             </p>
-          )}
-        </div>
-        <div className="rounded-2xl border border-border bg-surface p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">Niz trčanja</p>
-          <p className="mt-0.5 flex items-center gap-1.5 text-sm font-medium">
-            <Flame className="h-4 w-4 text-primary" aria-hidden />
-            <span className="text-xl font-bold text-success">{streak}</span> {streak === 1 ? 'dan' : 'dana'}
-          </p>
-        </div>
-      </div>
+          </AppCard>
+        </Link>
+      ) : (
+        <AppCard
+          data-testid="race-chip"
+          className="space-y-2 border-primary/40 bg-gradient-to-b from-primary-soft to-transparent"
+        >
+          {raceChipContent}
+        </AppCard>
+      )}
 
       <AppCard data-testid="week-board" className="space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold">Ova nedelja</p>
-          <Link to="/plan" className="text-sm font-medium text-primary hover:text-primary-pressed">
-            Ceo plan
-          </Link>
-        </div>
+        <SectionHeader
+          label="Tvoja nedelja"
+          action={
+            <Link to="/plan" className="text-sm font-medium text-primary-ink hover:text-primary-ink-hover">
+              Ceo plan
+            </Link>
+          }
+        />
         <div className="flex items-center gap-4">
           <ProgressRing value={week.plannedSessions > 0 ? week.doneSessions / week.plannedSessions : 0}>
-            <span className="text-xs font-semibold">
+            <span className="num text-caption font-semibold">
               {week.doneSessions}/{week.plannedSessions}
             </span>
           </ProgressRing>
-          <div className="text-sm">
-            <p data-testid="weekly-km">
-              <span className="font-semibold">{week.doneKm}</span> / {week.plannedKm} km
+          <div className="min-w-0">
+            <p data-testid="weekly-km" className="num text-stat font-semibold">
+              {week.doneKm} <span className="text-base font-medium text-text-secondary">/ {week.plannedKm} km</span>
             </p>
-            <p className="mt-0.5 text-text-muted">treninga ove nedelje</p>
+            <p className="text-caption text-text-muted">
+              {week.doneSessions} od {week.plannedSessions} treninga ove nedelje
+            </p>
           </div>
         </div>
         <WeekStrip workouts={weekWorkouts} today={today} />
@@ -320,6 +385,7 @@ export function TodayPage() {
       {showNextWorkout && upcoming ? <NextWorkoutCard workout={upcoming} today={today} /> : null}
 
       <WeatherSummaryCard
+        variant="row"
         data={weather.data}
         isError={weather.isError}
         date={weatherDate}

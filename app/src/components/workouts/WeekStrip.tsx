@@ -20,21 +20,21 @@ export function WeekStrip({ workouts, today = todayIso() }: { workouts: Workouts
             key={date}
             to={workout ? `/workout/${workout.id}` : '/plan'}
             className={clsx(
-              'flex select-none flex-col items-center gap-1.5 rounded-xl border px-1 py-2 transition-all duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-[0.96]',
-              isToday ? 'border-primary/60 bg-primary-soft' : 'border-border bg-surface hover:border-border',
+              'flex select-none flex-col items-center gap-1.5 rounded-lg px-1 py-2 transition-all duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-[0.96]',
+              isToday ? 'bg-primary-soft' : 'hover:bg-surface-elevated',
             )}
           >
-            <span className={clsx('text-[11px] font-medium', isToday ? 'text-primary' : 'text-text-muted')}>
+            <span className={clsx('text-caption font-medium', isToday ? 'text-primary-ink' : 'text-text-muted')}>
               {label}
             </span>
-            <span className="text-sm font-semibold">{Number(date.slice(8, 10))}</span>
+            <span className="num text-sm font-semibold">{Number(date.slice(8, 10))}</span>
             {workout ? (
               workout.status === 'DONE' ? (
-                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-success text-bg">
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-success text-on-accent">
                   <Check className="h-3 w-3" aria-hidden />
                 </span>
               ) : workout.status === 'SKIPPED' ? (
-                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-danger text-bg">
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-danger text-on-accent">
                   <X className="h-3 w-3" aria-hidden />
                 </span>
               ) : (

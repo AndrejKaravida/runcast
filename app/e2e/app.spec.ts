@@ -150,7 +150,7 @@ test('workout detalj, preskoči, profil i regeneracija plana', async ({ page }) 
   await page.getByRole('button', { name: /Generiši novi plan/ }).click();
   await page.getByLabel('Datum trke / ciljni datum').fill(isoFromNow(140));
   await page.getByRole('button', { name: 'Generiši', exact: true }).click();
-  await expect(page.getByText('Novi plan je generisan, a stari zamenjen.')).toBeVisible();
+  await expect(page.getByText('Novi plan je spreman, stari je arhiviran.')).toBeVisible();
 
   await page.goto('/plan');
   const rows = page.locator('[data-testid="week-row"]');

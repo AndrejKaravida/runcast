@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  buildFuelingPlan,
   buildStepTimeline,
   cueTextFor,
   elapsedAfterSkip,
@@ -17,16 +18,15 @@ import { useGeoDistance } from '@/components/guided/useGeoDistance';
 import { useGuidedClock, type GuidedPhase } from '@/components/guided/useGuidedClock';
 import { useSpeechCues } from '@/components/guided/useSpeechCues';
 import { useWakeLock } from '@/components/guided/useWakeLock';
-import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
-import { AppCard } from '@/components/ui/AppCard';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { StatRow } from '@/components/ui/StatRow';
 import { LogWorkoutModal } from '@/components/workouts/LogWorkoutModal';
 import { useRunLogs } from '@/features/logs/queries';
 import { useActivePlan, useWorkout } from '@/features/plans/queries';
-import { workoutSteps } from '@/features/workouts/utils';
+import { typeTone, workoutSteps } from '@/features/workouts/utils';
 
 const MIN_TIME_SCALE = 0.1;
 const MAX_TIME_SCALE = 120;
@@ -69,11 +69,17 @@ export function GuidedRunPage() {
   );
   const [logOpen, setLogOpen] = useState(false);
   const [finishOpen, setFinishOpen] = useState(false);
+  const [fuelingOn] = useState(() => localStorage.getItem('runcast.fueling') !== 'off');
+  const fuelingCues = useMemo(() => {
+    if (!fuelingOn || !workout || workout.type !== 'LONG' || !timeline) return [];
+    return buildFuelingPlan({ type: workout.type, durationSec: timeline.totalDurationSec })?.during ?? [];
+  }, [fuelingOn, workout, timeline]);
 
   const prevPhaseRef = useRef<GuidedPhase>('idle');
   const segmentIndexRef = useRef(-1);
   const halfwaySpokenRef = useRef(false);
   const finishedCueRef = useRef(false);
+  const fuelingIndexRef = useRef(0);
 
   const existingLog = workout ? (logs.find((entry) => entry.workout_id === workout.id) ?? null) : null;
   const position = timeline ? segmentAt(timeline, clock.elapsedSec) : null;
@@ -140,6 +146,15 @@ export function GuidedRunPage() {
     }
   }, [clock.phase, clock.elapsedSec, timeline, speech]);
 
+  useEffect(() => {
+    if (clock.phase !== 'running' || fuelingCues.length === 0) return;
+    const next = fuelingCues[fuelingIndexRef.current];
+    if (!next || clock.elapsedSec < next.atSec) return;
+    fuelingIndexRef.current += 1;
+    speech.speak(next.text);
+    speech.beep(660, 120);
+  }, [clock.phase, clock.elapsedSec, fuelingCues, speech]);
+
   const handleStart = () => {
     speech.unlock();
     clock.start();
@@ -172,7 +187,7 @@ export function GuidedRunPage() {
   if (!workout) {
     return (
       <div className="mx-auto w-full max-w-[560px] px-4 py-6">
-        <EmptyState title="Trening nije nađen" description="Možda je plan regenerisan." />
+        <EmptyState title="Ne nalazim ovaj trening" description="Plan je verovatno osvežen — pogledaj kalendar." />
       </div>
     );
   }
@@ -181,12 +196,12 @@ export function GuidedRunPage() {
     return (
       <div className="mx-auto w-full max-w-[560px] px-4 py-6">
         <EmptyState
-          title="Vođenje nije dostupno"
-          description="Vođeno trčanje postoji za treninge trčanja sa koracima."
+          title="Za ovaj trening nema vođenja"
+          description="Vođenje radi za trčanje sa koracima."
           action={
             <Link to={`/workout/${workout.id}`}>
               <AppButton size="sm" variant="secondary">
-                Detalj treninga
+                Pogledaj trening
               </AppButton>
             </Link>
           }
@@ -222,6 +237,18 @@ export function GuidedRunPage() {
               ? `${segmentCueWithPace} ${cueTextFor('HALFWAY')}`
               : segmentCueWithPace;
 
+  const firedFuelingCount = fuelingCues.filter((cue) => cue.atSec <= clock.elapsedSec).length;
+  const nextFuelingCue = fuelingCues[firedFuelingCount];
+  const lastFuelingCue = firedFuelingCount > 0 ? fuelingCues[firedFuelingCount - 1] : undefined;
+  const fuelingHint = lastFuelingCue
+    ? { fired: true, text: lastFuelingCue.text }
+    : nextFuelingCue
+      ? {
+          fired: false,
+          text: `Sledeći gel: ~${Math.max(1, Math.ceil((nextFuelingCue.atSec - clock.elapsedSec) / 60))} min`,
+        }
+      : undefined;
+
   if (clock.phase === 'idle') {
     return (
       <GuidedOverview
@@ -239,9 +266,13 @@ export function GuidedRunPage() {
 
   if (clock.phase === 'countdown') {
     return (
-      <div className="mx-auto flex min-h-[70vh] w-full max-w-[560px] flex-col items-center justify-center gap-4 px-4 py-6">
-        <p className="text-sm font-semibold uppercase tracking-wide text-text-muted">Pripremi se</p>
-        <p data-testid="guided-countdown" className="text-6xl font-bold text-primary">
+      <div className="mx-auto flex min-h-dvh w-full max-w-[560px] flex-col items-center justify-center gap-4 px-4 py-6">
+        <p className="section-label">Pripremi se</p>
+        <p
+          key={clock.countdownValue}
+          data-testid="guided-countdown"
+          className="num value-swap text-hero font-bold text-primary-ink"
+        >
           {clock.countdownValue}
         </p>
         <CueBanner text={bannerText} />
@@ -251,27 +282,30 @@ export function GuidedRunPage() {
 
   if (clock.phase === 'finished') {
     return (
-      <div className="mx-auto w-full max-w-[560px] space-y-4 px-4 py-6">
-        <AppCard className="space-y-4 text-center">
-          <CheckCircle2 className="mx-auto h-10 w-10 text-success" aria-hidden />
-          <h1 className="text-xl font-semibold">Trening završen</h1>
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <AppBadge tone="neutral">{formatDuration(Math.round(clock.elapsedSec))}</AppBadge>
-            <AppBadge tone="neutral">{formatKm(loggedDistance)} km</AppBadge>
-            {gpsEnabled ? <AppBadge tone="rain">GPS</AppBadge> : null}
-          </div>
+      <div className="mx-auto flex min-h-dvh w-full max-w-[560px] flex-col px-4 py-6">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+          <CheckCircle2 className="h-10 w-10 text-success-ink" aria-hidden />
+          <h1 className="text-2xl font-semibold">Trening završen</h1>
+          <StatRow
+            items={[
+              { label: 'Vreme', value: formatDuration(Math.round(clock.elapsedSec)) },
+              { label: 'Distanca', value: `${formatKm(loggedDistance)} km` },
+              { label: 'Izvor', value: gpsEnabled ? 'GPS' : 'Plan' },
+            ]}
+            className="w-full max-w-sm rounded-xl bg-surface-elevated py-1"
+          />
           <CueBanner text={bannerText} />
           {existingLog ? (
             <p className="text-sm text-text-secondary">Trening je već zabeležen.</p>
           ) : (
-            <AppButton data-testid="guided-log" className="w-full" onClick={() => setLogOpen(true)}>
+            <AppButton data-testid="guided-log" className="w-full max-w-sm" onClick={() => setLogOpen(true)}>
               Zabeleži trening
             </AppButton>
           )}
-          <AppButton variant="secondary" className="w-full" onClick={() => navigate(`/workout/${workout.id}`)}>
-            Detalj treninga
+          <AppButton variant="secondary" className="w-full max-w-sm" onClick={() => navigate(`/workout/${workout.id}`)}>
+            Pogledaj trening
           </AppButton>
-        </AppCard>
+        </div>
         <LogWorkoutModal
           workout={workout}
           open={logOpen}
@@ -286,12 +320,14 @@ export function GuidedRunPage() {
     <>
       <GuidedSessionCard
         workoutTitle={workout.title}
+        tone={typeTone(workout.type)}
         timeline={guidedTimeline}
         segment={activeSegment}
         remainingSec={position?.remainingSec ?? 0}
         elapsedSec={clock.elapsedSec}
         phase={clock.phase}
         bannerText={bannerText}
+        fuelingHint={fuelingHint}
         muted={speech.muted}
         gpsEnabled={gpsEnabled}
         gpsStatus={geo.status}
@@ -305,7 +341,7 @@ export function GuidedRunPage() {
       <ConfirmDialog
         open={finishOpen}
         title="Završiti pre kraja?"
-        description="Trening će se završiti sa vremenom koje je do sada proteklo."
+        description="Zabeležićemo vreme koje si do sada istrčao — ništa se ne gubi."
         confirmLabel="Završi"
         tone="danger"
         onConfirm={() => {

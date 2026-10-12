@@ -8,7 +8,7 @@ export function CueBanner({ text }: CueBannerProps) {
       data-testid="guided-cue"
       role="status"
       aria-live="polite"
-      className="min-h-11 rounded-xl bg-surface-elevated px-3 py-2 text-center text-sm font-medium"
+      className="min-h-11 rounded-full border border-border bg-surface-elevated/80 px-4 py-2.5 text-center text-sm font-medium backdrop-blur-xl"
     >
       {text}
     </p>

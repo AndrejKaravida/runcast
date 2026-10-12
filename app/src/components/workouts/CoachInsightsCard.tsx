@@ -3,17 +3,18 @@ import { buildCoachInsights, type Insight, type InsightTone } from '@runcast/sha
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
+import { SectionHeader } from '@/components/ui/SectionHeader';
 import { useScaleWeek } from '@/features/plans/queries';
 import type { RunLogsRow, WorkoutsRow } from '@/types';
 
 const APPLIED_KEY = 'runcast.coach.applied';
 
 const ACTION_LABELS: Record<string, string> = {
-  'missed-runs': 'Smanji sledeću nedelju 20%',
-  'high-rpe': 'Smanji 10%',
-  'rpe-drift': 'Ostavi kako je',
-  'long-run-missed': 'Ostavi kako je',
-  'ready-to-build': 'Povećaj 10%',
+  'missed-runs': 'Olakšaj sledeću nedelju 20%',
+  'high-rpe': 'Olakšaj 10%',
+  'rpe-drift': 'Bez promene',
+  'long-run-missed': 'Bez promene',
+  'ready-to-build': 'Dodaj 10%',
 };
 
 const TONE_BADGES: Record<InsightTone, { tone: 'success' | 'warning' | 'neutral'; label: string }> = {
@@ -72,33 +73,36 @@ export function CoachInsightsCard({ workouts, logs, today, raceDate }: CoachInsi
     }
   }
 
+  const recapItems = [
+    { label: 'Planirano', value: `${recap.plannedKm} km · ${sessionsLabel(recap.plannedSessions)}` },
+    { label: 'Urađeno', value: `${recap.doneKm} km · ${sessionsLabel(recap.doneSessions)}` },
+    { label: 'Najduži trk', value: recap.longestKm > 0 ? `${recap.longestKm} km` : '—' },
+    { label: 'Ispunjeno', value: `${recap.adherencePct}%` },
+  ];
+
   return (
     <AppCard data-testid="coach-card" className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold">Prošla nedelja</p>
-        <span className="text-[11px] text-text-muted">
-          {recap.weekStart.slice(8, 10)}.{recap.weekStart.slice(5, 7)}.
-        </span>
-      </div>
+      <SectionHeader
+        label="Prošla nedelja"
+        action={
+          <span className="num text-caption text-text-muted">
+            {recap.weekStart.slice(8, 10)}.{recap.weekStart.slice(5, 7)}.
+          </span>
+        }
+      />
 
-      <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
-        <dt className="text-text-secondary">Planirano</dt>
-        <dd className="text-right font-medium">
-          {recap.plannedKm} km · {sessionsLabel(recap.plannedSessions)}
-        </dd>
-        <dt className="text-text-secondary">Urađeno</dt>
-        <dd className="text-right font-medium">
-          {recap.doneKm} km · {sessionsLabel(recap.doneSessions)}
-        </dd>
-        <dt className="text-text-secondary">Najduži trk</dt>
-        <dd className="text-right font-medium">{recap.longestKm > 0 ? `${recap.longestKm} km` : '—'}</dd>
-        <dt className="text-text-secondary">Ispunjeno</dt>
-        <dd className="text-right font-medium">{recap.adherencePct}%</dd>
+      <dl className="grid grid-cols-2 gap-x-3 gap-y-2">
+        {recapItems.map((item) => (
+          <div key={item.label} className="min-w-0">
+            <dt className="section-label">{item.label}</dt>
+            <dd className="num truncate text-sm font-medium">{item.value}</dd>
+          </div>
+        ))}
       </dl>
 
       {insights.length === 0 ? (
         recap.plannedSessions > 0 ? (
-          <p className="text-sm text-text-muted">Sve izgleda stabilno — nastavi ovako.</p>
+          <p className="text-sm text-text-muted">Sve držiš pod kontrolom — samo nastavi.</p>
         ) : null
       ) : (
         <ul className="space-y-3">
@@ -112,7 +116,7 @@ export function CoachInsightsCard({ workouts, logs, today, raceDate }: CoachInsi
                   <p className="text-sm font-semibold">{insight.title}</p>
                   <AppBadge tone={tone.tone}>{tone.label}</AppBadge>
                 </div>
-                <p className="text-xs text-text-secondary">{insight.description}</p>
+                <p className="text-caption text-text-secondary">{insight.description}</p>
                 {insight.action && label && !weekApplied ? (
                   <AppButton size="sm" loading={scaleWeek.isPending} onClick={() => void applyAction(insight)}>
                     {label}
@@ -124,7 +128,7 @@ export function CoachInsightsCard({ workouts, logs, today, raceDate }: CoachInsi
         </ul>
       )}
 
-      {feedback ? <p className="text-xs text-text-muted">{feedback}</p> : null}
+      {feedback ? <p className="text-caption text-text-muted">{feedback}</p> : null}
     </AppCard>
   );
 }

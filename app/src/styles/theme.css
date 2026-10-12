@@ -1,40 +1,136 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/inter';
 
-@theme {
+@theme static {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
 
   --color-bg: #0b0f1a;
   --color-surface: #121a2b;
   --color-surface-elevated: #1b2439;
   --color-border: #232f47;
+  --color-scrim: rgba(0, 0, 0, 0.6);
 
   --color-primary: #ff6b4a;
   --color-primary-pressed: #e85535;
+  --color-primary-ink: #ff6b4a;
+  --color-primary-ink-hover: #e85535;
   --color-primary-soft: rgba(255, 107, 74, 0.14);
+
+  --color-on-accent: #0b0f1a;
 
   --color-rain: #4da6ff;
   --color-rain-pressed: #3d8fdf;
+  --color-rain-ink: #4da6ff;
   --color-rain-soft: rgba(77, 166, 255, 0.14);
 
   --color-success: #3ddc97;
+  --color-success-ink: #3ddc97;
   --color-success-soft: rgba(61, 220, 151, 0.14);
 
   --color-warning: #ffc24d;
+  --color-warning-ink: #ffc24d;
   --color-warning-soft: rgba(255, 194, 77, 0.16);
 
   --color-danger: #ff5470;
+  --color-danger-ink: #ff5470;
   --color-danger-soft: rgba(255, 84, 112, 0.14);
 
   --color-text: #f5f7fb;
   --color-text-secondary: #a5b0c6;
   --color-text-muted: #8391ab;
 
+  --color-ring-track: #1b2439;
+  --color-chart-bar: rgba(255, 107, 74, 0.8);
+
+  --color-phase-base: var(--color-success-ink);
+  --color-phase-base-soft: var(--color-success-soft);
+  --color-phase-build: var(--color-primary-ink);
+  --color-phase-build-soft: var(--color-primary-soft);
+  --color-phase-peak: var(--color-warning-ink);
+  --color-phase-peak-soft: var(--color-warning-soft);
+  --color-phase-taper: var(--color-rain-ink);
+  --color-phase-taper-soft: var(--color-rain-soft);
+  --color-phase-race: var(--color-danger-ink);
+  --color-phase-race-soft: var(--color-danger-soft);
+
   --radius-sm: 8px;
   --radius-md: 16px;
   --radius-lg: 24px;
 
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.3;
+  --text-stat: 1.5rem;
+  --text-stat--line-height: 1.1;
+  --text-hero: 2.5rem;
+  --text-hero--line-height: 1;
+  --text-hero--letter-spacing: -0.02em;
+
   --tracking-display: -0.02em;
+  --tracking-label: 0.08em;
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --shadow-card: 0 0 #0000;
+}
+
+@utility section-label {
+  font-size: var(--text-label);
+  line-height: var(--text-label--line-height);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+@utility num {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility value-swap {
+  animation: value-in 240ms var(--ease-out-soft);
+}
+
+@keyframes value-in {
+  from {
+    opacity: 0.4;
+    transform: translateY(2px);
+  }
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  --color-bg: #f6f6f4;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #f0efec;
+  --color-border: #dedbd4;
+  --color-scrim: rgba(20, 24, 31, 0.35);
+
+  --color-primary-ink: #be3b0b;
+  --color-primary-ink-hover: #9c3208;
+
+  --color-rain-ink: #135e9e;
+  --color-rain-soft: rgba(77, 166, 255, 0.16);
+
+  --color-success-ink: #0f7a50;
+  --color-success-soft: rgba(61, 220, 151, 0.18);
+
+  --color-warning-ink: #8a5b00;
+  --color-warning-soft: rgba(255, 194, 77, 0.22);
+
+  --color-danger-ink: #be2f4c;
+  --color-danger-soft: rgba(255, 84, 112, 0.14);
+
+  --color-text: #15181e;
+  --color-text-secondary: #4e5560;
+  --color-text-muted: #626b78;
+
+  --color-ring-track: #e6e2da;
+  --color-chart-bar: #be3b0b;
+
+  --shadow-card: 0 1px 2px rgba(21, 24, 30, 0.05), 0 1px 3px rgba(21, 24, 30, 0.04);
 }
 
 @layer base {
@@ -75,16 +171,22 @@
       background-color: var(--color-bg) !important;
     }
   }
+}
 
-  @media (prefers-contrast: more) {
-    :root {
-      --color-border: #3a4a6b;
-      --color-text-secondary: #c6cfdf;
-      --color-text-muted: #b6c1d6;
-    }
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: #3a4a6b;
+    --color-text-secondary: #c6cfdf;
+    --color-text-muted: #b6c1d6;
+  }
 
-    [class*='backdrop-blur'] {
-      background-color: var(--color-bg) !important;
-    }
+  [data-theme='light'] {
+    --color-border: #b9b3a8;
+    --color-text-secondary: #3a414c;
+    --color-text-muted: #4e5766;
+  }
+
+  [class*='backdrop-blur'] {
+    background-color: var(--color-bg) !important;
   }
 }

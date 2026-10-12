@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   formatDuration,
+  formatPace,
   pacesFromVdot,
   parseTimeToSeconds,
   predictRaceTimes,
@@ -8,18 +9,21 @@ import {
   type RunWindow,
   type VolumeBand,
 } from '@runcast/shared';
+import { clsx } from 'clsx';
+import { AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { AppButton } from '@/components/ui/AppButton';
-import { AppCard } from '@/components/ui/AppCard';
 import { AppInput } from '@/components/ui/AppInput';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { StatRow } from '@/components/ui/StatRow';
 import { CityPicker } from '@/components/forms/CityPicker';
 import { useGeneratePlan, type GeneratePlanInput } from '@/features/plans/queries';
 import { useUpdateProfile } from '@/features/profile/queries';
 import { dayDiff, todayIso } from '@/lib/dates';
 
 const DAY_LABELS = ['Ponedeljak', 'Utorak', 'Sreda', 'Četvrtak', 'Petak', 'Subota', 'Nedelja'];
+const DAY_SHORT = ['pon', 'uto', 'sre', 'čet', 'pet', 'sub', 'ned'];
 
 const DISTANCE_OPTIONS = [
   { value: '42.195', label: 'Maraton' },
@@ -236,23 +240,28 @@ export function OnboardingPage() {
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[560px] flex-col px-4 py-6">
-      <div className="mb-4">
-        <div className="mb-2 flex items-center justify-between text-xs text-text-muted">
-          <span>Korak {step + 1} / 6</span>
-          <span>RunCast onboarding</span>
+      <div className="mb-5 space-y-2">
+        <div className="flex items-center justify-between text-caption text-text-muted">
+          <span className="num">Korak {step + 1} / 6</span>
+          <span>Podešavamo plan za tebe</span>
         </div>
-        <div className="h-1.5 overflow-hidden rounded-full bg-surface-elevated">
-          <div
-            className="h-full rounded-full bg-primary transition-all"
-            style={{ width: `${((step + 1) / 6) * 100}%` }}
-          />
+        <div className="flex gap-1" aria-hidden>
+          {Array.from({ length: 6 }).map((_, index) => (
+            <span
+              key={index}
+              className={clsx(
+                'h-1 flex-1 rounded-full transition-colors',
+                index <= step ? 'bg-primary-ink' : 'bg-surface-elevated',
+              )}
+            />
+          ))}
         </div>
       </div>
 
       <div className="flex-1 space-y-4">
         {step === 0 ? (
-          <AppCard className="space-y-4">
-            <h1 className="text-lg font-semibold">Za koju trku se spremaš?</h1>
+          <div className="space-y-4">
+            <h1 className="text-2xl font-semibold tracking-display">Za koju trku se spremaš?</h1>
             <SegmentedControl
               value={state.hasRace ? 'yes' : 'no'}
               onChange={(value) => update('hasRace', value === 'yes')}
@@ -293,12 +302,12 @@ export function OnboardingPage() {
                 kasnije u podešavanjima.
               </p>
             )}
-          </AppCard>
+          </div>
         ) : null}
 
         {step === 1 ? (
-          <AppCard className="space-y-4">
-            <h1 className="text-lg font-semibold">Čemu težiš?</h1>
+          <div className="space-y-4">
+            <h1 className="text-2xl font-semibold tracking-display">Čemu težiš?</h1>
             <AppInput
               label="Ciljno vreme (h:mm:ss, opciono)"
               placeholder="3:45:00"
@@ -306,12 +315,12 @@ export function OnboardingPage() {
               onChange={(event) => update('goalTime', event.target.value)}
               hint="Npr. cilj za maraton u 3 sata i 45 minuta"
             />
-            <div className="flex items-center gap-3 text-xs text-text-muted">
+            <div className="flex items-center gap-3 text-caption text-text-muted">
               <span className="h-px flex-1 bg-border" />
               ili
               <span className="h-px flex-1 bg-border" />
             </div>
-            <div className="grid grid-cols-[1fr_1fr] gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <AppSelect
                 label="Poslednja trka"
                 value={state.recentDistanceKm}
@@ -330,18 +339,23 @@ export function OnboardingPage() {
               />
             </div>
             {preview ? (
-              <div className="rounded-xl border border-primary/30 bg-primary-soft p-3 text-sm">
-                <p className="font-semibold text-primary">VDOT {preview.vdot}</p>
-                <p className="mt-1 text-text-secondary">
-                  Easy {Math.floor(preview.paces.easySlowSecPerKm / 60)}:
-                  {String(preview.paces.easySlowSecPerKm % 60).padStart(2, '0')}–
-                  {Math.floor(preview.paces.easyFastSecPerKm / 60)}:
-                  {String(preview.paces.easyFastSecPerKm % 60).padStart(2, '0')} /km · Tempo{' '}
-                  {Math.floor(preview.paces.thresholdSecPerKm / 60)}:
-                  {String(preview.paces.thresholdSecPerKm % 60).padStart(2, '0')} /km
+              <div className="space-y-3 rounded-2xl bg-primary-soft p-4">
+                <p className="flex items-baseline gap-2">
+                  <span className="section-label">VDOT</span>{' '}
+                  <span className="num value-swap text-hero font-bold text-primary-ink">{preview.vdot}</span>
                 </p>
+                <StatRow
+                  items={[
+                    {
+                      label: 'Easy',
+                      value: `${formatPace(preview.paces.easySlowSecPerKm)}–${formatPace(preview.paces.easyFastSecPerKm)} /km`,
+                    },
+                    { label: 'Tempo', value: `${formatPace(preview.paces.thresholdSecPerKm)} /km` },
+                  ]}
+                  className="rounded-xl bg-surface py-1"
+                />
                 {preview.feasibility ? (
-                  <p className="mt-1 text-text-secondary">
+                  <p className="text-sm text-text-secondary">
                     {preview.feasibility.ambitious
                       ? `Cilj je ambiciozan za trenutnu formu (predviđeno ${formatDuration(preview.feasibility.predictedSec)}).`
                       : `Cilj je realan za trenutnu formu (predviđeno ${formatDuration(preview.feasibility.predictedSec)}).`}
@@ -349,16 +363,18 @@ export function OnboardingPage() {
                 ) : null}
               </div>
             ) : (
-              <p className="text-sm text-text-muted">Bez rezultata generišemo bazni plan — samo lagani treninzi.</p>
+              <p className="text-sm text-text-muted">
+                Bez rezultata dobijaš bazni plan: lagano trčanje dok ne uhvatimo formu.
+              </p>
             )}
-          </AppCard>
+          </div>
         ) : null}
 
         {step === 2 ? (
-          <AppCard className="space-y-4">
-            <h1 className="text-lg font-semibold">Iskustvo i trenutna kilometraža</h1>
+          <div className="space-y-4">
+            <h1 className="text-2xl font-semibold tracking-display">Iskustvo i trenutna kilometraža</h1>
             <div>
-              <p className="mb-1.5 text-sm font-medium text-text-secondary">Iskustvo</p>
+              <p className="section-label mb-1.5">Iskustvo</p>
               <SegmentedControl
                 value={state.experience}
                 onChange={(value) => update('experience', value)}
@@ -369,7 +385,7 @@ export function OnboardingPage() {
               />
             </div>
             <AppSelect
-              label="Nedeljna kilometraža (poslednjeg meseca)"
+              label="Koliko kilometara prelaziš nedeljno?"
               value={state.volumeBand}
               onChange={(event) => update('volumeBand', event.target.value as VolumeBand)}
             >
@@ -379,14 +395,14 @@ export function OnboardingPage() {
                 </option>
               ))}
             </AppSelect>
-          </AppCard>
+          </div>
         ) : null}
 
         {step === 3 ? (
-          <AppCard className="space-y-4">
-            <h1 className="text-lg font-semibold">Kada trčiš?</h1>
+          <div className="space-y-4">
+            <h1 className="text-2xl font-semibold tracking-display">Kada trčiš?</h1>
             <div>
-              <p className="mb-1.5 text-sm font-medium text-text-secondary">Koliko dana nedeljno</p>
+              <p className="section-label mb-1.5">Koliko dana nedeljno</p>
               <SegmentedControl
                 value={state.daysPerWeek}
                 onChange={(value) => update('daysPerWeek', value)}
@@ -409,8 +425,30 @@ export function OnboardingPage() {
                 </option>
               ))}
             </AppSelect>
+            <div className="space-y-2">
+              <div className="grid grid-cols-7 gap-1.5">
+                {DAY_SHORT.map((label, index) => {
+                  const isLong = index === state.longRunDay;
+                  return (
+                    <div
+                      key={label}
+                      className={clsx(
+                        'flex flex-col items-center gap-1.5 rounded-lg px-1 py-2',
+                        isLong ? 'bg-rain-soft' : 'bg-surface-elevated',
+                      )}
+                    >
+                      <span className={clsx('section-label', isLong && 'text-rain-ink')}>{label}</span>
+                      <span className={clsx('h-1.5 w-1.5 rounded-full', isLong ? 'bg-rain-ink' : 'bg-text-muted')} />
+                    </div>
+                  );
+                })}
+              </div>
+              <p className="text-caption text-text-muted">
+                Dugi trk nosi nedelju — ostale dane raspoređujemo oko njega.
+              </p>
+            </div>
             <div>
-              <p className="mb-1.5 text-sm font-medium text-text-secondary">Deo dana za trening</p>
+              <p className="section-label mb-1.5">Deo dana za trening</p>
               <SegmentedControl
                 value={state.runWindow}
                 onChange={(value) => update('runWindow', value)}
@@ -420,14 +458,14 @@ export function OnboardingPage() {
                   { value: 'flexible', label: 'Fleksibilno' },
                 ]}
               />
-              <p className="mt-1.5 text-xs text-text-muted">Za jutro gledamo prognozu 06–09 h, za veče 17–21 h.</p>
+              <p className="mt-1.5 text-caption text-text-muted">Za jutro gledamo prognozu 06–09 h, za veče 17–21 h.</p>
             </div>
-          </AppCard>
+          </div>
         ) : null}
 
         {step === 4 ? (
-          <AppCard className="space-y-4">
-            <h1 className="text-lg font-semibold">Gde trčiš?</h1>
+          <div className="space-y-4">
+            <h1 className="text-2xl font-semibold tracking-display">Gde trčiš?</h1>
             <CityPicker
               city={state.city}
               onSelect={(place) => {
@@ -443,7 +481,7 @@ export function OnboardingPage() {
               }}
             />
             <div>
-              <p className="mb-1.5 text-sm font-medium text-text-secondary">Osvežavanje prognoze</p>
+              <p className="section-label mb-1.5">Osvežavanje prognoze</p>
               <SegmentedControl
                 value={state.weatherRefreshMinutes}
                 onChange={(value) => update('weatherRefreshMinutes', value)}
@@ -452,17 +490,22 @@ export function OnboardingPage() {
               <button
                 type="button"
                 onClick={() => update('weatherRefreshMinutes', null)}
-                className={`mt-2 rounded-lg px-3 py-1.5 text-xs font-medium ${state.weatherRefreshMinutes === null ? 'bg-rain-soft text-rain' : 'bg-surface-elevated text-text-muted hover:text-text-secondary'}`}
+                className={clsx(
+                  'mt-2 rounded-lg px-3 py-1.5 text-caption font-medium',
+                  state.weatherRefreshMinutes === null
+                    ? 'bg-rain-soft text-rain-ink'
+                    : 'bg-surface-elevated text-text-muted hover:text-text-secondary',
+                )}
               >
                 Samo na otvaranje
               </button>
             </div>
-          </AppCard>
+          </div>
         ) : null}
 
         {step === 5 ? (
-          <AppCard className="space-y-4">
-            <h1 className="text-lg font-semibold">Još par detalja (opciono)</h1>
+          <div className="space-y-4">
+            <h1 className="text-2xl font-semibold tracking-display">Još samo par detalja</h1>
             <div className="grid grid-cols-2 gap-3">
               <AppInput
                 label="Visina (cm)"
@@ -496,32 +539,40 @@ export function OnboardingPage() {
                 <option value="other">Drugo</option>
               </AppSelect>
             </div>
-            <div className="rounded-xl border border-border bg-surface-elevated p-3 text-sm">
-              <p className="font-semibold">Pregled</p>
-              <ul className="mt-2 space-y-1 text-text-secondary">
-                <li>
-                  {state.hasRace
-                    ? `Trka: ${state.raceName || 'bez naziva'}, ${state.raceDate}`
-                    : 'Bez trke (bazni plan)'}
-                </li>
-                {preview ? <li>VDOT {preview.vdot}</li> : null}
-                <li>
-                  {state.daysPerWeek} dana nedeljno · dugi trk: {DAY_LABELS[state.longRunDay]}
-                </li>
-                <li>Lokacija: {state.city}</li>
-              </ul>
-              {willUseBasePlan ? (
-                <p className="mt-2 text-xs text-warning">
-                  Napomena: bez cilja/rezultata ili sa manje od 12 nedelja do trke, plan će biti bazni (samo lagani
-                  treninzi).
-                </p>
-              ) : null}
+            <div className="space-y-2 rounded-2xl bg-surface-elevated p-4">
+              {state.hasRace && state.raceDate && weeksToRace !== null && weeksToRace >= 0 ? (
+                <div>
+                  <p className="section-label">Trka</p>
+                  <p className="text-sm font-medium">{state.raceName || 'Trka bez naziva'}</p>
+                  <p className="flex items-baseline gap-2">
+                    <span className="num text-hero font-bold text-primary-ink">{weeksToRace}</span>
+                    <span className="text-sm text-text-secondary">dana do trke</span>
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p className="section-label">Plan</p>
+                  <p className="text-sm font-medium">Bazni plan · 8 nedelja</p>
+                </div>
+              )}
+              <p className="num text-caption text-text-muted">
+                {weeksToRace !== null && weeksToRace >= 0 ? `${Math.ceil(weeksToRace / 7)} nedelja · ` : ''}
+                {state.daysPerWeek} dana nedeljno · dugi trk {DAY_LABELS[state.longRunDay]}
+                {preview ? ` · VDOT ${preview.vdot}` : ''}
+                {state.city ? ` · ${state.city}` : ''}
+              </p>
             </div>
-          </AppCard>
+            {willUseBasePlan ? (
+              <p className="flex items-start gap-2 rounded-xl bg-warning-soft p-3 text-caption text-warning-ink">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                Bez cilja ili rezultata (ili manje od 12 nedelja do trke) dobijaš bazni plan — samo lagani treninzi.
+              </p>
+            ) : null}
+          </div>
         ) : null}
 
         {error ? (
-          <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>
+          <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">{error}</p>
         ) : null}
       </div>
 

@@ -183,24 +183,24 @@ export function buildCoachInsights(input: CoachInput): CoachResult {
     insights.push({
       id: 'missed-runs',
       tone: 'warning',
-      title: `Propustio si ${missed} treninga u poslednje dve nedelje`,
-      description: 'Sledeća nedelja je lakša da se vratiš u ritam.',
+      title: `${missed} treninga su izostala — desi se`,
+      description: 'Sledeća nedelja je lakša — vraćamo te u ritam bez pritiska.',
       action: action(0.8),
     });
   } else if (recent.avg >= RPE_HIGH) {
     insights.push({
       id: 'high-rpe',
       tone: 'warning',
-      title: `RPE je visok (prosek ${fmtNumber(recent.avg)})`,
-      description: 'Poslednjih pet treninga traži mnogo od tebe. Uzimamo korak nazad.',
+      title: `Telo traži predah (prosek RPE ${fmtNumber(recent.avg)})`,
+      description: 'Pet treninga je bilo naporno. Uzimamo korak nazad — oporavak je trening.',
       action: action(0.9),
     });
   } else if (recent.count >= MIN_RPE_LOGS && recent.avg >= RPE_DRIFT) {
     insights.push({
       id: 'rpe-drift',
       tone: 'neutral',
-      title: `RPE blago raste (prosek ${fmtNumber(recent.avg)})`,
-      description: 'Volumen ostaje isti dok se ne stabilizuje.',
+      title: `Umor se polako skuplja (prosek ${fmtNumber(recent.avg)})`,
+      description: 'Volumen ostaje isti dok se ne vratiš u ritam.',
       action: action(1),
     });
   }
@@ -209,8 +209,8 @@ export function buildCoachInsights(input: CoachInput): CoachResult {
     insights.push({
       id: 'long-run-missed',
       tone: 'neutral',
-      title: 'Dugi trk nije ispunjen',
-      description: 'Prošle nedelje dugi trk je izostao. Ne nadoknađujemo kilometre — sledeća nedelja ostaje po planu.',
+      title: 'Dugi trk je izostao',
+      description: 'Kilometri se ne nadoknađuju — sledeća nedelja ostaje tačno po planu.',
       action: action(1),
     });
   }
@@ -235,7 +235,7 @@ export function buildCoachInsights(input: CoachInput): CoachResult {
     insights.push({
       id: 'ready-to-build',
       tone: 'positive',
-      title: 'Sve po planu — možeš malo više',
+      title: 'Sve teče po planu — možemo malo jače',
       description: `Realizacija ${adherence}% i nizak RPE (prosek ${fmtNumber(recent.avg)}). Sledeća nedelja ide +10%.`,
       action: action(1.1),
     });

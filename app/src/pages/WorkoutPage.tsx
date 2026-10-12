@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import {
+  buildFuelingPlan,
+  buildStepTimeline,
   describeWorkout,
   formatDuration,
   formatPace,
@@ -11,24 +13,39 @@ import {
   type RunWindow,
   type WorkoutType,
 } from '@runcast/shared';
-import { ArrowLeft, CheckCircle2, SkipForward } from 'lucide-react';
+import { clsx } from 'clsx';
+import { ArrowLeft, CalendarPlus, CheckCircle2, SkipForward } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { StatRow } from '@/components/ui/StatRow';
 import { WeatherSummaryCard } from '@/components/weather/WeatherSummaryCard';
+import { FuelingCard } from '@/components/workouts/FuelingCard';
 import { LogWorkoutModal } from '@/components/workouts/LogWorkoutModal';
 import { PaceZoneBadge } from '@/components/workouts/PaceZoneBadge';
 import { WhyCard } from '@/components/workouts/WhyCard';
+import { WorkoutTypeIcon } from '@/components/workouts/WorkoutTypeIcon';
 import { useCompleteWorkout, useRunLogs, useSkipWorkout } from '@/features/logs/queries';
+import { buildGoogleCalendarUrlForWorkout } from '@/features/plans/export';
 import { useActivePlan, useWorkout } from '@/features/plans/queries';
 import { useProfile } from '@/features/profile/queries';
 import { useWeather } from '@/features/weather/queries';
-import { statusTone, typeLabel, workoutSteps } from '@/features/workouts/utils';
-import { formatDateLong, todayIso } from '@/lib/dates';
+import {
+  heroStats,
+  phaseLabel,
+  statusTone,
+  TONE_TEXT_CLASSES,
+  typeLabel,
+  typeTone,
+  workoutDurationSec,
+  workoutSteps,
+} from '@/features/workouts/utils';
+import { dayDiff, formatDateLong, todayIso } from '@/lib/dates';
 
 export function WorkoutPage() {
   const navigate = useNavigate();
@@ -60,8 +77,8 @@ export function WorkoutPage() {
     return (
       <div className="mx-auto w-full max-w-[560px] px-4 py-6">
         <EmptyState
-          title="Trening nije nađen"
-          description="Možda je plan regenerisan."
+          title="Ne nalazim ovaj trening"
+          description="Plan je verovatno osvežen — pogledaj kalendar."
           action={
             <Link to="/plan">
               <AppButton size="sm" variant="secondary">
@@ -77,6 +94,10 @@ export function WorkoutPage() {
   const steps = workoutSteps(workout);
   const log = logs.find((entry) => entry.workout_id === workout.id) ?? null;
   const isStrength = workout.type === 'STRENGTH';
+  const googleCalendarUrl = buildGoogleCalendarUrlForWorkout(workout, {
+    runWindow,
+    paces: (plan?.paces ?? null) as unknown as PlanPaces | null,
+  });
   const showWeather = workout.workout_date >= today && workout.type !== 'REST' && !isStrength;
   const explanation = describeWorkout(
     {
@@ -87,57 +108,132 @@ export function WorkoutPage() {
     },
     { paces: (plan?.paces ?? null) as unknown as PlanPaces | null },
   );
+  const stats = heroStats(workout, (plan?.paces ?? null) as unknown as PlanPaces | null);
+  const planWeek = plan ? Math.min(Math.floor(dayDiff(plan.start_date, today) / 7) + 1, plan.weeks) : null;
+  const planWeekLabel = plan && planWeek ? ` · Nedelja ${planWeek}/${plan.weeks}` : '';
+  const totalDuration = workoutDurationSec(workout);
+  const canAct = workout.status === 'PLANNED' && workout.type !== 'REST';
+  const fuelingTimeline = buildStepTimeline(
+    {
+      type: workout.type,
+      paceZone: workout.pace_zone,
+      distanceKm: workout.distance_km,
+      steps,
+    },
+    (plan?.paces ?? null) as unknown as PlanPaces | null,
+  );
+  const apparentC = showWeather
+    ? (weather.data?.hours ?? [])
+        .filter((hour) => {
+          const hourNumber = Number(hour.time.slice(11, 13));
+          return (
+            hour.time.startsWith(workout.workout_date) && hourNumber >= window.startHour && hourNumber < window.endHour
+          );
+        })
+        .reduce<number | null>((max, hour) => (max === null || hour.apparentC > max ? hour.apparentC : max), null)
+    : null;
+  const fuelingPlan = buildFuelingPlan({
+    type: workout.type,
+    durationSec: fuelingTimeline.totalDurationSec,
+    distanceKm: workout.distance_km,
+    paceSecPerKm: fuelingTimeline.segments[0]?.paceSecPerKm,
+  });
 
   return (
-    <div className="mx-auto w-full max-w-[560px] space-y-4 px-4 py-6">
-      <AppButton variant="ghost" size="sm" className="-ml-2 w-auto" onClick={() => navigate(-1)}>
-        <ArrowLeft className="h-4 w-4" aria-hidden /> Nazad
-      </AppButton>
-
-      <AppCard className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-          {formatDateLong(workout.workout_date)}
-        </p>
-        <div className="flex items-start justify-between gap-3">
-          <h1 className="text-xl font-semibold">{workout.title}</h1>
-          <PaceZoneBadge zone={workout.pace_zone} />
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <AppBadge tone="neutral">{isStrength ? 'Snaga' : typeLabel(workout.type)}</AppBadge>
-          <AppBadge tone={statusTone(workout.status)}>
-            {workout.status === 'DONE' ? 'Urađeno' : workout.status === 'SKIPPED' ? 'Preskočeno' : 'Planirano'}
-          </AppBadge>
-          <AppBadge tone="neutral">Faza: {workout.phase}</AppBadge>
-          {workout.distance_km > 0 ? <AppBadge tone="neutral">{workout.distance_km} km</AppBadge> : null}
-          {isStrength && workout.duration_sec ? (
-            <AppBadge tone="neutral">{formatDuration(workout.duration_sec)}</AppBadge>
+    <div className="mx-auto w-full max-w-[560px] space-y-5 px-4 py-6">
+      <div className="flex items-center justify-between">
+        <AppButton variant="ghost" size="sm" className="-ml-2 w-auto" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-4 w-4" aria-hidden /> Nazad
+        </AppButton>
+        <div className="flex items-center gap-1">
+          {googleCalendarUrl ? (
+            <a
+              href={googleCalendarUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="add-google"
+              aria-label="Dodaj u Google kalendar"
+              className="block"
+            >
+              <AppButton variant="ghost" size="sm" className="w-auto">
+                <CalendarPlus className="h-4 w-4" aria-hidden />
+                <span className="hidden sm:inline">Dodaj u Google kalendar</span>
+              </AppButton>
+            </a>
+          ) : null}
+          {canAct ? (
+            <AppButton variant="ghost" size="sm" className="-mr-2 w-auto" onClick={() => setSkipConfirmOpen(true)}>
+              <SkipForward className="h-4 w-4" aria-hidden /> Preskoči
+            </AppButton>
           ) : null}
         </div>
-      </AppCard>
+      </div>
+
+      <header className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <p className="section-label flex min-w-0 items-center gap-1.5">
+            <WorkoutTypeIcon
+              type={workout.type}
+              className={clsx('h-4 w-4 shrink-0', TONE_TEXT_CLASSES[typeTone(workout.type)])}
+            />
+            <span className="truncate">{formatDateLong(workout.workout_date)}</span>
+          </p>
+          {workout.status !== 'PLANNED' ? (
+            <AppBadge tone={statusTone(workout.status)}>
+              {workout.status === 'DONE' ? 'Urađeno' : 'Preskočeno'}
+            </AppBadge>
+          ) : null}
+        </div>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-2xl font-semibold tracking-display">{workout.title}</h1>
+          <PaceZoneBadge zone={workout.pace_zone} />
+        </div>
+        <p className="text-sm text-text-secondary">
+          {typeLabel(workout.type)} · Faza {phaseLabel(workout.phase)}
+          {planWeekLabel}
+        </p>
+        {stats.length >= 2 ? (
+          <StatRow items={stats} className="rounded-2xl border border-border bg-surface py-1" />
+        ) : null}
+      </header>
+
+      {steps.length > 0 ? (
+        <section className="space-y-1">
+          <SectionHeader
+            label="Koraci"
+            action={
+              totalDuration ? (
+                <span className="num text-caption text-text-muted">{formatDuration(totalDuration)}</span>
+              ) : null
+            }
+          />
+          <ol className="divide-y divide-border">
+            {steps.map((step, index) => (
+              <li key={`${step.label}-${index}`} className="flex items-center gap-3 py-3">
+                <span className="num flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-elevated text-caption text-text-muted">
+                  {index + 1}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">{step.label}</span>
+                <span className="num shrink-0 text-sm text-text-secondary">
+                  {step.pace
+                    ? `${step.pace} /km`
+                    : step.durationSec
+                      ? formatDuration(step.durationSec)
+                      : step.distanceKm
+                        ? `${step.distanceKm} km`
+                        : ''}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
 
       <WhyCard explanation={explanation} />
 
-      {steps.length > 0 ? (
-        <AppCard className="space-y-2">
-          <p className="text-sm font-semibold">Koraci</p>
-          <ul className="divide-y divide-border">
-            {steps.map((step, index) => (
-              <li key={`${step.label}-${index}`} className="flex items-center justify-between gap-3 py-2 text-sm">
-                <span>{step.label}</span>
-                {step.pace ? (
-                  <span className="shrink-0 text-text-muted">{step.pace} /km</span>
-                ) : step.durationSec ? (
-                  <span className="shrink-0 text-text-muted">{formatDuration(step.durationSec)}</span>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </AppCard>
-      ) : null}
-
       {log ? (
-        <AppCard className="space-y-2">
-          <p className="text-sm font-semibold">Zabeleženo</p>
+        <AppCard className="space-y-2 border-l-2 border-l-success-ink">
+          <SectionHeader label="Zabeleženo" />
           <div className="flex flex-wrap items-center gap-2 text-sm">
             {log.distance_km ? <AppBadge tone="neutral">{log.distance_km} km</AppBadge> : null}
             {log.duration_sec ? <AppBadge tone="neutral">{formatDuration(log.duration_sec)}</AppBadge> : null}
@@ -163,40 +259,48 @@ export function WorkoutPage() {
         />
       ) : null}
 
-      {workout.status === 'PLANNED' && workout.type !== 'REST' ? (
-        <div className="flex flex-wrap gap-3">
-          {!isStrength && isGuidedRunType(workout.type) && steps.length > 0 ? (
-            <Link to={`/run/${workout.id}`} className="flex-1" data-testid="start-guided">
-              <AppButton variant="secondary" className="w-full">
-                Vođeno trčanje
-              </AppButton>
-            </Link>
-          ) : null}
+      {fuelingPlan ? <FuelingCard plan={fuelingPlan} apparentC={apparentC} runWindow={runWindow} /> : null}
+
+      {canAct ? (
+        <div className="space-y-2">
           {isStrength ? (
             <AppButton
-              className="flex-1"
+              size="lg"
+              className="w-full"
               loading={completeWorkout.isPending}
               data-testid="complete-strength"
               onClick={() => void completeWorkout.mutateAsync(workout.id)}
             >
-              <CheckCircle2 className="h-4 w-4" aria-hidden /> Završi trening
+              <CheckCircle2 className="h-5 w-5" aria-hidden /> Završi trening
             </AppButton>
           ) : (
-            <AppButton className="flex-1" onClick={() => setLogOpen(true)}>
-              <CheckCircle2 className="h-4 w-4" aria-hidden /> Urađeno
+            <AppButton size="lg" className="w-full" onClick={() => setLogOpen(true)}>
+              <CheckCircle2 className="h-5 w-5" aria-hidden /> Urađeno
             </AppButton>
           )}
-          <AppButton variant="ghost" className="flex-1" onClick={() => setSkipConfirmOpen(true)}>
-            <SkipForward className="h-4 w-4" aria-hidden /> Preskoči
-          </AppButton>
+          {!isStrength && isGuidedRunType(workout.type) && steps.length > 0 ? (
+            <Link to={`/run/${workout.id}`} className="block" data-testid="start-guided">
+              <AppButton variant="secondary" size="lg" className="w-full">
+                Vođeno trčanje
+              </AppButton>
+            </Link>
+          ) : null}
         </div>
+      ) : null}
+
+      {workout.type === 'RACE' ? (
+        <Link to="/race-day" className="block" data-testid="race-day-link">
+          <AppButton variant="secondary" size="lg" className="w-full">
+            Strategija za dan trke
+          </AppButton>
+        </Link>
       ) : null}
 
       <LogWorkoutModal workout={workout} open={logOpen} onClose={() => setLogOpen(false)} />
       <ConfirmDialog
         open={skipConfirmOpen}
         title="Preskoči trening?"
-        description="Trening će biti označen kao preskočen i neće ulaziti u realizaciju plana."
+        description="Označićemo ga kao preskočen. Ne utiče na realizaciju plana."
         confirmLabel="Preskoči"
         tone="danger"
         loading={skipWorkout.isPending}
