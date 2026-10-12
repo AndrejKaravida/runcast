@@ -191,7 +191,7 @@ export function SettingsPage() {
     <div className="space-y-4">
       <AppCard className="space-y-2">
         <p className="text-sm font-semibold">Nalog</p>
-        <p className="text-sm text-text-secondary">{session?.user.email}</p>
+        <p className="break-all text-sm text-text-secondary">{session?.user.email}</p>
         <AppButton
           variant="ghost"
           size="sm"

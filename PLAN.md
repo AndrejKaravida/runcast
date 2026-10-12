@@ -75,22 +75,36 @@ npm run build               # produkcijski build (route-level code splitting)
 `.env.local` je popunjen lokalnim Supabase URL-om i anon ključem; lokalne email potvrde su
 isključene (`supabase/config.toml`).
 
-## Deploy (ručni koraci)
+## Hosted okruženje — trenutno stanje
 
-1. **Supabase (prod):** projekat u `eu-central-1` → `npx supabase link --project-ref <ref>` →
-   `npx supabase db push` (primenjuje 0001+0002). Auth → Site URL = prod origin, confirmations ON,
-   min lozinka 8.
-2. **Cloudflare Pages:** root `/`, install `npm ci`, build `npm run build -w app`,
-   output `app/dist`, env: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `NODE_VERSION=24`.
-   `_redirects` (SPA) i `_headers` (nosniff, referrer, permissions) su već u `app/public/`.
-3. **GitHub secrets:**
-   - `SUPABASE_DB_URL` — **session pooler** string:
-     `postgresql://postgres.<ref>:<pw>@aws-0-<region>.pooler.supabase.com:5432/postgres?sslmode=require`
-     (nikako direktni `db.<ref>.supabase.co` — IPv6-only — niti port 6543, pg_dump ne radi kroz njega).
-     Backup pokriva `public` šemu (app podaci); `auth` korisnici se ne dump-uju.
-   - `SUPABASE_URL` + `SUPABASE_ANON_KEY` — dnevni ping (keepalive).
-4. **Napomene:** Supabase free nema automatski backup → `backup.yml` (nedeljni artefakt, 90 dana).
-   Default SMTP ima mali dnevni limit; za produkciju razmotriti Resend.
+- **GitHub:** https://github.com/AndrejKaravida/runcast (main), GH Actions aktivni.
+- **Supabase (projekat `zhwqqcewxccwjhtdkvck`):** migracije primenjene
+  (`init_schema`, `data_integrity`, `harden_functions`), 5 tabela sa RLS, security advisori **0
+  upozorenja**. URL: `https://zhwqqcewxccwjhtdkvck.supabase.co`.
+- **GitHub secrets:** `SUPABASE_URL`, `SUPABASE_ANON_KEY` (keepalive je aktivan). Nedostaju
+  `SUPABASE_ACCESS_TOKEN` (personal access token) i `SUPABASE_DB_PASSWORD` da `db-migrate.yml`
+  automatski primenjuje buduće migracije na push u `main`.
+- **Responsive:** automatski E2E audit (320/375/768/1440, sve strane + log sheet + ceo onboarding
+  na 320) — bez horizontalnog overflow-a; ispravljeni kontrast, dugmad koja se prelamaju,
+  truncate za duge nazive, 44px touch targeti.
+
+### Šta je ostalo ručno (zahteva tvoj nalog)
+
+1. **Supabase ↔ GitHub integracija (dashboard):** Supabase → Project Settings → Integrations →
+   GitHub → _Install Supabase GitHub App_ → izaberi repo `runcast` → uključi **Deploy to
+   production** na `main` (migrations directory: `supabase/migrations`). Nakon toga nova migracija
+   u `main` se automatski primenjuje — alternativa je `db-migrate.yml` uz gore navedena dva secret-a.
+2. **Auth za produkciju (dashboard):** Authentication → URL Configuration → Site URL = budući
+   Cloudflare Pages domen, + isti domen u Redirect URLs; ostaviti confirmations ON, min lozinka 8.
+3. **Cloudflare Pages:** connect GitHub `runcast` → build `npm run build -w app`, output `app/dist`,
+   root `/`, env: `VITE_SUPABASE_URL=https://zhwqqcewxccwjhtdkvck.supabase.co`,
+   `VITE_SUPABASE_ANON_KEY=<anon ključ iz Supabase dashboarda>`, `NODE_VERSION=24`.
+   `_redirects` (SPA) i `_headers` su već u `app/public/`.
+4. **Backup (opciono):** `SUPABASE_DB_URL` kao **session pooler** string
+   `postgresql://postgres.<ref>:<pw>@aws-0-eu-central-1.pooler.supabase.com:5432/postgres?sslmode=require`
+   (ne direktni host — IPv6-only; ne port 6543). Backup pokriva `public` šemu, ne `auth` korisnike.
+5. **Napomene:** Supabase free projekat se pauzira posle 7 dana bez aktivnosti (keepalive ping je već
+   podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
 
 ## Poznati sledeći koraci

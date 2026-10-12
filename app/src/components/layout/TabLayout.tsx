@@ -13,7 +13,7 @@ export function TabLayout() {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[720px] flex-col bg-bg">
       <header className="sticky top-0 z-40 bg-bg/85 backdrop-blur-xl backdrop-saturate-150">
-        <div className="px-4 py-3">
+        <div className="mx-auto w-full max-w-[720px] px-4 py-3">
           <span className="text-base font-bold tracking-tight">
             Run<span className="text-primary">Cast</span>
           </span>

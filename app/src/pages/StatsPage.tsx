@@ -73,8 +73,8 @@ export function StatsPage() {
         <div className="flex h-32 items-end gap-2">
           {stats.series.map((entry) => (
             <div key={entry.week} className="flex flex-1 flex-col items-center gap-1">
-              <span className="text-[10px] text-text-muted">
-                {Math.round(entry.done)}/{Math.round(entry.planned)}
+              <span className="text-[10px] text-text-muted" title={`${entry.done} od ${entry.planned} km`}>
+                {Math.round(entry.done)}
               </span>
               <div className="relative h-full w-full overflow-hidden rounded-t-lg bg-surface-elevated">
                 <div
@@ -98,9 +98,9 @@ export function StatsPage() {
         ) : (
           <ul className="divide-y divide-border">
             {logs.slice(0, 5).map((log) => (
-              <li key={log.id} className="flex items-center justify-between gap-3 py-2 text-sm">
+              <li key={log.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
                 <span className="text-text-secondary">{formatDateShort(log.log_date)}</span>
-                <span className="flex items-center gap-2">
+                <span className="flex flex-wrap items-center justify-end gap-2">
                   {log.distance_km ? <AppBadge tone="neutral">{log.distance_km} km</AppBadge> : null}
                   {log.avg_pace_sec_per_km ? (
                     <span className="text-text-muted">{formatPace(log.avg_pace_sec_per_km)} /km</span>

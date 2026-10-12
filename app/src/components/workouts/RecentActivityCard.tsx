@@ -16,9 +16,9 @@ export function RecentActivityCard({ logs }: { logs: RunLogsRow[] }) {
       </div>
       <ul className="divide-y divide-border">
         {logs.slice(0, 2).map((log) => (
-          <li key={log.id} className="flex items-center justify-between gap-3 py-2 text-sm">
+          <li key={log.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
             <span className="text-text-secondary">{formatDateShort(log.log_date)}</span>
-            <span className="flex items-center gap-3">
+            <span className="flex flex-wrap items-center justify-end gap-3">
               {log.distance_km ? <span className="font-medium">{log.distance_km} km</span> : null}
               {log.avg_pace_sec_per_km ? (
                 <span className="text-text-muted">{formatPace(log.avg_pace_sec_per_km)} /km</span>

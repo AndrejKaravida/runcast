@@ -176,7 +176,7 @@ export function TodayPage() {
                 {verdict.description}
                 {candidate ? ` Najbliži slobodan termin: ${formatDateShort(candidate.workout_date)}.` : ''}
               </p>
-              <div className="mt-2 flex gap-2">
+              <div className="mt-2 flex flex-wrap gap-2">
                 {candidate ? (
                   <AppButton
                     type="button"
@@ -234,7 +234,7 @@ export function TodayPage() {
 
       <div className="grid grid-cols-2 gap-3" data-testid="race-chip">
         <div className="rounded-2xl border border-border bg-surface p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-text-muted">
+          <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-text-muted">
             {raceInfo?.name ?? (raceInfo ? 'Ciljna trka' : 'Plan')}
           </p>
           {raceInfo ? (
