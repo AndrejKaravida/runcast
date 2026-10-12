@@ -116,6 +116,25 @@ isključene (`supabase/config.toml`).
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
 
+## Bezbednost (stanje)
+
+- **DDoS:** Cloudflare L3/4 + L7 HTTP DDoS zaštita je **always-on za sve planove** (uključena i za
+  `*.pages.dev` bez ikakve konfiguracije). Verifikovano u CF dokumentaciji.
+- **Sigurnosni headeri (live, verifikovani na produkciji):** `Content-Security-Policy` (allowlist:
+  self + `*.supabase.co` + Open-Meteo hostovi; `frame-ancestors 'none'`), `Strict-Transport-Security`,
+  `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`.
+- **Supabase:** RLS na svih 5 tabela (`user_id = auth.uid()`), FK-vlasništvo provereno u policy-jima,
+  trigger funkcije skinute sa javnog RPC pristupa, security advisori **0 upozorenja**, auth rate
+  limits ugrađeni u platformu, email potvrde ON u produkciji. Anon ključ je javan po dizajnu (štiti RLS).
+- **GitHub Actions:** least-privilege `permissions` u svim workflow-ima; secrets (Supabase URL/ključ)
+  se ne prosleđuju PR-ovima iz forkova.
+- **Repo je trenutno javan** (`github.com/AndrejKaravida/runcast`): u njemu nema tajni (`.env.local`
+  je ignorisan, anon ključ je javan po dizajnu), ali po želji prebaci na private u repo settings.
+- **Šta nije moguće na `*.pages.dev`:** WAF managed rules, rate limiting pravila i Bot Fight Mode
+  zahtevaju custom domen kao Cloudflare zonu (free plan tada daje Bot Fight Mode; WAF/rate limiting
+  su plaćeni tier-ovi). Ako zatreba: dodaj domen → zone → Security pravila. Za abuse na auth-u
+  Supabase podržava Turnstile CAPTCHA (dashboard toggle).
+
 ## Poznati sledeći koraci
 
 - Google login (Supabase provider), notifikacije, mobilna app preko istog `packages/shared`.
