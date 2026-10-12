@@ -81,29 +81,44 @@ isključene (`supabase/config.toml`).
 - **Supabase (projekat `zhwqqcewxccwjhtdkvck`):** migracije primenjene
   (`init_schema`, `data_integrity`, `harden_functions`), 5 tabela sa RLS, security advisori **0
   upozorenja**. URL: `https://zhwqqcewxccwjhtdkvck.supabase.co`.
-- **GitHub secrets:** `SUPABASE_URL`, `SUPABASE_ANON_KEY` (keepalive je aktivan). Nedostaju
-  `SUPABASE_ACCESS_TOKEN` (personal access token) i `SUPABASE_DB_PASSWORD` da `db-migrate.yml`
-  automatski primenjuje buduće migracije na push u `main`.
+- **GitHub secrets:** `SUPABASE_URL`, `SUPABASE_ANON_KEY` (keepalive je aktivan).
+- **Supabase ↔ GitHub integracija: AKTIVNA i verifikovana** — probna migracija push-ovana u `main`
+  automatski je primenjena na produkciju za ~60 s (pa uklonjena iz istorije). Od sada svaki push koji
+  menja `supabase/migrations/**` sam ide na produkciju; `db-migrate.yml` je uklonjen kao redundantan.
+  Bitno: ime fajla migracije mora da odgovara verziji u istoriji (`YYYYMMDDHHMMSS_naziv.sql`) — kada
+  migraciju praviš lokalno preko `supabase migration new`, to je automatski tačno; migracije
+  primenjene ručno (MCP/SQL) moraju da se imenuju po stvarnoj verziji.
 - **Responsive:** automatski E2E audit (320/375/768/1440, sve strane + log sheet + ceo onboarding
   na 320) — bez horizontalnog overflow-a; ispravljeni kontrast, dugmad koja se prelamaju,
   truncate za duge nazive, 44px touch targeti.
 
+### Deploy frontenda (izaberi jedno — oba su free)
+
+**A) Cloudflare Pages (preporučeno; `_redirects` i `_headers` su već u `app/public/`)**
+
+1. dash.cloudflare.com → Workers & Pages → Create → Pages → Connect to Git → repo `runcast`.
+2. Build command `npm run build -w app`, output `app/dist`, root `/` (framework preset: None).
+3. Env: `VITE_SUPABASE_URL=https://zhwqqcewxccwjhtdkvck.supabase.co`,
+   `VITE_SUPABASE_ANON_KEY=<anon ključ>`, `NODE_VERSION=24`.
+
+**B) Vercel (alternativa; `vercel.json` je već u repou — import je zero-config)**
+
+1. vercel.com → Add New Project → import `runcast` (build/install/output se čitaju iz `vercel.json`).
+2. Env: iste dve `VITE_*` promenljive za Production i Preview.
+
+**Posle prvog deploy-a (obavezno):** Supabase dashboard → Authentication → URL Configuration →
+Site URL = dobijeni domen i `Redirect URLs += https://<domen>/**` (bez toga reset lozinke ne radi na
+produkciji). Zatim proveriti registraciju i reset na produkciji. MCP nema alat za auth config, pa je
+ovaj korak ručni (ili Management API uz PAT).
+
 ### Šta je ostalo ručno (zahteva tvoj nalog)
 
-1. **Supabase ↔ GitHub integracija (dashboard):** Supabase → Project Settings → Integrations →
-   GitHub → _Install Supabase GitHub App_ → izaberi repo `runcast` → uključi **Deploy to
-   production** na `main` (migrations directory: `supabase/migrations`). Nakon toga nova migracija
-   u `main` se automatski primenjuje — alternativa je `db-migrate.yml` uz gore navedena dva secret-a.
-2. **Auth za produkciju (dashboard):** Authentication → URL Configuration → Site URL = budući
-   Cloudflare Pages domen, + isti domen u Redirect URLs; ostaviti confirmations ON, min lozinka 8.
-3. **Cloudflare Pages:** connect GitHub `runcast` → build `npm run build -w app`, output `app/dist`,
-   root `/`, env: `VITE_SUPABASE_URL=https://zhwqqcewxccwjhtdkvck.supabase.co`,
-   `VITE_SUPABASE_ANON_KEY=<anon ključ iz Supabase dashboarda>`, `NODE_VERSION=24`.
-   `_redirects` (SPA) i `_headers` su već u `app/public/`.
-4. **Backup (opciono):** `SUPABASE_DB_URL` kao **session pooler** string
+1. **Deploy frontenda:** koraci A ili B iznad.
+2. **Auth URL-ovi za produkciju:** korak „Posle prvog deploy-a" iznad.
+3. **Backup (opciono):** `SUPABASE_DB_URL` kao **session pooler** string
    `postgresql://postgres.<ref>:<pw>@aws-0-eu-central-1.pooler.supabase.com:5432/postgres?sslmode=require`
    (ne direktni host — IPv6-only; ne port 6543). Backup pokriva `public` šemu, ne `auth` korisnike.
-5. **Napomene:** Supabase free projekat se pauzira posle 7 dana bez aktivnosti (keepalive ping je već
+4. **Napomene:** Supabase free projekat se pauzira posle 7 dana bez aktivnosti (keepalive ping je već
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
 
