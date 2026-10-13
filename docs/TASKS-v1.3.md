@@ -14,7 +14,7 @@ paralelnim feature-istraživanjima (read-only) dok traje L. Status se ažurira u
 - [x] R3 — implementacija P0/P1 popravki
 - [x] F1 — feature istraživanja (gamifikacija / profil+social / šta još fali) → docs/features/09-11 feature istraživanja (gamifikacija / profil+social / šta još fali)
 - [x] F2 — implementacija: gamifikacija + profil/avatar/rang lista + benchmark recalibracija (33 E2E)
-- [ ] Final — (u toku) format/typecheck/test/lint/build/E2E → commit+push → CI/deploy/prod verifikacija
+- [x] Final — 193 unit + 33 E2E; CI (uklj. migrations job) zelen; 7 migracija na prod bazi; Cloudflare deploy + prod smoke verifikovani format/typecheck/test/lint/build/E2E → commit+push → CI/deploy/prod verifikacija
 
 ---
 
