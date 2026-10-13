@@ -31,6 +31,8 @@
     "rpeValue": "RPE {{rpe}} od 10",
     "notes": "Beleška (opciono)",
     "notesPlaceholder": "Kako je bilo?",
+    "shoe": "Patike (opciono)",
+    "shoeNone": "Bez patika",
     "errorDuration": "Trajanje unesi kao mm:ss ili h:mm:ss",
     "errorInvalid": "Proveri distancu (km), trajanje i RPE",
     "errorSave": "Čuvanje nije uspelo. Pokušaj ponovo"

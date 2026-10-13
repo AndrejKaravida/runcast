@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
 import { AppModal } from '@/components/ui/AppModal';
+import { AppSelect } from '@/components/ui/AppSelect';
 import { AppTextarea } from '@/components/ui/AppTextarea';
+import { useShoes } from '@/features/gear/queries';
 import { useLogWorkout } from '@/features/logs/queries';
 import type { WorkoutsRow } from '@/types';
 
@@ -41,11 +43,14 @@ function LogForm({
 }) {
   const { t } = useTranslation('workout');
   const logWorkout = useLogWorkout();
+  const { data: shoes = [] } = useShoes();
+  const activeShoes = shoes.filter((shoe) => !shoe.retired);
   const initialDistance = prefill ? (prefill.distanceKm ?? null) : workout.distance_km > 0 ? workout.distance_km : null;
   const [distance, setDistance] = useState(initialDistance ? String(initialDistance) : '');
   const [duration, setDuration] = useState(prefill?.durationSec ? formatDuration(prefill.durationSec) : '');
   const [rpe, setRpe] = useState(5);
   const [notes, setNotes] = useState('');
+  const [shoeId, setShoeId] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit() {
@@ -67,7 +72,7 @@ function LogForm({
       return;
     }
     try {
-      await logWorkout.mutateAsync({ workout, ...parsed.data });
+      await logWorkout.mutateAsync({ workout, ...parsed.data, shoeId: shoeId || null });
       onClose();
     } catch {
       setError(t('log.errorSave'));
@@ -115,6 +120,21 @@ function LogForm({
         value={notes}
         onChange={(event) => setNotes(event.target.value)}
       />
+      {activeShoes.length > 0 ? (
+        <AppSelect
+          data-testid="log-shoe"
+          label={t('log.shoe')}
+          value={shoeId}
+          onChange={(event) => setShoeId(event.target.value)}
+        >
+          <option value="">{t('log.shoeNone')}</option>
+          {activeShoes.map((shoe) => (
+            <option key={shoe.id} value={shoe.id}>
+              {shoe.name}
+            </option>
+          ))}
+        </AppSelect>
+      ) : null}
       {error ? (
         <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">{error}</p>
       ) : null}

@@ -21,7 +21,7 @@ i predlaže zamenu treninga unutar iste nedelje kada uslovi nisu dobri.
 | 21   | v1.3/R: arhitekturalni review (6 agenata → `docs/review/*`) + sve P0/P1 popravke                                      | ✅     |
 | 22   | v1.3/F: gamifikacija + profil/avatar/rang lista + benchmark recalibracija tempa                                       | ✅     |
 
-Testovi: **253 unit** (shared) + **44 E2E** (Playwright kroz pravi UI) + typecheck/lint/build.
+Testovi: **269 unit** (shared) + **50 E2E** (Playwright kroz pravi UI) + typecheck/lint/build.
 
 ## Struktura
 
@@ -123,6 +123,21 @@ je zatvoren.
 2. **Napomene:** Supabase free projekat se pauzira posle 7 dana bez aktivnosti (keepalive ping je već
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
+
+## v1.6 — native shell, Health integracije, splash, floating dock, shoes
+
+- **Capacitor native shell**: ista codebase kao prava Android/iOS app (bez browsera); Android APK
+  build lokalno i u CI-ju (artifact), iOS projekat verifikovan build-om (Xcode 27); uputstva u
+  `docs/NATIVE.md` (uključujući besplatnu iOS instalaciju sa 7-dnevnim potpisom).
+- **Health integracije**: Apple Health + Health Connect preko `@capgo/capacitor-health` adaptera;
+  uvoz trčanja u logove (dedupe po external_id + tolerancije, match na plan, auto-DONE);
+  Xiaomi/Zepp put preko Mi Fitness sync-a; Settings „Integracije" (web prikazuje „dostupno u
+  mobilnoj aplikaciji"); `run_logs.external_id` + unique index.
+- **Splash**: animirani runner (SVG mark) u web overlayu i loaderu + native splash resursi.
+- **Floating dock** meni sa safe-area (viewport-fit=cover).
+- **Shoe tracking**: „Oprema" u Settings (dodavanje, početna kilometraža, penzionisanje, brisanje),
+  izbor patika pri beleženju treninga, kilometraža po patikama (`shoes` tabela + `run_logs.shoe_id`,
+  `log_workout` RPC proširen).
 
 ## v1.5 — humanizacija, notifikacije 2.0, weather fokus, manualni reschedule, animacije, launch polish
 

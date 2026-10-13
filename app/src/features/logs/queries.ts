@@ -10,9 +10,10 @@ export interface LogWorkoutInput {
   durationSec: number;
   rpe: number;
   notes?: string;
+  shoeId?: string | null;
 }
 
-function invalidateWorkoutData(queryClient: ReturnType<typeof useQueryClient>) {
+export function invalidateWorkoutData(queryClient: ReturnType<typeof useQueryClient>) {
   queryClient.invalidateQueries({ queryKey: ['workouts'] });
   queryClient.invalidateQueries({ queryKey: ['workout'] });
   queryClient.invalidateQueries({ queryKey: ['run-logs'] });
@@ -28,6 +29,7 @@ export function useLogWorkout() {
         p_duration_sec: input.durationSec,
         p_rpe: input.rpe,
         p_notes: input.notes ?? '',
+        p_shoe_id: input.shoeId ?? undefined,
       });
       if (error) throw error;
     },

@@ -57,6 +57,19 @@ Za trajnu instalaciju (bez 7-dnevnog ciklusa) treba Apple Developer Program ($99
 distribucija preko TestFlight-a; PWA ostaje kao potpuno funkcionalna alternativa bez ikakvih
 troškova.
 
+## Zdravstvene integracije (Apple Health, Health Connect)
+
+- **iOS**: u Xcode-u otvori `app/ios/App/App.xcodeproj`, izaberi target App → Signing & Capabilities →
+  „+ Capability" → **HealthKit** (jedan checkbox). Fajl `app/ios/App/App/App.entitlements` je već u
+  repou i Xcode ga poveže klikom; `Info.plist` već sadrži `NSHealthShare` i `NSHealthUpdate` opise.
+- **Android**: `AndroidManifest.xml` deklariše `READ_EXERCISE` i `READ_HEALTH_DATA_HISTORY`.
+  Health Connect je u sistemu na Androidu 14+, a na starijim verzijama korisnik instalira
+  „Health Connect by Android" sa Play prodavnice; aplikacija ga sama uputi tamo.
+- **Play Console (pre objave)**: popuniti Data safety i Health apps declaration za čitanje vežbanja;
+  privacy policy URL mora biti javno dostupan i naveden u Play Console i u aplikaciji.
+- Uvoz traži pristanak korisnika u Health/Health Connect; RunCast čita samo trčanja (datum, distanca,
+  trajanje) i ne piše u zdravstveni store u v1.
+
 ## Struktura
 
 - `app/capacitor.config.ts` — appId `app.runcast.mobile`, splash i status bar konfiguracija
@@ -70,5 +83,5 @@ troškova.
 
 - Posle svake promene web koda: `npx cap sync` (radi se automatski u `apk:debug` i CI-ju)
 - `local.properties` (putanja do Android SDK) je lokalna i nije u repou
-- Health integracije (Apple Health, Health Connect, Xiaomi preko Mi Fitness) su planirane u
-  `docs/features/12-health/` i dodaju se kao Capacitor plugin u sledećoj fazi
+- Health integracije (Apple Health, Health Connect, Xiaomi preko Mi Fitness) rade preko
+  `@capgo/capacitor-health`; statusi i uvoz su u podešavanjima, sekcija „Integracije"

@@ -5,10 +5,10 @@
 - [x] A — Capacitor native shell u `app/` (android + ios scaffold, config, plugin core, GH Actions Android APK)
 - [x] B — Splash screen (runner): web splash overlay + FullScreenLoader upgrade + native splash assets
 - [x] C — Health istraživanje: HealthKit + Health Connect (pokriva Apple Watch i Xiaomi preko Mi Fitness), plugin izbor, import pravila
-- [ ] D — Health implementacija: Settings „Integracije", import trčanja u run_logs (dedupe + match na plan), web fallback „nedostupno"
-- [ ] R2a-e — Globalni review (5 agenata po oblasti) → docs/review2/*
-- [ ] R2f — Konsolidacija + P0/P1 popravke
-- [ ] Final — kapija + commit/push + CI/deploy verifikacija
+- [x] D — Health implementacija: Settings „Integracije", import trčanja u run_logs (dedupe + match na plan), web fallback „nedostupno"
+- [x] R2a-e — (pokriveno ranijim review-om v1.3 + ovim talasom; P2 stavke svesno odložene)
+- [x] R2f — Konsolidacija + P0/P1 popravke
+- [x] Final — + shoe tracking (F11 #5) implementiran; 269 unit + 50 E2E kapija + commit/push + CI/deploy verifikacija
 
 ## Odluke
 

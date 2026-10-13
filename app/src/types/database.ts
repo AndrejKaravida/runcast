@@ -247,10 +247,12 @@ export type Database = {
           created_at: string;
           distance_km: number | null;
           duration_sec: number | null;
+          external_id: string | null;
           id: string;
           log_date: string;
           notes: string | null;
           rpe: number | null;
+          shoe_id: string | null;
           user_id: string;
           workout_id: string | null;
         };
@@ -260,10 +262,12 @@ export type Database = {
           created_at?: string;
           distance_km?: number | null;
           duration_sec?: number | null;
+          external_id?: string | null;
           id?: string;
           log_date: string;
           notes?: string | null;
           rpe?: number | null;
+          shoe_id?: string | null;
           user_id: string;
           workout_id?: string | null;
         };
@@ -272,14 +276,23 @@ export type Database = {
           created_at?: string;
           distance_km?: number | null;
           duration_sec?: number | null;
+          external_id?: string | null;
           id?: string;
           log_date?: string;
           notes?: string | null;
           rpe?: number | null;
+          shoe_id?: string | null;
           user_id?: string;
           workout_id?: string | null;
         };
         Relationships: [
+          {
+            foreignKeyName: 'run_logs_shoe_id_fkey';
+            columns: ['shoe_id'];
+            isOneToOne: false;
+            referencedRelation: 'shoes';
+            referencedColumns: ['id'];
+          },
           {
             foreignKeyName: 'run_logs_workout_id_fkey';
             columns: ['workout_id'];
@@ -288,6 +301,34 @@ export type Database = {
             referencedColumns: ['id'];
           },
         ];
+      };
+      shoes: {
+        Row: {
+          created_at: string;
+          id: string;
+          initial_km: number;
+          name: string;
+          retired: boolean;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          initial_km?: number;
+          name: string;
+          retired?: boolean;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          initial_km?: number;
+          name?: string;
+          retired?: boolean;
+          user_id?: string;
+        };
+        Relationships: [];
       };
       workouts: {
         Row: {
@@ -380,7 +421,14 @@ export type Database = {
       };
       get_push_public_key: { Args: Record<PropertyKey, never>; Returns: string };
       log_workout: {
-        Args: { p_distance_km: number; p_duration_sec: number; p_notes: string; p_rpe: number; p_workout_id: string };
+        Args: {
+          p_distance_km: number;
+          p_duration_sec: number;
+          p_notes: string;
+          p_rpe: number;
+          p_shoe_id?: string;
+          p_workout_id: string;
+        };
         Returns: undefined;
       };
       recalibrate_plan: { Args: { p_anchor: Json; p_pace_map: Json; p_paces: Json }; Returns: undefined };

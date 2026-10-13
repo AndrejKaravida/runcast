@@ -31,6 +31,8 @@
     "rpeValue": "RPE {{rpe}} of 10",
     "notes": "Note (optional)",
     "notesPlaceholder": "How did it go?",
+    "shoe": "Shoes (optional)",
+    "shoeNone": "No shoes",
     "errorDuration": "Enter the duration as mm:ss or h:mm:ss",
     "errorInvalid": "Check the distance (km), duration and RPE",
     "errorSave": "Saving failed. Try again"

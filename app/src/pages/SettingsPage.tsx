@@ -13,6 +13,8 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { AvatarUpload } from '@/components/profile/AvatarUpload';
+import { GearSection } from '@/components/settings/GearSection';
+import { HealthIntegrations } from '@/components/settings/HealthIntegrations';
 import { PushNotifications } from '@/components/settings/PushNotifications';
 import { CityPicker } from '@/components/forms/CityPicker';
 import { PlanFields } from '@/components/forms/PlanFields';
@@ -319,6 +321,11 @@ export function SettingsPage() {
       ) : null}
 
       <section className="space-y-2">
+        <SectionHeader label={t('integrations.label')} />
+        <HealthIntegrations />
+      </section>
+
+      <section className="space-y-2">
         <SectionHeader
           label={t('plan.label')}
           action={plan ? <AppBadge tone="primary">{t('plan.weeks', { weeks: plan.weeks })}</AppBadge> : null}
@@ -387,6 +394,11 @@ export function SettingsPage() {
       <section className="space-y-2">
         <SectionHeader label={t('push.label')} />
         <PushNotifications />
+      </section>
+
+      <section className="space-y-2">
+        <SectionHeader label={t('gear.label')} />
+        <GearSection />
       </section>
 
       <section className="space-y-2">

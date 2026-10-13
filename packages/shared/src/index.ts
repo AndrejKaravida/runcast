@@ -19,3 +19,4 @@ export * from './rebalance-week';
 export * from './raceday';
 export * from './fueling';
 export * from './ics';
+export * from './health';

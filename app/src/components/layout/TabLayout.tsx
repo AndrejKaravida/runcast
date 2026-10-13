@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation, useOutlet } from 'react-router';
 import { ThemeQuickToggle } from '@/components/ui/ThemeToggle';
+import { useHealthAutoImport } from '@/features/health/queries';
 
 const tabs = [
   { to: '/today', labelKey: 'nav.today', icon: House },
@@ -19,6 +20,7 @@ export function TabLayout() {
   const outlet = useOutlet();
   const reduceMotion = useReducedMotion();
   const [scrolled, setScrolled] = useState(false);
+  useHealthAutoImport();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 0);
