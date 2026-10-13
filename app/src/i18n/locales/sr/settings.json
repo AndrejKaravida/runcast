@@ -8,6 +8,7 @@
     "label": "Izgled"
   },
   "index": {
+    "appGroup": "Aplikacija",
     "trainingGroup": "Trening",
     "connectionsGroup": "Povezivanje",
     "planSubtitle": "Ciljna trka, izvoz i novi plan",

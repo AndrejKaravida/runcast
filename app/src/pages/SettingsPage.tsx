@@ -36,23 +36,23 @@ export function SettingsPage() {
       </Link>
 
       <section className="space-y-2">
-        <SectionHeader label={t('language.label')} />
-        <AppCard>
-          <SegmentedControl
-            value={language}
-            onChange={setLanguage}
-            options={[
-              { value: 'sr', label: t('language.sr') },
-              { value: 'en', label: t('language.en') },
-            ]}
-          />
-        </AppCard>
-      </section>
-
-      <section className="space-y-2">
-        <SectionHeader label={t('appearance.label')} />
-        <AppCard>
-          <ThemeToggle />
+        <SectionHeader label={t('index.appGroup')} />
+        <AppCard className="space-y-4">
+          <div>
+            <p className="section-label mb-1.5">{t('language.label')}</p>
+            <SegmentedControl
+              value={language}
+              onChange={setLanguage}
+              options={[
+                { value: 'sr', label: t('language.sr') },
+                { value: 'en', label: t('language.en') },
+              ]}
+            />
+          </div>
+          <div>
+            <p className="section-label mb-1.5">{t('appearance.label')}</p>
+            <ThemeToggle />
+          </div>
         </AppCard>
       </section>
 

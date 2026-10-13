@@ -8,6 +8,7 @@
     "label": "Appearance"
   },
   "index": {
+    "appGroup": "App",
     "trainingGroup": "Training",
     "connectionsGroup": "Connections",
     "planSubtitle": "Goal race, export and a new plan",
