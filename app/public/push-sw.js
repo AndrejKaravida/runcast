@@ -18,7 +18,9 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = (event.notification.data && event.notification.data.url) || '/';
+  const requested = (event.notification.data && event.notification.data.url) || '/';
+  const url =
+    typeof requested === 'string' && requested.startsWith('/') && !requested.startsWith('//') ? requested : '/';
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
       const client = windowClients.find((item) => 'focus' in item);

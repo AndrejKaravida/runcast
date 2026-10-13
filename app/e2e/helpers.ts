@@ -1,7 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 
 export function isoFromNow(days: number): string {
-  return new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
+  return new Date(Date.now() + days * 86_400_000).toLocaleDateString('sv-SE');
 }
 
 export function uniqueEmail(prefix: string): string {

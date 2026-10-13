@@ -324,6 +324,28 @@ export type Database = {
         };
         Relationships: [];
       };
+      rpc_rate_limits: {
+        Row: {
+          attempts: number;
+          rpc: string;
+          user_id: string;
+          window_started_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          attempts?: number;
+          rpc: string;
+          user_id: string;
+          window_started_at?: string;
+        };
+        Update: {
+          attempts?: number;
+          rpc?: string;
+          user_id?: string;
+          window_started_at?: string;
+        };
+        Relationships: [];
+      };
       run_logs: {
         Row: {
           avg_pace_sec_per_km: number | null;
@@ -503,8 +525,10 @@ export type Database = {
         }[];
       };
       apply_week_plan: { Args: { p_assignments: Json }; Returns: number };
+      can_send_friend_request: { Args: Record<PropertyKey, never>; Returns: boolean };
       can_view_profile: { Args: { p_profile_id: string }; Returns: boolean };
       can_view_run_log: { Args: { p_run_log_id: string }; Returns: boolean };
+      consume_rpc_quota: { Args: { p_max: number; p_rpc: string; p_window: string }; Returns: undefined };
       create_plan_with_workouts: {
         Args: {
           p_anchor: Json;
