@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { isoDateSchema, onboardingSchema, parseTimeToSeconds, profileSchema, runLogSchema } from './schemas';
+import {
+  isoDateSchema,
+  onboardingSchema,
+  parseTimeToSeconds,
+  parseWorkoutSteps,
+  profileSchema,
+  runLogSchema,
+} from './schemas';
 
 const validOnboarding = {
   city: 'Belgrade',
@@ -65,5 +72,34 @@ describe('runLogSchema', () => {
   it('rejects out-of-range rpe', () => {
     expect(runLogSchema.safeParse({ distanceKm: 10, durationSec: 3000, rpe: 0 }).success).toBe(false);
     expect(runLogSchema.safeParse({ distanceKm: 10, durationSec: 3000, rpe: 11 }).success).toBe(false);
+  });
+});
+
+describe('parseWorkoutSteps', () => {
+  it('returns validated steps for a well-formed array', () => {
+    expect(
+      parseWorkoutSteps([
+        { label: 'Zagrevanje 2 km', distanceKm: 2, pace: '6:00' },
+        { label: 'Tempo 20 min', durationSec: 1200, pace: '4:30' },
+      ]),
+    ).toEqual([
+      { label: 'Zagrevanje 2 km', distanceKm: 2, pace: '6:00' },
+      { label: 'Tempo 20 min', durationSec: 1200, pace: '4:30' },
+    ]);
+  });
+
+  it('returns an empty array for non-arrays and malformed entries', () => {
+    expect(parseWorkoutSteps(null)).toEqual([]);
+    expect(parseWorkoutSteps(undefined)).toEqual([]);
+    expect(parseWorkoutSteps('[]')).toEqual([]);
+    expect(parseWorkoutSteps({})).toEqual([]);
+    expect(parseWorkoutSteps([{ distanceKm: 2 }])).toEqual([]);
+    expect(parseWorkoutSteps([{ label: 'Ok' }, { label: 42 }])).toEqual([]);
+    expect(parseWorkoutSteps([null])).toEqual([]);
+    expect(parseWorkoutSteps([{ label: 'A', distanceKm: Number.NaN }])).toEqual([]);
+  });
+
+  it('strips unknown keys and keeps optional fields absent', () => {
+    expect(parseWorkoutSteps([{ label: 'Lako trčanje', extra: true }])).toEqual([{ label: 'Lako trčanje' }]);
   });
 });

@@ -1,5 +1,5 @@
 import type { HourlyForecast } from './weather';
-import type { RunWindow, WorkoutStatus, WorkoutType } from './types';
+import { isRunType, type RunWindow, type WorkoutStatus, type WorkoutType } from './types';
 import { addDays, parseIso, startOfWeek } from './dates';
 
 export const WEATHER_RULES = {
@@ -32,10 +32,6 @@ export function runWindowHours(runWindow: RunWindow): { startHour: number; endHo
 
 function hourOf(time: string): number {
   return Number(time.slice(11, 13));
-}
-
-function isRunningType(type: WorkoutType): boolean {
-  return type === 'EASY' || type === 'LONG' || type === 'TEMPO' || type === 'INTERVALS' || type === 'REPETITIONS';
 }
 
 export function assessWorkoutWeather(params: {
@@ -73,7 +69,7 @@ export function assessWorkoutWeather(params: {
   if (maxRainProbability >= WEATHER_RULES.rainProbabilityPct || totalRainMm >= WEATHER_RULES.rainMm) {
     const details = { precipProbabilityPct: maxRainProbability, precipMm: totalRainMm };
     if (isRace) return { code: 'RAIN', severity: 'warn', suggestion: 'keep', details };
-    if (isRunningType(params.type)) return { code: 'RAIN', severity: 'swap', suggestion: 'swap', details };
+    if (isRunType(params.type)) return { code: 'RAIN', severity: 'swap', suggestion: 'swap', details };
     return { code: 'RAIN', severity: 'info', suggestion: 'keep', details };
   }
 
@@ -110,12 +106,12 @@ export function assessWorkoutWeather(params: {
   return { code: null, severity: 'none', suggestion: 'keep', details: {} };
 }
 
-export function pickSwapCandidate(
+export function swapCandidates(
   target: { id: string; date: string; type: WorkoutType; status: WorkoutStatus },
   weekWorkouts: { id: string; date: string; type: WorkoutType; status: WorkoutStatus }[],
   weekStart?: string,
-): SwapCandidate | null {
-  if (target.status !== 'PLANNED' || target.type === 'RACE') return null;
+): SwapCandidate[] {
+  if (target.status !== 'PLANNED' || target.type === 'RACE') return [];
   const targetWeek = weekStart ?? startOfWeek(target.date);
   const eligible = weekWorkouts.filter(
     (workout) =>
@@ -128,7 +124,15 @@ export function pickSwapCandidate(
         : startOfWeek(workout.date) === targetWeek),
   );
   const easy = eligible.filter((workout) => workout.type === 'EASY');
-  const pool = easy.length > 0 ? easy : eligible.filter((workout) => workout.type === 'REST');
+  return easy.length > 0 ? easy : eligible.filter((workout) => workout.type === 'REST');
+}
+
+export function pickSwapCandidate(
+  target: { id: string; date: string; type: WorkoutType; status: WorkoutStatus },
+  weekWorkouts: { id: string; date: string; type: WorkoutType; status: WorkoutStatus }[],
+  weekStart?: string,
+): SwapCandidate | null {
+  const pool = swapCandidates(target, weekWorkouts, weekStart);
   if (pool.length === 0) return null;
 
   const distance = (date: string): number => Math.abs(parseIso(date).getTime() - parseIso(target.date).getTime());

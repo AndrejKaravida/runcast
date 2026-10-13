@@ -79,9 +79,7 @@ export function useWorkout(id: string | undefined) {
 }
 
 export function useGeneratePlan() {
-  const { session } = useAuth();
   const queryClient = useQueryClient();
-  const userId = session?.user.id as string;
   return useMutation({
     mutationFn: async (input: GeneratePlanInput): Promise<string> => {
       const anchor: PlanAnchor | null = input.recentRace
@@ -125,7 +123,6 @@ export function useGeneratePlan() {
         p_workouts: draft.workouts as unknown as Json,
       });
       if (error) throw error;
-      queryClient.setQueryData(['plan', 'active', userId], null);
       return data;
     },
     onSuccess: () => {

@@ -57,5 +57,9 @@
     "text": "Ova stranica ne postoji.",
     "back": "Nazad na Danas"
   },
-  "avatar": "Avatar"
+  "avatar": "Avatar",
+  "pwa": {
+    "updateAvailable": "Nova verzija je spremna",
+    "refresh": "Osveži"
+  }
 }

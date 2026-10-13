@@ -130,6 +130,68 @@ export type Database = {
         };
         Relationships: [];
       };
+      push_config: {
+        Row: {
+          created_at: string;
+          cron_secret: string | null;
+          id: number;
+          vapid_private: string | null;
+          vapid_public: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          cron_secret?: string | null;
+          id: number;
+          vapid_private?: string | null;
+          vapid_public?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          cron_secret?: string | null;
+          id?: number;
+          vapid_private?: string | null;
+          vapid_public?: string | null;
+        };
+        Relationships: [];
+      };
+      push_subscriptions: {
+        Row: {
+          auth: string;
+          created_at: string;
+          endpoint: string;
+          id: string;
+          language: string;
+          p256dh: string;
+          remind_race_week: boolean;
+          remind_training: boolean;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          auth: string;
+          created_at?: string;
+          endpoint: string;
+          id?: string;
+          language?: string;
+          p256dh: string;
+          remind_race_week?: boolean;
+          remind_training?: boolean;
+          user_id: string;
+        };
+        Update: {
+          auth?: string;
+          created_at?: string;
+          endpoint?: string;
+          id?: string;
+          language?: string;
+          p256dh?: string;
+          remind_race_week?: boolean;
+          remind_training?: boolean;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       races: {
         Row: {
           created_at: string;
@@ -297,6 +359,7 @@ export type Database = {
         };
         Returns: string;
       };
+      get_push_public_key: { Args: Record<PropertyKey, never>; Returns: string };
       log_workout: {
         Args: { p_distance_km: number; p_duration_sec: number; p_notes: string; p_rpe: number; p_workout_id: string };
         Returns: undefined;

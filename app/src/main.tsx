@@ -4,6 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import { RouterProvider } from 'react-router';
 import { AuthProvider } from '@/auth/AuthProvider';
+import { PwaUpdatePrompt } from '@/components/layout/PwaUpdatePrompt';
 import i18n from '@/i18n';
 import { queryClient } from '@/lib/queryClient';
 import { router } from '@/router';
@@ -17,6 +18,7 @@ createRoot(document.getElementById('root')!).render(
         <ThemeProvider>
           <AuthProvider>
             <RouterProvider router={router} />
+            <PwaUpdatePrompt />
           </AuthProvider>
         </ThemeProvider>
       </I18nextProvider>

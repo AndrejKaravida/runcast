@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { formatDuration, type PlanPaces, type RunWindow, type VolumeBand } from '@runcast/shared';
+import { formatDuration, type RunWindow, type VolumeBand } from '@runcast/shared';
 import { Download, LogOut, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -13,9 +13,11 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { AvatarUpload } from '@/components/profile/AvatarUpload';
+import { PushNotifications } from '@/components/settings/PushNotifications';
 import { CityPicker } from '@/components/forms/CityPicker';
 import { PlanFields } from '@/components/forms/PlanFields';
 import { useExportPlanIcs } from '@/features/plans/export';
+import { planPaces } from '@/features/plans/plan-data';
 import { useActivePlan, useGeneratePlan, type GeneratePlanInput } from '@/features/plans/queries';
 import { useProfile, useUpdateProfile } from '@/features/profile/queries';
 import { useAuth } from '@/auth/AuthProvider';
@@ -166,7 +168,7 @@ export function SettingsPage() {
       await exportPlan.mutateAsync({
         planId: plan.id,
         runWindow: (profile?.run_window as RunWindow | undefined) ?? 'morning',
-        paces: (plan.paces ?? null) as unknown as PlanPaces | null,
+        paces: planPaces(plan),
       });
       setNotice(t('plan.exported'));
     } catch {
@@ -380,6 +382,11 @@ export function SettingsPage() {
             <RefreshCw className="h-4 w-4" aria-hidden /> {t('plan.generateNew')}
           </AppButton>
         )}
+      </section>
+
+      <section className="space-y-2">
+        <SectionHeader label={t('push.label')} />
+        <PushNotifications />
       </section>
 
       <section className="space-y-2">

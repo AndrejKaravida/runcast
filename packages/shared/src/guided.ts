@@ -1,7 +1,5 @@
-import type { LocalizedText, PaceZone, PlanPaces, WorkoutStep } from './types';
+import { isRunType, type LocalizedText, type PaceZone, type PlanPaces, type WorkoutStep } from './types';
 import { formatDuration, formatPace } from './vdot';
-
-const GUIDED_RUN_TYPES = new Set(['EASY', 'LONG', 'TEMPO', 'INTERVALS', 'REPETITIONS']);
 
 export const DEFAULT_PACE_SEC_PER_KM = 360;
 
@@ -70,7 +68,7 @@ const ZONE_FIELD: Record<PaceZone, keyof PlanPaces> = {
 };
 
 export function isGuidedRunType(type: string): boolean {
-  return GUIDED_RUN_TYPES.has(type);
+  return isRunType(type) && type !== 'RACE';
 }
 
 export function parsePaceLabel(value?: string): number | null {

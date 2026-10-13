@@ -1,9 +1,16 @@
-import { formatDuration, formatPace, isGuidedRunType, type PlanPaces, type WorkoutStep } from '@runcast/shared';
+import {
+  formatDuration,
+  formatPace,
+  isGuidedRunType,
+  parseWorkoutSteps,
+  type PlanPaces,
+  type WorkoutStep,
+} from '@runcast/shared';
 import type { TFunction } from 'i18next';
 import type { WorkoutsRow } from '@/types';
 
 export function workoutSteps(row: WorkoutsRow): WorkoutStep[] {
-  return Array.isArray(row.steps) ? (row.steps as unknown as WorkoutStep[]) : [];
+  return parseWorkoutSteps(row.steps);
 }
 
 const TYPE_KEYS: Record<string, string> = {

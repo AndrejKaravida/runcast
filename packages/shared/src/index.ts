@@ -1,7 +1,9 @@
 export * from './types';
+export * from './format';
 export * from './vdot';
 export * from './benchmark';
 export * from './coach';
+export * from './srpe';
 export * from './achievements';
 export * from './predict';
 export * from './guided';
@@ -11,6 +13,7 @@ export * from './plan-generator';
 export * from './strength';
 export * from './weather';
 export * from './weather-rules';
+export * from './weather-reschedule';
 export * from './raceday';
 export * from './fueling';
 export * from './ics';

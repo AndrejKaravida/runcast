@@ -32,7 +32,7 @@ export function ForgotPasswordPage() {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     if (error) {
-      setServerError(t(authErrorMessage(error.message)));
+      setServerError(t(authErrorMessage(error.message, error.code)));
       return;
     }
     setSent(true);

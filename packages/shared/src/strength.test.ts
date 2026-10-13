@@ -2,9 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { addDays, weekdayOf } from './dates';
 import { generatePlan } from './plan-generator';
 import { strengthDaysFor, strengthWorkoutsForWeek, type StrengthWeekInput } from './strength';
-import type { PlanConfig, WorkoutDraft } from './types';
-
-const RUN_TYPES = ['EASY', 'LONG', 'TEMPO', 'INTERVALS', 'REPETITIONS', 'RACE'];
+import { isRunType, type PlanConfig, type WorkoutDraft } from './types';
 
 const fullConfig: PlanConfig = {
   raceDate: '2026-05-10',
@@ -111,9 +109,7 @@ describe('generatePlan strength integration', () => {
       const race = plan.workouts.at(-1);
       const raceEve = race ? addDays(race.date, -1) : null;
       for (const week of byWeek.values()) {
-        const runDays = week
-          .filter((workout) => RUN_TYPES.includes(workout.type))
-          .map((workout) => weekdayOf(workout.date));
+        const runDays = week.filter((workout) => isRunType(workout.type)).map((workout) => weekdayOf(workout.date));
         for (const session of week.filter((workout) => workout.type === 'STRENGTH')) {
           const day = weekdayOf(session.date);
           expect(runDays).not.toContain(day);

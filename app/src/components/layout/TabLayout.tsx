@@ -1,7 +1,9 @@
 import { clsx } from 'clsx';
 import { BarChart3, CalendarDays, House, Settings } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion, type Transition } from 'motion/react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NavLink, Outlet } from 'react-router';
+import { NavLink, useLocation, useOutlet } from 'react-router';
 import { ThemeQuickToggle } from '@/components/ui/ThemeToggle';
 
 const tabs = [
@@ -13,6 +15,21 @@ const tabs = [
 
 export function TabLayout() {
   const { t } = useTranslation();
+  const location = useLocation();
+  const outlet = useOutlet();
+  const reduceMotion = useReducedMotion();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 0);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const pillTransition: Transition = reduceMotion ? { duration: 0 } : { type: 'spring', bounce: 0, duration: 0.3 };
+  const pageTransition: Transition = { duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' };
+
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[720px] flex-col bg-bg">
       <header className="sticky top-0 z-40 bg-bg/85 backdrop-blur-xl backdrop-saturate-150">
@@ -22,10 +39,25 @@ export function TabLayout() {
           </span>
           <ThemeQuickToggle />
         </div>
-        <div className="pointer-events-none absolute inset-x-0 -bottom-4 h-4 bg-gradient-to-b from-bg/80 to-transparent" />
+        <div
+          className={clsx(
+            'pointer-events-none absolute inset-x-0 -bottom-4 h-4 bg-gradient-to-b from-bg/80 to-transparent transition-opacity duration-200',
+            scrolled ? 'opacity-100' : 'opacity-0',
+          )}
+        />
       </header>
       <main className="flex-1 px-4 pb-28 pt-4">
-        <Outlet />
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={location.pathname}
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
+            transition={pageTransition}
+          >
+            {outlet}
+          </motion.div>
+        </AnimatePresence>
       </main>
       <nav className="fixed inset-x-0 bottom-0 z-40 bg-surface/90 backdrop-blur-xl backdrop-saturate-150">
         <div className="pointer-events-none absolute inset-x-0 -top-4 h-4 bg-gradient-to-t from-surface/80 to-transparent" />
@@ -36,13 +68,25 @@ export function TabLayout() {
               to={to}
               className={({ isActive }) =>
                 clsx(
-                  'flex select-none flex-col items-center gap-1 py-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/60 active:scale-[0.97]',
+                  'relative flex select-none flex-col items-center gap-1 py-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/60 active:scale-[0.97]',
                   isActive ? 'text-primary-ink' : 'text-text-secondary hover:text-text',
                 )
               }
             >
-              <Icon className="h-5 w-5" aria-hidden />
-              {t(labelKey)}
+              {({ isActive }) => (
+                <>
+                  {isActive ? (
+                    <motion.span
+                      layoutId="tab-pill"
+                      transition={pillTransition}
+                      aria-hidden
+                      className="absolute inset-x-2 top-1 bottom-1 rounded-xl bg-primary-soft"
+                    />
+                  ) : null}
+                  <Icon className="relative z-10 h-5 w-5" aria-hidden />
+                  <span className="relative z-10">{t(labelKey)}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </div>

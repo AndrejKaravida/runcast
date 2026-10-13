@@ -1,14 +1,13 @@
+import { isRunType } from '@runcast/shared';
 import { addDaysIso, startOfWeekIso } from '@/lib/dates';
 import type { RunLogsRow, WorkoutsRow } from '@/types';
-
-const RUN_TYPES = ['EASY', 'LONG', 'TEMPO', 'INTERVALS', 'REPETITIONS', 'RACE'];
 
 function round1(value: number): number {
   return Math.round(value * 10) / 10;
 }
 
 export function isRunWorkout(workout: WorkoutsRow): boolean {
-  return RUN_TYPES.includes(workout.type);
+  return isRunType(workout.type);
 }
 
 export interface WeekProgress {

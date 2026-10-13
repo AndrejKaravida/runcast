@@ -21,6 +21,27 @@
     "noDone": "No completed workouts yet — the bars fill in as you log sessions.",
     "description": "How much of the plan you've run — week by week."
   },
+  "load": {
+    "title": "Training load",
+    "acute": "Acute (7 days)",
+    "acwr": "ACWR",
+    "barTooltip": "{{load}} load points",
+    "note": "A rough heuristic from RPE and duration — not a diagnosis.",
+    "bands": {
+      "insufficient": "Not enough data",
+      "low": "Low",
+      "sweet": "Sweet spot",
+      "caution": "Caution",
+      "high": "High"
+    },
+    "explanations": {
+      "insufficient": "At least 8 sessions in 4 weeks and 3 in the last 7 days are needed — keep logging.",
+      "low": "Acute load is below your usual — your body is resting.",
+      "sweet": "Acute load tracks chronic load — your rhythm is steady.",
+      "caution": "Acute load is rising faster than chronic — take care next week.",
+      "high": "The load jump is large — ease the intensity and give your body room to adapt."
+    }
+  },
   "recent": {
     "title": "Recently logged",
     "emptyTitle": "Your first workout is waiting",
@@ -41,6 +62,8 @@
     "actions": {
       "missedRuns": "Ease next week by 20%",
       "highRpe": "Ease by 10%",
+      "loadCaution": "Ease by 10%",
+      "loadHigh": "Ease by 20%",
       "rpeDrift": "No change",
       "longRunMissed": "No change",
       "readyToBuild": "Add 10%"

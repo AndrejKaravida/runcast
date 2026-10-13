@@ -76,6 +76,26 @@
     "baseConfirmText": "Bez ciljnog vremena ili rezultata trke, plan nema kvalitetne treninge ni ciljne tempe — dobijaš samo lagano trčanje. Nastaviti?",
     "baseConfirmAction": "Generiši bazni plan"
   },
+  "push": {
+    "label": "Notifikacije",
+    "master": "Push notifikacije",
+    "hint": "Podsetnik dan pred trening i nedelju dana pred trku.",
+    "on": "Uključi",
+    "off": "Isključi",
+    "enabled": "Notifikacije su uključene na ovom uređaju.",
+    "disabled": "Notifikacije su isključene.",
+    "training": "Trening sutra",
+    "raceWeek": "Trka nedelja",
+    "test": "Pošalji test notifikaciju",
+    "testSent": "Test notifikacija je poslata.",
+    "testFailed": "Slanje nije uspelo — probaj ponovo.",
+    "unsupported": "Ovaj pregledač ne podržava push notifikacije.",
+    "denied": "Dozvola za notifikacije je odbijena. Uključi ih u podešavanjima pregledača; na iPhone-u app prvo dodaj na Home Screen.",
+    "unavailable": "Push servis nije dostupan — proveri vezu i da je app instalirana, pa probaj ponovo.",
+    "notConfigured": "Notifikacije još nisu podešene na serveru — probaj kasnije.",
+    "saveFailed": "Čuvanje nije uspelo — probaj ponovo.",
+    "working": "Podešavanje…"
+  },
   "account": {
     "label": "Nalog",
     "signOut": "Odjavi se"

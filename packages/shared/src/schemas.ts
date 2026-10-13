@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { WorkoutStep } from './types';
 
 export const isoDateSchema = z
   .string()
@@ -73,6 +74,20 @@ export const runLogSchema = z.object({
   rpe: z.number().int().min(1).max(10),
   notes: z.string().max(1000).optional(),
 });
+
+export const workoutStepSchema = z.object({
+  label: z.string(),
+  distanceKm: z.number().optional(),
+  durationSec: z.number().optional(),
+  pace: z.string().optional(),
+});
+
+export const workoutStepsSchema = z.array(workoutStepSchema);
+
+export function parseWorkoutSteps(json: unknown): WorkoutStep[] {
+  const result = workoutStepsSchema.safeParse(json);
+  return result.success ? result.data : [];
+}
 
 export type RaceInput = z.infer<typeof raceSchema>;
 export type ProfileInput = z.infer<typeof profileSchema>;

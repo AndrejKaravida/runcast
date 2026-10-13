@@ -112,6 +112,16 @@
       "description": "{{adherence, number}}% completion and low RPE (average {{rpe, number}}). Next week goes +10%."
     }
   },
+  "srpe": {
+    "caution": {
+      "title": "Your load ratio is creeping up (ACWR {{acwr, number}})",
+      "description": "Acute load is above your usual — next week goes 10% easier."
+    },
+    "high": {
+      "title": "Your load jumped sharply (ACWR {{acwr, number}})",
+      "description": "Injury risk rises with spikes — next week eases by 20%."
+    }
+  },
   "fueling": {
     "nextGel": "Next gel: ~{{minutes, number}} min",
     "hydration": {
@@ -237,5 +247,16 @@
       "longDone": "long run ✓",
       "longPlanned": "long run"
     }
+  },
+  "reschedule": {
+    "prompt": "Looks like rain is coming — should I move your workout?",
+    "reason": "{{pct}}% rain, {{temp}}°C",
+    "shift": {
+      "morning": "Or move it to the morning — {{pct}}% rain, {{temp}}°C.",
+      "evening": "Or move it to the evening — {{pct}}% rain, {{temp}}°C."
+    },
+    "indoor": "If it stays like this, do the workout indoors.",
+    "dismiss": "Leave it as is",
+    "applied": "Workout moved — the week is recalculated."
   }
 }

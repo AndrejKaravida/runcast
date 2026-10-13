@@ -43,7 +43,7 @@ export function RegisterPage() {
       options: { data: { display_name: displayName } },
     });
     if (error) {
-      setServerError(t(authErrorMessage(error.message)));
+      setServerError(t(authErrorMessage(error.message, error.code)));
       return;
     }
     if (data.session) {

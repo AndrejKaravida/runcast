@@ -18,3 +18,6 @@ export type WorkoutsInsert = Tables['workouts']['Insert'];
 export type WorkoutsUpdate = Tables['workouts']['Update'];
 export type RunLogsRow = Tables['run_logs']['Row'];
 export type RunLogsInsert = Tables['run_logs']['Insert'];
+export type PushSubscriptionsRow = Tables['push_subscriptions']['Row'];
+export type PushSubscriptionsInsert = Tables['push_subscriptions']['Insert'];
+export type PushSubscriptionsUpdate = Tables['push_subscriptions']['Update'];

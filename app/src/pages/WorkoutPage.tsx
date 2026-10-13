@@ -8,7 +8,6 @@ import {
   isGuidedRunType,
   runWindowHours,
   type PaceZone,
-  type PlanPaces,
   type PlanPhase,
   type RunWindow,
   type WorkoutType,
@@ -16,10 +15,12 @@ import {
 import { clsx } from 'clsx';
 import { ArrowLeft, CalendarPlus, CheckCircle2, SkipForward } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
+import { AppLinkButton } from '@/components/ui/AppLinkButton';
+import { buttonClassName } from '@/components/ui/button-styles';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { QueryError } from '@/components/ui/QueryError';
@@ -34,6 +35,7 @@ import { WhyCard } from '@/components/workouts/WhyCard';
 import { WorkoutTypeIcon } from '@/components/workouts/WorkoutTypeIcon';
 import { useCompleteWorkout, useRunLogs, useSkipWorkout } from '@/features/logs/queries';
 import { buildGoogleCalendarUrlForWorkout } from '@/features/plans/export';
+import { planPaces } from '@/features/plans/plan-data';
 import { useActivePlan, useWorkout } from '@/features/plans/queries';
 import { useProfile } from '@/features/profile/queries';
 import { useWeather } from '@/features/weather/queries';
@@ -93,11 +95,9 @@ export function WorkoutPage() {
           title={t('workout:missing.title')}
           description={t('workout:missing.description')}
           action={
-            <Link to="/plan">
-              <AppButton size="sm" variant="secondary">
-                {t('workout:missing.action')}
-              </AppButton>
-            </Link>
+            <AppLinkButton to="/plan" size="sm" variant="secondary">
+              {t('workout:missing.action')}
+            </AppLinkButton>
           }
         />
       </div>
@@ -107,9 +107,10 @@ export function WorkoutPage() {
   const steps = workoutSteps(workout);
   const log = logs.find((entry) => entry.workout_id === workout.id) ?? null;
   const isStrength = workout.type === 'STRENGTH';
+  const paces = planPaces(plan);
   const googleCalendarUrl = buildGoogleCalendarUrlForWorkout(workout, {
     runWindow,
-    paces: (plan?.paces ?? null) as unknown as PlanPaces | null,
+    paces,
   });
   const showWeather = workout.workout_date >= today && workout.type !== 'REST' && !isStrength;
   const explanation = describeWorkout(
@@ -119,9 +120,9 @@ export function WorkoutPage() {
       paceZone: workout.pace_zone as PaceZone | null,
       distanceKm: workout.distance_km,
     },
-    { paces: (plan?.paces ?? null) as unknown as PlanPaces | null },
+    { paces },
   );
-  const stats = heroStats(t, workout, (plan?.paces ?? null) as unknown as PlanPaces | null);
+  const stats = heroStats(t, workout, paces);
   const planWeek = plan ? Math.min(Math.floor(dayDiff(plan.start_date, today) / 7) + 1, plan.weeks) : null;
   const planWeekLabel = plan && planWeek ? ` · ${t('workout:meta.week', { week: planWeek, weeks: plan.weeks })}` : '';
   const totalDuration = workoutDurationSec(workout);
@@ -133,7 +134,7 @@ export function WorkoutPage() {
       distanceKm: workout.distance_km,
       steps,
     },
-    (plan?.paces ?? null) as unknown as PlanPaces | null,
+    paces,
   );
   const apparentC = showWeather
     ? (weather.data?.hours ?? [])
@@ -187,12 +188,10 @@ export function WorkoutPage() {
               rel="noopener noreferrer"
               data-testid="add-google"
               aria-label={t('workout:actions.googleCalendar')}
-              className="block"
+              className={buttonClassName('ghost', 'sm', 'w-auto')}
             >
-              <AppButton variant="ghost" size="sm" className="w-auto">
-                <CalendarPlus className="h-4 w-4" aria-hidden />
-                <span className="hidden sm:inline">{t('workout:actions.googleCalendar')}</span>
-              </AppButton>
+              <CalendarPlus className="h-4 w-4" aria-hidden />
+              <span className="hidden sm:inline">{t('workout:actions.googleCalendar')}</span>
             </a>
           ) : null}
           {canAct ? (
@@ -314,21 +313,23 @@ export function WorkoutPage() {
           )}
           {completeError ? <p className="text-caption text-danger-ink">{completeError}</p> : null}
           {!isStrength && isGuidedRunType(workout.type) && steps.length > 0 ? (
-            <Link to={`/run/${workout.id}`} className="block" data-testid="start-guided">
-              <AppButton variant="secondary" size="lg" className="w-full">
-                {t('workout:actions.guided')}
-              </AppButton>
-            </Link>
+            <AppLinkButton
+              to={`/run/${workout.id}`}
+              variant="secondary"
+              size="lg"
+              className="w-full"
+              data-testid="start-guided"
+            >
+              {t('workout:actions.guided')}
+            </AppLinkButton>
           ) : null}
         </div>
       ) : null}
 
       {workout.type === 'RACE' ? (
-        <Link to="/race-day" className="block" data-testid="race-day-link">
-          <AppButton variant="secondary" size="lg" className="w-full">
-            {t('workout:actions.raceDay')}
-          </AppButton>
-        </Link>
+        <AppLinkButton to="/race-day" variant="secondary" size="lg" className="w-full" data-testid="race-day-link">
+          {t('workout:actions.raceDay')}
+        </AppLinkButton>
       ) : null}
 
       <LogWorkoutModal workout={workout} open={logOpen} onClose={() => setLogOpen(false)} />

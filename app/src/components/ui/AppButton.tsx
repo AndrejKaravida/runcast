@@ -1,31 +1,15 @@
-import { clsx } from 'clsx';
 import { Loader2 } from 'lucide-react';
 import { motion, type HTMLMotionProps } from 'motion/react';
 import type { ReactNode } from 'react';
+import { buttonClassName, type ButtonSize, type ButtonVariant } from '@/components/ui/button-styles';
 import { useTapProps } from '@/lib/motion';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
-type Size = 'sm' | 'md' | 'lg';
-
 interface AppButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
-  variant?: Variant;
-  size?: Size;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   loading?: boolean;
   children?: ReactNode;
 }
-
-const variantClasses: Record<Variant, string> = {
-  primary: 'bg-primary text-on-accent hover:bg-primary-pressed',
-  secondary: 'border border-border bg-surface-elevated text-text hover:bg-surface',
-  ghost: 'bg-transparent text-text-secondary hover:bg-surface hover:text-text',
-  danger: 'border border-danger/40 bg-danger-soft text-danger-ink hover:bg-danger/20',
-};
-
-const sizeClasses: Record<Size, string> = {
-  sm: 'h-9 px-3 text-sm',
-  md: 'h-11 px-4 text-sm',
-  lg: 'h-12 px-5 text-base',
-};
 
 export function AppButton({
   variant = 'primary',
@@ -39,12 +23,7 @@ export function AppButton({
   const tapProps = useTapProps();
   return (
     <motion.button
-      className={clsx(
-        'inline-flex select-none items-center justify-center gap-2 rounded-xl font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg disabled:pointer-events-none disabled:opacity-50',
-        variantClasses[variant],
-        sizeClasses[size],
-        className,
-      )}
+      className={buttonClassName(variant, size, className)}
       disabled={disabled || loading}
       {...tapProps}
       {...rest}

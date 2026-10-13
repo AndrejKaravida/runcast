@@ -1,0 +1,206 @@
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { AppButton } from '@/components/ui/AppButton';
+import { AppCard } from '@/components/ui/AppCard';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import {
+  fetchPushPublicKey,
+  useDeletePushSubscription,
+  usePushSubscription,
+  useSavePushSubscription,
+  useSendTestPush,
+  useUpdatePushPreferences,
+} from '@/features/push/queries';
+import {
+  pushPermission,
+  serviceWorkerRegistration,
+  urlBase64ToUint8Array,
+  type PushPermission,
+} from '@/features/push/push';
+
+const TOGGLE_OPTIONS = [
+  { value: 'on', labelKey: 'push.on' },
+  { value: 'off', labelKey: 'push.off' },
+] as const;
+
+export function PushNotifications() {
+  const { t, i18n } = useTranslation('settings');
+  const { data: subscription } = usePushSubscription();
+  const saveSubscription = useSavePushSubscription();
+  const updatePreferences = useUpdatePushPreferences();
+  const deleteSubscription = useDeletePushSubscription();
+  const sendTest = useSendTestPush();
+
+  const [permission, setPermission] = useState<PushPermission>(pushPermission);
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const language = i18n.resolvedLanguage === 'en' ? 'en' : 'sr';
+  const options = TOGGLE_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) }));
+
+  if (permission === 'unsupported') {
+    return (
+      <AppCard>
+        <p data-testid="push-unsupported" className="text-sm text-text-muted">
+          {t('push.unsupported')}
+        </p>
+      </AppCard>
+    );
+  }
+
+  async function handleEnable() {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const result = await Notification.requestPermission();
+      setPermission(result);
+      if (result !== 'granted') {
+        setError(t('push.denied'));
+        return;
+      }
+      const registration = await serviceWorkerRegistration();
+      const publicKey = await fetchPushPublicKey();
+      if (!publicKey) {
+        setError(t('push.notConfigured'));
+        return;
+      }
+      const browserSubscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
+      });
+      const json = browserSubscription.toJSON();
+      await saveSubscription.mutateAsync({
+        endpoint: browserSubscription.endpoint,
+        p256dh: json.keys?.p256dh ?? '',
+        auth: json.keys?.auth ?? '',
+        language,
+        remind_training: subscription?.remind_training ?? true,
+        remind_race_week: subscription?.remind_race_week ?? true,
+      });
+      setNotice(t('push.enabled'));
+    } catch {
+      setError(t('push.unavailable'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleDisable() {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    setNotice(null);
+    try {
+      let endpoint = subscription?.endpoint ?? null;
+      const registration = await serviceWorkerRegistration(2000).catch(() => null);
+      const browserSubscription = registration
+        ? await registration.pushManager.getSubscription().catch(() => null)
+        : null;
+      if (browserSubscription) {
+        endpoint = browserSubscription.endpoint;
+        await browserSubscription.unsubscribe();
+      }
+      await deleteSubscription.mutateAsync(endpoint);
+      setNotice(t('push.disabled'));
+    } catch {
+      setError(t('push.saveFailed'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function handlePreference(key: 'remind_training' | 'remind_race_week', value: boolean) {
+    if (!subscription) return;
+    setError(null);
+    const patch =
+      key === 'remind_training'
+        ? { id: subscription.id, remind_training: value }
+        : { id: subscription.id, remind_race_week: value };
+    updatePreferences.mutate(patch, { onError: () => setError(t('push.saveFailed')) });
+  }
+
+  async function handleTest() {
+    setError(null);
+    setNotice(null);
+    try {
+      await sendTest.mutateAsync();
+      setNotice(t('push.testSent'));
+    } catch {
+      setError(t('push.testFailed'));
+    }
+  }
+
+  return (
+    <AppCard className="space-y-4">
+      {permission === 'denied' && !subscription ? (
+        <p data-testid="push-denied" className="text-sm text-text-muted">
+          {t('push.denied')}
+        </p>
+      ) : null}
+
+      <div data-testid="push-master" className="space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm font-medium">{t('push.master')}</p>
+          {busy ? <p className="text-caption text-text-muted">{t('push.working')}</p> : null}
+        </div>
+        <SegmentedControl
+          value={subscription ? 'on' : 'off'}
+          onChange={(value) => {
+            if (value === 'on') void handleEnable();
+            else void handleDisable();
+          }}
+          options={options}
+        />
+        <p className="text-caption text-text-muted">{t('push.hint')}</p>
+      </div>
+
+      {subscription ? (
+        <>
+          <p data-testid="push-status" className="text-sm text-success-ink">
+            {t('push.enabled')}
+          </p>
+          <div data-testid="push-training">
+            <p className="section-label mb-1.5">{t('push.training')}</p>
+            <SegmentedControl
+              value={subscription.remind_training ? 'on' : 'off'}
+              onChange={(value) => handlePreference('remind_training', value === 'on')}
+              options={options}
+            />
+          </div>
+          <div data-testid="push-race-week">
+            <p className="section-label mb-1.5">{t('push.raceWeek')}</p>
+            <SegmentedControl
+              value={subscription.remind_race_week ? 'on' : 'off'}
+              onChange={(value) => handlePreference('remind_race_week', value === 'on')}
+              options={options}
+            />
+          </div>
+          <AppButton
+            type="button"
+            variant="secondary"
+            className="w-full"
+            data-testid="push-test"
+            loading={sendTest.isPending}
+            onClick={() => void handleTest()}
+          >
+            {t('push.test')}
+          </AppButton>
+        </>
+      ) : null}
+
+      {notice ? (
+        <p data-testid="push-notice" className="text-sm text-success-ink">
+          {notice}
+        </p>
+      ) : null}
+      {error ? (
+        <p data-testid="push-error" className="text-sm text-danger-ink">
+          {error}
+        </p>
+      ) : null}
+    </AppCard>
+  );
+}

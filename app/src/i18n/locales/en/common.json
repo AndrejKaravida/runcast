@@ -57,5 +57,9 @@
     "text": "This page doesn't exist.",
     "back": "Back to Today"
   },
-  "avatar": "Avatar"
+  "avatar": "Avatar",
+  "pwa": {
+    "updateAvailable": "A new version is ready",
+    "refresh": "Refresh"
+  }
 }

@@ -21,6 +21,27 @@
     "noDone": "Još nema urađenih treninga — kolone se pune kako beležiš treninge.",
     "description": "Koliko si istrčao od planiranog — nedelja po nedelju."
   },
+  "load": {
+    "title": "Opterećenje treninga",
+    "acute": "Akutno (7 dana)",
+    "acwr": "ACWR",
+    "barTooltip": "{{load}} poena opterećenja",
+    "note": "Gruba heuristika iz RPE-a i trajanja — ne dijagnoza.",
+    "bands": {
+      "insufficient": "Nedovoljno podataka",
+      "low": "Nisko",
+      "sweet": "U ravnoteži",
+      "caution": "Oprez",
+      "high": "Visoko"
+    },
+    "explanations": {
+      "insufficient": "Treba bar 8 treninga u 4 nedelje i 3 u poslednjih 7 dana — nastavi da beležiš.",
+      "low": "Akutno opterećenje je ispod uobičajenog — telo se odmara.",
+      "sweet": "Akutno opterećenje prati hronično — ritam je stabilan.",
+      "caution": "Akutno opterećenje raste brže od hroničnog — pripazi na sledeću nedelju.",
+      "high": "Skok opterećenja je velik — smanji intenzitet i daj telu prostor da se prilagodi."
+    }
+  },
   "recent": {
     "title": "Poslednje zabeleženo",
     "emptyTitle": "Prvi trening još čeka",
@@ -41,6 +62,8 @@
     "actions": {
       "missedRuns": "Olakšaj sledeću nedelju 20%",
       "highRpe": "Olakšaj 10%",
+      "loadCaution": "Olakšaj 10%",
+      "loadHigh": "Olakšaj 20%",
       "rpeDrift": "Bez promene",
       "longRunMissed": "Bez promene",
       "readyToBuild": "Dodaj 10%"

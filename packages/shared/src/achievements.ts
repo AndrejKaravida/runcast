@@ -1,6 +1,6 @@
 import { addDays, startOfWeek } from './dates';
 import { STANDARD_RACE_KM } from './predict';
-import type { LocalizedText, WorkoutStatus, WorkoutType } from './types';
+import { isRunType, RUN_TYPES, type LocalizedText, type WorkoutStatus, type WorkoutType } from './types';
 
 export type AchievementFamily =
   'first' | 'sessions' | 'streakWeeks' | 'long' | 'tempo' | 'km' | 'race' | 'strength' | 'pb';
@@ -67,7 +67,6 @@ export interface AchievementsInput {
   today: string;
 }
 
-const RUN_TYPES: readonly WorkoutType[] = ['EASY', 'LONG', 'TEMPO', 'INTERVALS', 'REPETITIONS', 'RACE'];
 const DISTANCE_TOLERANCE = 0.004;
 const MIN_DISTANCE_KM = 3;
 
@@ -342,8 +341,7 @@ export function weeklyChallenge(
   const weekStart = startOfWeek(today);
   const weekEnd = addDays(weekStart, 6);
   const runs = workouts.filter(
-    (workout) =>
-      RUN_TYPES.includes(workout.type) && workout.workout_date >= weekStart && workout.workout_date <= weekEnd,
+    (workout) => isRunType(workout.type) && workout.workout_date >= weekStart && workout.workout_date <= weekEnd,
   );
   if (runs.length === 0) return null;
   const done = runs.filter((workout) => workout.status === 'DONE').length;

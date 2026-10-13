@@ -41,12 +41,15 @@ export function useSkipWorkout() {
   const userId = session?.user.id as string;
   return useMutation({
     mutationFn: async (workoutId: string) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('workouts')
         .update({ status: 'SKIPPED' })
         .eq('id', workoutId)
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .select('id')
+        .single();
       if (error) throw error;
+      if (!data) throw new Error('Workout not updated');
     },
     onSuccess: () => invalidateWorkoutData(queryClient),
   });
@@ -58,12 +61,15 @@ export function useCompleteWorkout() {
   const userId = session?.user.id as string;
   return useMutation({
     mutationFn: async (workoutId: string) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('workouts')
         .update({ status: 'DONE' })
         .eq('id', workoutId)
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .select('id')
+        .single();
       if (error) throw error;
+      if (!data) throw new Error('Workout not updated');
     },
     onSuccess: () => invalidateWorkoutData(queryClient),
   });

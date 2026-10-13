@@ -203,4 +203,65 @@ describe('buildCoachInsights', () => {
     const { insights } = build(done.concat(skipped, NEXT_WEEK_RUN), ratedLogs(windowDates.slice(0, 5), 5));
     expect(insights.map((insight) => insight.id)).toEqual(['missed-runs', 'long-run-missed']);
   });
+
+  const cautionLogs: CoachLog[] = [
+    log({ log_date: '2026-03-15', rpe: 1, duration_sec: 6000 }),
+    log({ log_date: '2026-03-13', rpe: 1, duration_sec: 6000 }),
+    log({ log_date: '2026-03-11', rpe: 1, duration_sec: 6000 }),
+    log({ log_date: '2026-03-08', rpe: 1, duration_sec: 4200 }),
+    log({ log_date: '2026-03-05', rpe: 1, duration_sec: 4200 }),
+    log({ log_date: '2026-03-02', rpe: 1, duration_sec: 4200 }),
+    log({ log_date: '2026-02-27', rpe: 1, duration_sec: 4200 }),
+    log({ log_date: '2026-02-24', rpe: 1, duration_sec: 4200 }),
+    log({ log_date: '2026-02-21', rpe: 1, duration_sec: 4200 }),
+    log({ log_date: '2026-02-19', rpe: 1, duration_sec: 4200 }),
+    log({ log_date: '2026-02-17', rpe: 1, duration_sec: 4200 }),
+  ];
+
+  it('appends an ACWR caution insight with a 0.9 action when nothing else scales', () => {
+    const { insights } = build([NEXT_WEEK_RUN], cautionLogs);
+    expect(insights).toHaveLength(1);
+    expect(insights[0].id).toBe('load-caution');
+    expect(insights[0].tone).toBe('warning');
+    expect(insights[0].titleKey).toBe('content:srpe.caution.title');
+    expect(insights[0].titleParams).toEqual({ acwr: 1.4 });
+    expect(insights[0].actionLabelKey).toBe('stats:coach.actions.loadCaution');
+    expect(insights[0].action).toEqual({ kind: 'scale-week', weekStart: TARGET_WEEK_START, factor: 0.9 });
+  });
+
+  it('appends a high-load insight with a 0.8 action when nothing else scales', () => {
+    const highLogs = [
+      log({ log_date: '2026-03-15', rpe: 1, duration_sec: 6000 }),
+      log({ log_date: '2026-03-13', rpe: 1, duration_sec: 6000 }),
+      log({ log_date: '2026-03-11', rpe: 1, duration_sec: 6000 }),
+      log({ log_date: '2026-03-08', rpe: 1, duration_sec: 3000 }),
+      log({ log_date: '2026-03-05', rpe: 1, duration_sec: 3000 }),
+      log({ log_date: '2026-03-02', rpe: 1, duration_sec: 3000 }),
+      log({ log_date: '2026-02-27', rpe: 1, duration_sec: 3000 }),
+      log({ log_date: '2026-02-24', rpe: 1, duration_sec: 3000 }),
+      log({ log_date: '2026-02-21', rpe: 1, duration_sec: 3000 }),
+      log({ log_date: '2026-02-19', rpe: 1, duration_sec: 3000 }),
+      log({ log_date: '2026-02-17', rpe: 1, duration_sec: 3000 }),
+    ];
+    const { insights } = build([NEXT_WEEK_RUN], highLogs);
+    expect(insights[0].id).toBe('load-high');
+    expect(insights[0].tone).toBe('warning');
+    expect(insights[0].action).toEqual({ kind: 'scale-week', weekStart: TARGET_WEEK_START, factor: 0.8 });
+  });
+
+  it('skips the ACWR insight when an existing rule already scales a week', () => {
+    const skipped = [
+      workout({ workout_date: '2026-03-12', status: 'SKIPPED' }),
+      workout({ workout_date: '2026-03-14', status: 'SKIPPED' }),
+    ];
+    const { insights } = build([...skipped, NEXT_WEEK_RUN], cautionLogs);
+    expect(insights.map((insight) => insight.id)).toEqual(['missed-runs']);
+  });
+
+  it('keeps the ACWR insight without an action when no week can be scaled', () => {
+    const { insights } = build([], cautionLogs);
+    expect(insights).toHaveLength(1);
+    expect(insights[0].id).toBe('load-caution');
+    expect(insights[0].action).toBeUndefined();
+  });
 });

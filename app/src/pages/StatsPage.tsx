@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
-import { formatDuration, formatPace, type PlanAnchor, type PlanPaces } from '@runcast/shared';
+import { formatDuration, formatPace } from '@runcast/shared';
 import { BarChart3, History } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AchievementToast } from '@/components/achievements/AchievementToast';
 import { AchievementsGrid } from '@/components/achievements/AchievementsGrid';
-import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
+import { AppLinkButton } from '@/components/ui/AppLinkButton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ListRow } from '@/components/ui/ListRow';
 import { QueryError } from '@/components/ui/QueryError';
@@ -14,10 +14,12 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { StatRow } from '@/components/ui/StatRow';
 import { CoachInsightsCard } from '@/components/workouts/CoachInsightsCard';
+import { LoadCard } from '@/components/workouts/LoadCard';
 import { PersonalBestsCard } from '@/components/workouts/PersonalBestsCard';
 import { PredictorCard } from '@/components/workouts/PredictorCard';
 import { useAchievementCelebration } from '@/features/achievements/seen';
 import { useRunLogs } from '@/features/logs/queries';
+import { planAnchor, planPaces } from '@/features/plans/plan-data';
 import { adherencePct, isRunWorkout, loggedKm, runStreak, weeklyKmSeries } from '@/features/plans/progress';
 import { useActivePlan, useWorkoutsRange } from '@/features/plans/queries';
 import { dayDiff, formatDateShort, startOfWeekIso, todayIso } from '@/lib/dates';
@@ -65,17 +67,17 @@ export function StatsPage() {
         description={t('empty.description')}
         icon={<BarChart3 className="h-6 w-6" />}
         action={
-          <Link to="/settings">
-            <AppButton size="sm">{t('empty.action')}</AppButton>
-          </Link>
+          <AppLinkButton to="/settings" size="sm">
+            {t('empty.action')}
+          </AppLinkButton>
         }
       />
     );
   }
 
   const daysToRace = dayDiff(today, plan.race_date);
-  const paces = plan.paces as unknown as PlanPaces | null;
-  const anchor = plan.anchor as unknown as PlanAnchor | null;
+  const paces = planPaces(plan);
+  const anchor = planAnchor(plan);
   const progressPct =
     stats.plannedToDate > 0 ? Math.min(100, Math.round((stats.doneKm / stats.plannedToDate) * 100)) : 0;
 
@@ -164,14 +166,14 @@ export function StatsPage() {
         )}
       </AppCard>
 
+      <LoadCard logs={logs} today={today} />
+
       <AchievementsGrid achievements={achievements} />
 
       <PredictorCard paces={paces} anchor={anchor} raceDistanceKm={plan.races?.distance_km ?? null} />
-      <Link to="/benchmark" className="block">
-        <AppButton variant="secondary" className="w-full">
-          {t('predictor.benchmarkCta')}
-        </AppButton>
-      </Link>
+      <AppLinkButton to="/benchmark" variant="secondary" className="w-full">
+        {t('predictor.benchmarkCta')}
+      </AppLinkButton>
       <PersonalBestsCard logs={logs} />
 
       <div className="space-y-2">

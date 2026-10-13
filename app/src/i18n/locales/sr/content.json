@@ -103,6 +103,16 @@
       "description": "Realizacija {{adherence, number}}% i nizak RPE (prosek {{rpe, number}}). Sledeća nedelja ide +10%."
     }
   },
+  "srpe": {
+    "caution": {
+      "title": "Odnos opterećenja raste (ACWR {{acwr, number}})",
+      "description": "Akutno opterećenje je iznad uobičajenog — sledeća nedelja ide 10% lakše."
+    },
+    "high": {
+      "title": "Skok opterećenja je velik (ACWR {{acwr, number}})",
+      "description": "Rizik od preopterećenja raste — smanji sledeću nedelju 20%."
+    }
+  },
   "fueling": {
     "nextGel": "Sledeći gel: ~{{minutes, number}} min",
     "hydration": {
@@ -228,5 +238,16 @@
       "longDone": "dugi trk ✓",
       "longPlanned": "dugi trk"
     }
+  },
+  "reschedule": {
+    "prompt": "Izgleda da te danas čeka kiša — da pomerim trening?",
+    "reason": "{{pct}}% kiše, {{temp}}°",
+    "shift": {
+      "morning": "Ili pomeri na jutro — {{pct}}% kiše, {{temp}}°.",
+      "evening": "Ili pomeri na veče — {{pct}}% kiše, {{temp}}°."
+    },
+    "indoor": "Ako ostane ovako, odradi trening u zatvorenom.",
+    "dismiss": "Ostavi kako je",
+    "applied": "Trening je premešten — nedelja je preračunata."
   }
 }

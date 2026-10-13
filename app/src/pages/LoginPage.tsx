@@ -38,7 +38,7 @@ export function LoginPage() {
     setServerError(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      setServerError(t(authErrorMessage(error.message)));
+      setServerError(t(authErrorMessage(error.message, error.code)));
       return;
     }
     navigate('/today', { replace: true });

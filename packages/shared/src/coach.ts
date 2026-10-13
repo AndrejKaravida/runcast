@@ -1,4 +1,6 @@
 import { addDays, startOfWeek } from './dates';
+import { loadInsight, trainingLoad } from './srpe';
+import { isRunType } from './types';
 
 export type InsightTone = 'positive' | 'warning' | 'neutral';
 
@@ -41,6 +43,7 @@ export interface CoachLog {
   rpe: number | null;
   log_date: string;
   distance_km: number | null;
+  duration_sec?: number | null;
 }
 
 export interface CoachInput {
@@ -55,7 +58,6 @@ export interface CoachResult {
   recap: WeeklyRecap;
 }
 
-const RUN_TYPES = ['EASY', 'LONG', 'TEMPO', 'INTERVALS', 'REPETITIONS'];
 const MISSED_DAYS = 14;
 const MISSED_MIN = 2;
 const RPE_WINDOW = 5;
@@ -83,7 +85,7 @@ export function clampScaleFactor(factor: number): number {
 }
 
 function isRun(workout: CoachWorkout): boolean {
-  return RUN_TYPES.includes(workout.type);
+  return isRunType(workout.type) && workout.type !== 'RACE';
 }
 
 function recentRpe(logs: CoachLog[], today: string): { avg: number; count: number } {
@@ -228,6 +230,15 @@ export function buildCoachInsights(input: CoachInput): CoachResult {
       actionLabelKey: 'stats:coach.actions.readyToBuild',
       action: action(1.1),
     });
+  }
+
+  const hasScaleAction = insights.some((insight) => insight.action !== undefined);
+  if (!hasScaleAction) {
+    const loadNote = loadInsight(trainingLoad(logs, today));
+    if (loadNote) {
+      const { factor, ...loadInsightFields } = loadNote;
+      insights.push({ ...loadInsightFields, action: action(factor) });
+    }
   }
 
   return { insights: insights.slice(0, MAX_INSIGHTS), recap };

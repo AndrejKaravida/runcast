@@ -10,6 +10,7 @@ import type {
   WorkoutStep,
 } from './types';
 import { addDays, dayDiff, weekdayOf } from './dates';
+import { fmtKm } from './format';
 import { strengthWorkoutsForWeek } from './strength';
 import { formatPace, pacesFromVdot, vdotFromPerformance } from './vdot';
 
@@ -114,10 +115,6 @@ interface WeekBuildParams {
 
 function round1(value: number): number {
   return Math.round(value * 10) / 10;
-}
-
-function fmtKm(value: number): string {
-  return Number.isInteger(value) ? String(value) : value.toFixed(1).replace('.', ',');
 }
 
 function buildLayout(daysPerWeek: number, longRunDay: number, qualityCount: number): Layout {

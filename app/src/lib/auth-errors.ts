@@ -1,4 +1,21 @@
-export function authErrorMessage(message: string): string {
+const CODE_MESSAGES: Record<string, string> = {
+  invalid_credentials: 'errors.invalidCredentials',
+  user_already_exists: 'errors.userExists',
+  email_not_confirmed: 'errors.emailNotConfirmed',
+  weak_password: 'errors.weakPassword',
+  over_email_send_rate_limit: 'errors.tooManyAttempts',
+  same_password: 'errors.passwordUnchanged',
+  signup_disabled: 'errors.signupsDisabled',
+  otp_expired: 'errors.linkInvalid',
+  session_not_found: 'errors.sessionExpired',
+  session_expired: 'errors.sessionExpired',
+};
+
+export function authErrorMessage(message: string, code?: string | null): string {
+  if (code) {
+    const mapped = CODE_MESSAGES[code];
+    if (mapped) return mapped;
+  }
   if (message.includes('Invalid login credentials')) return 'errors.invalidCredentials';
   if (message.includes('Email not confirmed')) return 'errors.emailNotConfirmed';
   if (message.includes('User already registered')) return 'errors.userExists';

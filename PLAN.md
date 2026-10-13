@@ -21,7 +21,7 @@ i predlaže zamenu treninga unutar iste nedelje kada uslovi nisu dobri.
 | 21   | v1.3/R: arhitekturalni review (6 agenata → `docs/review/*`) + sve P0/P1 popravke                                      | ✅     |
 | 22   | v1.3/F: gamifikacija + profil/avatar/rang lista + benchmark recalibracija tempa                                       | ✅     |
 
-Testovi: **193 unit** (shared) + **33 E2E** (Playwright kroz pravi UI) + typecheck/lint/build.
+Testovi: **237 unit** (shared) + **39 E2E** (Playwright kroz pravi UI) + typecheck/lint/build.
 
 ## Struktura
 
@@ -123,6 +123,24 @@ je zatvoren.
 2. **Napomene:** Supabase free projekat se pauzira posle 7 dana bez aktivnosti (keepalive ping je već
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
+
+## v1.4 — notifikacije, smart reschedule, sRPE, P1 sweep
+
+- **Smart weather reschedule**: skorovanje dana/prozora po pravilima, rangirane opcije (swap/shift/
+  indoor), dnevni prompt „Pomeriti trening?" sa najboljom opcijom i alternativama; primena kroz
+  postojeći swap RPC (nedelja ostaje strukturno ista).
+- **Web push**: `push_subscriptions` + `push_config` (VAPID/cron tajna se auto-generišu, bez
+  commited tajni), Settings „Notifikacije" (dozvola, tipovi, test), Edge Function `send-reminders`
+  (sutrašnji trening + vreme + predlog; trka-nedelja), dnevni GitHub cron sa `PUSH_CRON_SECRET`.
+- **PWA**: manifest + ikone, service worker (precache shell, bez keširanja API-ja), offline shell,
+  update prompt; **Apple design faza 2**: klizeći segmented pill, tab indikator, page tranzicije,
+  scroll-edge maska.
+- **sRPE training load**: acute/chronic/ACWR + bendovi, LoadCard na Stats, coach uvid pri
+  preopterećenju (akcija „Olakšaj").
+- **P1 sweep**: RUN_TYPES single source, `parseWorkoutSteps` runtime validacija, `planPaces/planAnchor`
+  helperi (nema više cast-ova), `AppLinkButton` (validan HTML), tihi 0-row update-i sada bacaju
+  grešku, auth-errors po `error.code`, split TodayPage/GuidedRunPage, kalendar `data-testid`,
+  plan-generator test gapovi.
 
 ## v1.3 — lokalizacija, arhitekturalni review, nove feature
 

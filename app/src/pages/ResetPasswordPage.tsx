@@ -39,7 +39,7 @@ export function ResetPasswordPage() {
     setServerError(null);
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
-      setServerError(t(authErrorMessage(error.message)));
+      setServerError(t(authErrorMessage(error.message, error.code)));
       return;
     }
     navigate('/today', { replace: true });

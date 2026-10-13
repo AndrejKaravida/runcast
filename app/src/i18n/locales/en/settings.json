@@ -76,6 +76,26 @@
     "baseConfirmText": "Without a goal time or a race result, the plan has no quality workouts or target paces — you only get easy running. Continue?",
     "baseConfirmAction": "Generate base plan"
   },
+  "push": {
+    "label": "Notifications",
+    "master": "Push notifications",
+    "hint": "A reminder a day before training and a week before the race.",
+    "on": "Enable",
+    "off": "Disable",
+    "enabled": "Notifications are on for this device.",
+    "disabled": "Notifications are off.",
+    "training": "Tomorrow's training",
+    "raceWeek": "Race week",
+    "test": "Send a test notification",
+    "testSent": "Test notification sent.",
+    "testFailed": "Sending failed — please try again.",
+    "unsupported": "This browser doesn't support push notifications.",
+    "denied": "Notification permission was denied. Allow notifications in your browser settings; on iPhone add the app to the Home Screen first.",
+    "unavailable": "Push service unavailable — check your connection and that the app is installed, then try again.",
+    "notConfigured": "Notifications aren't configured on the server yet — try again later.",
+    "saveFailed": "Saving failed — please try again.",
+    "working": "Setting up…"
+  },
   "account": {
     "label": "Account",
     "signOut": "Sign out"

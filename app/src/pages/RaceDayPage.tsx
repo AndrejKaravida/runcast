@@ -10,8 +10,6 @@ import {
   vdotFromPlan,
   type ChecklistGroup,
   type ChecklistItem,
-  type PlanAnchor,
-  type PlanPaces,
   type RunWindow,
 } from '@runcast/shared';
 import { ArrowLeft } from 'lucide-react';
@@ -19,12 +17,14 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
+import { AppLinkButton } from '@/components/ui/AppLinkButton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { QueryError } from '@/components/ui/QueryError';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { StatRow } from '@/components/ui/StatRow';
 import { RaceDayCard } from '@/components/workouts/RaceDayCard';
+import { planAnchor, planPaces } from '@/features/plans/plan-data';
 import { useActivePlan } from '@/features/plans/queries';
 import { useProfile } from '@/features/profile/queries';
 import { useWeather } from '@/features/weather/queries';
@@ -149,12 +149,12 @@ export function RaceDayPage() {
     if (!raceInfo || raceInfo.distance_km <= 0) return null;
     if (raceInfo.goal_time_sec) return raceInfo.goal_time_sec;
     const vdot = vdotFromPlan({
-      paces: (plan?.paces ?? null) as unknown as PlanPaces | null,
-      anchor: (plan?.anchor ?? null) as unknown as PlanAnchor | null,
+      paces: planPaces(plan),
+      anchor: planAnchor(plan),
     });
     if (!vdot) return null;
     return predictRaceTimes(vdot, [raceInfo.distance_km])?.[0]?.timeSec ?? null;
-  }, [raceInfo, plan?.paces, plan?.anchor]);
+  }, [raceInfo, plan]);
 
   const weatherNote = useMemo(() => {
     const withinForecast = daysToRace !== null && daysToRace >= 0 && daysToRace <= FORECAST_HORIZON_DAYS;
@@ -196,9 +196,9 @@ export function RaceDayPage() {
           title={t('empty.title')}
           description={t('empty.description')}
           action={
-            <Link to="/settings">
-              <AppButton size="sm">{t('openSettings')}</AppButton>
-            </Link>
+            <AppLinkButton to="/settings" size="sm">
+              {t('openSettings')}
+            </AppLinkButton>
           }
         />
       </div>

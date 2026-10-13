@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { addDays, dayDiff, weekdayOf } from './dates';
 import { generatePlan } from './plan-generator';
-import type { PlanConfig, VolumeBand, WorkoutDraft } from './types';
+import { isRunType, type PlanConfig, type PlanPhase, type VolumeBand, type WorkoutDraft } from './types';
 
 const QUALITY_TYPES = ['TEMPO', 'INTERVALS', 'REPETITIONS'];
-const RUN_TYPES = ['EASY', 'LONG', 'TEMPO', 'INTERVALS', 'REPETITIONS', 'RACE'];
 
 const fullConfig: PlanConfig = {
   raceDate: '2026-05-10',
@@ -39,6 +38,12 @@ function longKmByWeek(workouts: WorkoutDraft[]): Map<number, number> {
   for (const workout of workouts) {
     if (workout.type === 'LONG') map.set(workout.weekIndex, workout.distanceKm);
   }
+  return map;
+}
+
+function phaseByWeek(workouts: WorkoutDraft[]): Map<number, PlanPhase> {
+  const map = new Map<number, PlanPhase>();
+  for (const workout of workouts) map.set(workout.weekIndex, workout.phase);
   return map;
 }
 
@@ -120,9 +125,7 @@ describe('generatePlan', () => {
   it('respects three runs per week and a shifted long run day', () => {
     const plan = generatePlan({ ...fullConfig, daysPerWeek: 3, longRunDay: 0 });
     for (let week = 0; week < plan.weeks; week++) {
-      const count = plan.workouts.filter(
-        (workout) => workout.weekIndex === week && RUN_TYPES.includes(workout.type),
-      ).length;
+      const count = plan.workouts.filter((workout) => workout.weekIndex === week && isRunType(workout.type)).length;
       expect(count).toBe(3);
     }
     for (const workout of plan.workouts) {
@@ -163,6 +166,91 @@ describe('generatePlan', () => {
     expect(quality.get(0) ?? []).toHaveLength(0);
     expect(quality.get(1) ?? []).toHaveLength(0);
     expect(plan.workouts.filter((workout) => workout.weekIndex === 0 && workout.phase !== 'BASE')).toHaveLength(0);
+  });
+
+  it('holds its structure with six sessions per week over eighteen weeks', () => {
+    const plan = generatePlan({ ...fullConfig, daysPerWeek: 6 });
+    expect(plan.weeks).toBe(18);
+    expect(plan.workouts).toHaveLength(126);
+    const dates = plan.workouts.map((workout) => workout.date);
+    expect(new Set(dates).size).toBe(dates.length);
+    expect(plan.workouts[0].date).toBe('2026-01-05');
+    expect(plan.workouts.at(-1)?.date).toBe('2026-05-10');
+    expect(plan.workouts.at(-1)?.type).toBe('RACE');
+    expect(plan.workouts.filter((workout) => workout.type === 'LONG')).toHaveLength(17);
+    const quality = qualityPerWeek(plan.workouts);
+    for (let week = 0; week < 5; week++) expect(quality.get(week) ?? []).toHaveLength(0);
+    for (let week = 5; week < 15; week++) expect(quality.get(week)).toHaveLength(2);
+    for (let week = 0; week < plan.weeks; week++) {
+      const runs = plan.workouts.filter((workout) => workout.weekIndex === week && isRunType(workout.type));
+      expect(runs).toHaveLength(6);
+      expect(new Set(runs.map((workout) => weekdayOf(workout.date))).size).toBe(6);
+    }
+  });
+
+  it('excludes race distance from race-week volume for marathon and half marathon anchors', () => {
+    for (const volumeBand of ['lt20', '20-40', '40-60', 'gt60'] as const) {
+      const raceWeekKms: number[] = [];
+      for (const distanceKm of [42.195, 21.0975]) {
+        const plan = generatePlan({
+          ...fullConfig,
+          volumeBand,
+          distanceKm,
+          anchor: { kind: 'goal', distanceKm, timeSec: 13500 },
+        });
+        const weeks = weekKms(plan.workouts);
+        const raceWeekKm = weeks.at(-1) ?? 0;
+        expect(raceWeekKm).toBeGreaterThan(0);
+        expect(raceWeekKm).toBeLessThanOrEqual((weeks.at(-2) ?? 0) * 0.5);
+        raceWeekKms.push(raceWeekKm);
+      }
+      expect(raceWeekKms[0]).toBe(raceWeekKms[1]);
+    }
+  });
+
+  it('uses the twelve-week template at the twelve-week boundary', () => {
+    const plan = generatePlan({ ...fullConfig, raceDate: '2026-03-29' });
+    expect(plan.weeks).toBe(12);
+    expect(plan.workouts).toHaveLength(84);
+    const phases = phaseByWeek(plan.workouts);
+    expect(phases.get(0)).toBe('BASE');
+    expect(phases.get(1)).toBe('BASE');
+    expect(phases.get(2)).toBe('BUILD');
+    expect(phases.get(6)).toBe('BUILD');
+    expect(phases.get(7)).toBe('PEAK');
+    expect(phases.get(8)).toBe('PEAK');
+    expect(phases.get(9)).toBe('TAPER');
+    expect(phases.get(10)).toBe('TAPER');
+    const quality = qualityPerWeek(plan.workouts);
+    expect(quality.get(1) ?? []).toHaveLength(0);
+    for (let week = 2; week <= 8; week++) expect(quality.get(week)).toHaveLength(2);
+  });
+
+  it('adds an extra base week at the thirteen-week boundary', () => {
+    const plan = generatePlan({ ...fullConfig, raceDate: '2026-04-05' });
+    expect(plan.weeks).toBe(13);
+    expect(plan.workouts).toHaveLength(91);
+    const phases = phaseByWeek(plan.workouts);
+    expect(phases.get(0)).toBe('BASE');
+    expect(phases.get(2)).toBe('BASE');
+    expect(phases.get(3)).toBe('BUILD');
+    expect(phases.get(7)).toBe('BUILD');
+    expect(phases.get(8)).toBe('PEAK');
+    expect(phases.get(9)).toBe('PEAK');
+    expect(phases.get(10)).toBe('TAPER');
+    expect(phases.get(11)).toBe('TAPER');
+    const quality = qualityPerWeek(plan.workouts);
+    for (let week = 0; week < 3; week++) expect(quality.get(week) ?? []).toHaveLength(0);
+    for (let week = 3; week <= 9; week++) expect(quality.get(week)).toHaveLength(2);
+  });
+
+  it('keeps the anchor and paces in a nine-week base plan', () => {
+    const plan = generatePlan({ ...fullConfig, raceDate: '2026-03-08' });
+    expect(plan.weeks).toBe(9);
+    expect(plan.anchor).not.toBeNull();
+    expect(plan.paces).not.toBeNull();
+    expect(plan.workouts.some((workout) => QUALITY_TYPES.includes(workout.type))).toBe(false);
+    expect(plan.workouts.at(-1)?.type).toBe('RACE');
   });
 });
 

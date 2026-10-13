@@ -63,7 +63,26 @@ export async function completeOnboarding(page: Page) {
   await page.waitForURL('**/today');
 }
 
-export function rainFixture() {
+interface ForecastOverrides {
+  temperature?: number;
+  apparent?: number;
+  probability?: number;
+  precipitation?: number;
+  weatherCode?: number;
+  wind?: number;
+  gusts?: number;
+}
+
+function forecastFixture(overrides: ForecastOverrides = {}) {
+  const {
+    temperature: temperatureValue = 12,
+    apparent: apparentValue = 11,
+    probability: probabilityValue = 90,
+    precipitation: precipitationValue = 3,
+    weatherCode: weatherCodeValue = 61,
+    wind: windValue = 10,
+    gusts: gustsValue = 20,
+  } = overrides;
   const times: string[] = [];
   const temperature: number[] = [];
   const apparent: number[] = [];
@@ -77,13 +96,13 @@ export function rainFixture() {
     for (let hour = 0; hour < 24; hour++) {
       const stamp = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + day, hour));
       times.push(stamp.toISOString().slice(0, 16));
-      temperature.push(12);
-      apparent.push(11);
-      probability.push(90);
-      precipitation.push(3);
-      code.push(61);
-      wind.push(10);
-      gusts.push(20);
+      temperature.push(temperatureValue);
+      apparent.push(apparentValue);
+      probability.push(probabilityValue);
+      precipitation.push(precipitationValue);
+      code.push(weatherCodeValue);
+      wind.push(windValue);
+      gusts.push(gustsValue);
     }
   }
   return {
@@ -98,6 +117,22 @@ export function rainFixture() {
       wind_gusts_10m: gusts,
     },
   };
+}
+
+export function rainFixture() {
+  return forecastFixture();
+}
+
+export function lightRainFixture() {
+  return forecastFixture({
+    temperature: 18,
+    apparent: 18,
+    probability: 20,
+    precipitation: 0.1,
+    weatherCode: 3,
+    wind: 8,
+    gusts: 15,
+  });
 }
 
 export async function assertNoHorizontalOverflow(page: Page, label: string) {

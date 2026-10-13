@@ -5,6 +5,7 @@ import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, XCircle } from '
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppButton } from '@/components/ui/AppButton';
+import { AppLinkButton } from '@/components/ui/AppLinkButton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { QueryError } from '@/components/ui/QueryError';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -106,7 +107,12 @@ export function PlanPage() {
   const gridStart = startOfWeekIso(monthAnchor);
   const gridEnd = endOfWeekIso(lastDayOfMonth(monthAnchor));
   const { data: plan, isLoading: planLoading, isError: planError, refetch } = useActivePlan();
-  const { data: monthWorkouts = [], isLoading: monthLoading } = useWorkoutsRange(gridStart, gridEnd);
+  const {
+    data: monthWorkouts = [],
+    isLoading: monthLoading,
+    isError: monthError,
+    refetch: refetchMonth,
+  } = useWorkoutsRange(gridStart, gridEnd);
 
   const weeks: string[][] = [];
   for (let cursor = gridStart; cursor <= gridEnd; cursor = addDaysIso(cursor, 7)) {
@@ -138,9 +144,9 @@ export function PlanPage() {
         description={t('empty.description')}
         icon={<CalendarDays className="h-6 w-6" />}
         action={
-          <Link to="/settings">
-            <AppButton size="sm">{t('empty.action')}</AppButton>
-          </Link>
+          <AppLinkButton to="/settings" size="sm">
+            {t('empty.action')}
+          </AppLinkButton>
         }
       />
     );
@@ -221,47 +227,63 @@ export function PlanPage() {
           ))}
         </div>
         <div className="space-y-1">
-          {weeks.map((week) => (
-            <div key={week[0]} className="grid grid-cols-7 gap-1">
-              {week.map((date) => {
-                const workout = monthWorkouts.find((item) => item.workout_date === date);
-                const inMonth = date.slice(0, 7) === month;
-                const isToday = date === today;
-                const cell = (
-                  <div
-                    className={clsx(
-                      'flex h-10 flex-col items-center justify-center gap-0.5 rounded-lg',
-                      isToday
-                        ? 'bg-primary-soft ring-1 ring-inset ring-primary/60'
-                        : workout
-                          ? 'bg-surface-elevated'
-                          : 'bg-transparent',
-                      inMonth ? '' : 'opacity-40',
-                    )}
-                  >
-                    <span
+          {monthError ? (
+            <QueryError onRetry={() => void refetchMonth()} />
+          ) : (
+            weeks.map((week) => (
+              <div key={week[0]} className="grid grid-cols-7 gap-1">
+                {week.map((date) => {
+                  const workout = monthWorkouts.find((item) => item.workout_date === date);
+                  const inMonth = date.slice(0, 7) === month;
+                  const isToday = date === today;
+                  const cellAttrs = {
+                    'data-testid': 'cal-cell',
+                    'data-date': date,
+                    'data-type': workout?.type ?? '',
+                  };
+                  const cell = (
+                    <div
                       className={clsx(
-                        'num text-xs',
-                        isToday ? 'font-bold text-primary-ink' : 'font-medium text-text-secondary',
+                        'flex h-10 flex-col items-center justify-center gap-0.5 rounded-lg',
+                        isToday
+                          ? 'bg-primary-soft ring-1 ring-inset ring-primary/60'
+                          : workout
+                            ? 'bg-surface-elevated'
+                            : 'bg-transparent',
+                        inMonth ? '' : 'opacity-40',
                       )}
                     >
-                      {Number(date.slice(8, 10))}
-                    </span>
-                    <span
-                      className={clsx('h-1.5 w-1.5 rounded-full', workout ? dotClass(workout) : 'bg-transparent')}
-                    />
-                  </div>
-                );
-                return workout ? (
-                  <Link key={date} to={`/workout/${workout.id}`} aria-label={`${date}: ${workoutTitle(t, workout)}`}>
-                    {cell}
-                  </Link>
-                ) : (
-                  <div key={date}>{cell}</div>
-                );
-              })}
-            </div>
-          ))}
+                      <span
+                        className={clsx(
+                          'num text-xs',
+                          isToday ? 'font-bold text-primary-ink' : 'font-medium text-text-secondary',
+                        )}
+                      >
+                        {Number(date.slice(8, 10))}
+                      </span>
+                      <span
+                        className={clsx('h-1.5 w-1.5 rounded-full', workout ? dotClass(workout) : 'bg-transparent')}
+                      />
+                    </div>
+                  );
+                  return workout ? (
+                    <Link
+                      key={date}
+                      to={`/workout/${workout.id}`}
+                      aria-label={`${date}: ${workoutTitle(t, workout)}`}
+                      {...cellAttrs}
+                    >
+                      {cell}
+                    </Link>
+                  ) : (
+                    <div key={date} {...cellAttrs}>
+                      {cell}
+                    </div>
+                  );
+                })}
+              </div>
+            ))
+          )}
         </div>
       </div>
 

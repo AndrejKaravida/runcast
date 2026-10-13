@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BENCHMARK_DISTANCES_KM, formatDuration, parseTimeToSeconds, type PlanPaces } from '@runcast/shared';
+import { BENCHMARK_DISTANCES_KM, formatDuration, parseTimeToSeconds } from '@runcast/shared';
 import { ArrowLeft, Play } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -11,6 +11,7 @@ import { AppInput } from '@/components/ui/AppInput';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { useSaveBenchmarkLog } from '@/features/logs/queries';
+import { planPaces } from '@/features/plans/plan-data';
 import { useActivePlan } from '@/features/plans/queries';
 import { dayDiff, todayIso } from '@/lib/dates';
 
@@ -31,7 +32,7 @@ export function BenchmarkPage() {
   const [result, setResult] = useState<{ distanceKm: number; timeSec: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const paces = (plan?.paces as unknown as PlanPaces | null) ?? null;
+  const paces = planPaces(plan);
   const daysToRace = plan ? dayDiff(todayIso(), plan.race_date) : null;
 
   function handleStart() {
