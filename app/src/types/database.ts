@@ -419,6 +419,7 @@ export type Database = {
         };
         Returns: string;
       };
+      delete_my_account: { Args: Record<PropertyKey, never>; Returns: undefined };
       get_push_public_key: { Args: Record<PropertyKey, never>; Returns: string };
       log_workout: {
         Args: {

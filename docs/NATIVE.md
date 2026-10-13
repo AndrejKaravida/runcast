@@ -85,3 +85,14 @@ troškova.
 - `local.properties` (putanja do Android SDK) je lokalna i nije u repou
 - Health integracije (Apple Health, Health Connect, Xiaomi preko Mi Fitness) rade preko
   `@capgo/capacitor-health`; statusi i uvoz su u podešavanjima, sekcija „Integracije"
+
+## App Store: privatnost (privacy labels)
+
+- Privacy manifest `app/ios/App/App/PrivacyInfo.xcprivacy` je u repou i Xcode ga pakuje u bundle
+  (`App.app/PrivacyInfo.xcprivacy`, provereno build-om za simulator).
+- App Store Connect → App Privacy: prijaviti **Email Address, Name, Health & Fitness, User ID** —
+  svuda „Linked to you" i „Not used for tracking".
+- Zdravstveni podaci se koriste isključivo za funkcionalnost aplikacije (uvoz trčanja); nikad se ne
+  dele sa trećim stranama niti koriste za reklamiranje.
+- `Info.plist` sadrži `ITSAppUsesNonExemptEncryption = false` (samo HTTPS), pa se pitanje o izvoznom
+  compliance-u ne postavlja pri svakoj predaji.

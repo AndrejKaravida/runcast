@@ -114,7 +114,9 @@
     "install": "Install Health Connect",
     "xiaomiIos": "Xiaomi: Mi Fitness → Profile → Third-party data → Health (enable cloud sync).",
     "xiaomiAndroid": "Xiaomi: Mi Fitness/Zepp Life → Third-party data → Google Fit, then Google Fit → Sync with Health Connect.",
-    "privacy": "Data stays on your phone. RunCast stores only the date, distance and duration of a run."
+    "privacy": "Data stays on your phone. RunCast stores only the date, distance and duration of a run.",
+    "consent": "Importing is voluntary and started by you. Imported runs stay linked to your account.",
+    "consentLink": "Privacy Policy"
   },
   "push": {
     "label": "Notifications",
@@ -163,6 +165,28 @@
   },
   "account": {
     "label": "Account",
+    "emailHint": "Your email is used for sign in and is never shown to others.",
+    "legalGroup": "Legal",
+    "dataGroup": "Data",
+    "exportButton": "Download my data",
+    "exportHint": "You get a JSON file with your profile, plan, workouts, run log and gear.",
+    "exportDone": "Your data has been downloaded.",
+    "exportFailed": "Download failed. Please try again.",
+    "deleteTitle": "Delete account",
+    "deleteWarning": "Deleting your account permanently removes:",
+    "deleteList": {
+      "profile": "profile",
+      "plan": "plan and workouts",
+      "logs": "run log",
+      "shoes": "shoes",
+      "avatar": "avatar",
+      "notifications": "notifications"
+    },
+    "deleteIrreversible": "This action cannot be undone. Your account and all data are deleted right away.",
+    "deleteButton": "Delete account",
+    "deleteConfirmLabel": "DELETE",
+    "deleteConfirmHint": "Type DELETE to confirm.",
+    "deleteFailed": "Delete failed. Please try again.",
     "signOut": "Sign out"
   },
   "cancel": "Cancel",

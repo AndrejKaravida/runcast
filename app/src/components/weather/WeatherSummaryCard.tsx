@@ -8,6 +8,8 @@ import type { WeatherData } from '@/features/weather/queries';
 import { weatherIcon } from '@/components/weather/weather-utils';
 import { localeForLanguage } from '@/i18n';
 
+const OPEN_METEO_URL = 'https://open-meteo.com';
+
 interface WeatherSummaryCardProps {
   data: WeatherData | undefined;
   isError: boolean;
@@ -125,7 +127,9 @@ export function WeatherSummaryCard({
             <p className="mt-2 text-caption text-text-muted">
               {updatedText}
               {updatedText ? ' · ' : ''}
-              {t('weather.source')}
+              <a href={OPEN_METEO_URL} target="_blank" rel="noopener noreferrer" className="hover:text-text-secondary">
+                {t('weather.source')}
+              </a>
             </p>
           </div>
         ) : null}
@@ -155,7 +159,9 @@ export function WeatherSummaryCard({
       <p className="num mt-2 text-caption text-text-muted">
         {updatedText}
         {updatedText ? ' · ' : ''}
-        {t('weather.source')}
+        <a href={OPEN_METEO_URL} target="_blank" rel="noopener noreferrer" className="hover:text-text-secondary">
+          {t('weather.source')}
+        </a>
       </p>
     </AppCard>
   );

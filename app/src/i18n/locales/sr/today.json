@@ -52,7 +52,8 @@
   "weather": {
     "best": "Najbolji termin danas: {{from}}–{{to}}h · skor {{score}}",
     "earlier": "Predlog: trči pre {{hour}}h",
-    "conditions": "{{pct}}% kiše · vetar {{wind}} km/h"
+    "conditions": "{{pct}}% kiše · vetar {{wind}} km/h",
+    "attribution": "Podaci:"
   },
   "rangeError": "Deo plana nije učitan."
 }

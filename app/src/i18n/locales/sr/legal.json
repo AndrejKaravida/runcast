@@ -1,0 +1,175 @@
+{
+  "privacyTitle": "Politika privatnosti",
+  "termsTitle": "Uslovi korišćenja",
+  "version": "Verzija {{version}}",
+  "backToLogin": "Nazad na prijavu",
+  "backToApp": "Nazad u aplikaciju",
+  "privacy": {
+    "sections": [
+      {
+        "heading": "Ko smo mi i kako nas kontaktirati",
+        "paragraphs": [
+          "RunCast je aplikacija za pripremu maratona i polumaratona. Vodi je samostalni programer iz Srbije, kao rukovalac podacima u smislu Zakona o zaštiti podataka o ličnosti.",
+          "Za pitanja o privatnosti, pristup podacima ili brisanje naloga piši na support@runcast.app. Odgovaramo najkasnije u roku od 30 dana."
+        ]
+      },
+      {
+        "heading": "Koje podatke prikupljamo i zašto",
+        "paragraphs": [
+          "Podaci naloga: email adresa, ime ili nadimak i avatar ako ga izabereš. Služe za prijavu, prikaz u aplikaciji i, ako uključiš javni profil, prikaz na nedeljnoj rang listi.",
+          "Podaci za plan i prognozu: grad i koordinate, željeni deo dana za trening, ciljna trka, ciljno vreme, generisani plan i treninzi. Koristimo ih da napravimo plan i prilagodimo ga vremenskim uslovima.",
+          "Podaci o trčanju: zapisi o treninzima, distanca, trajanje, tempo, osećaj napora, napomene, patike i dostignuća. Služe za praćenje napretka i statistiku.",
+          "Telesni podaci (visina, težina, godina rođenja i pol) su opcioni i koriste se isključivo za proračune u planu.",
+          "Ako uključiš obaveštenja, čuvamo tehnički endpoint za push i podatke potrebne za slanje. Bez tvoje dozvole ne šaljemo obaveštenja.",
+          "Ne koristimo podatke za oglašavanje i ne prodajemo ih."
+        ]
+      },
+      {
+        "heading": "Pravni osnovi obrade",
+        "paragraphs": [
+          "Podatke obrađujemo radi izvršenja ugovora (nalog i usluga treninga), po zakonskim obavezama, na osnovu legitimnog interesa (bezbednost, sprečavanje zloupotreba i tehničko održavanje) i uz izričitu saglasnost za posebne kategorije podataka.",
+          "Zdravstvene i telesne podatke obrađujemo samo uz tvoju izričitu saglasnost, koju daješ dobrovoljnim unosom ili uvozom. Saglasnost možeš povući u svakom trenutku brisanjem tih podataka ili naloga."
+        ]
+      },
+      {
+        "heading": "Zdravstveni podaci",
+        "paragraphs": [
+          "Uvoz iz Apple Health ili Health Connect je dobrovoljan i pokrećeš ga sam. Uvoze se trčanja (datum, distanca i trajanje) i koristimo ih samo za istoriju treninga i statistiku u aplikaciji.",
+          "Zdravstvene podatke nikada ne koristimo za oglašavanje, ne prodajemo ih i ne delimo sa trećim licima. Brisanjem uvezenih trčanja ili naloga brišemo i te podatke.",
+          "Telesne podatke koje uneseš ručno možeš izmeniti ili obrisati u profilu u svakom trenutku."
+        ]
+      },
+      {
+        "heading": "Pružaoci usluga sa kojima delimo podatke",
+        "paragraphs": [
+          "Supabase: autentifikacija, baza podataka, čuvanje fajlova i transakcioni email.",
+          "Cloudflare: hosting i distribucija sadržaja (CDN).",
+          "Open-Meteo: vremenska prognoza i geokodiranje. Prima koordinate ili upit za mesto, bez podataka o nalogu.",
+          "Push servisi pregledača (FCM ili APNs preko proizvođača pregledača): samo ako uključiš obaveštenja.",
+          "Ne koristimo analitiku, oglašavanje, prodaju podataka niti alate veštačke inteligencije trećih lica."
+        ]
+      },
+      {
+        "heading": "Kolačići i lokalno skladište",
+        "paragraphs": [
+          "RunCast ne koristi kolačiće za praćenje. U lokalnom skladištu pregledača (localStorage) čuvamo samo temu, izabrani jezik, uključenost podsetnika za gorivo i vreme poslednjeg uvoza iz zdravstvenih aplikacija.",
+          "Ti podaci ostaju na tvom uređaju i ne šalju se nama. Brisanjem podataka pregledača brišeš ih."
+        ]
+      },
+      {
+        "heading": "Čuvanje podataka i brisanje naloga",
+        "id": "brisanje-naloga",
+        "paragraphs": [
+          "Podatke čuvamo dok je nalog aktivan. Posle brisanja naloga podaci se uklanjaju iz aktivnih sistema u roku od 30 dana, a iz rezervnih kopija najkasnije u roku od 90 dana.",
+          "Nalog možeš obrisati u aplikaciji: Podešavanja → Nalog → Obriši nalog. Time se brišu nalog i prateći podaci, uključujući uvezena trčanja.",
+          "Brisanje možeš zatražiti i emailom na support@runcast.app sa adrese kojom si registrovan. Zahtev obrađujemo najkasnije u roku od 30 dana."
+        ]
+      },
+      {
+        "heading": "Tvoja prava",
+        "paragraphs": [
+          "Imaš pravo na pristup, izvoz (prenosivost), ispravku i brisanje podataka, kao i na ograničenje obrade i prigovor. Zahtev pošalji na support@runcast.app, a mi odgovaramo najkasnije u roku od 30 dana.",
+          "Ako smatraš da podatke obrađujemo suprotno zakonu, možeš se obratiti Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti."
+        ]
+      },
+      {
+        "heading": "Deca mlađa od 16 godina",
+        "paragraphs": [
+          "RunCast je namenjen osobama od 16 godina i starijim. Ne prikupljamo svesno podatke mlađih od 16 godina. Ako saznamo da je takav nalog napravljen, obrisaćemo ga."
+        ]
+      },
+      {
+        "heading": "Bezbednost",
+        "paragraphs": [
+          "Podaci se prenose zaštićenom vezom (HTTPS), a pristup im je ograničen i na nivou redova u bazi. Lozinku čuva i obrađuje Supabase Auth i nikada je ne vidimo."
+        ]
+      },
+      {
+        "heading": "Izmene politike",
+        "paragraphs": [
+          "Politiku možemo povremeno izmeniti. Nova verzija stupa na snagu danom objavljivanja i uvek je označena datumom na vrhu strane. O bitnim izmenama obavestićemo te u aplikaciji.",
+          "Ako se ne slažeš sa izmenama, možeš obrisati nalog."
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "sections": [
+      {
+        "heading": "Čemu služi RunCast",
+        "paragraphs": [
+          "RunCast je aplikacija za pripremu maratona, polumaratona i kraćih trka. Pravi plan treninga na osnovu tvojih ciljeva i forme, predlaže zamene treninga prema vremenskoj prognozi i vodi te kroz treninge, statistiku i pripremu za dan trke.",
+          "Usluga je dostupna kao veb aplikacija i kao mobilna aplikacija za Android i iOS."
+        ]
+      },
+      {
+        "heading": "Pravila naloga",
+        "paragraphs": [
+          "RunCast možeš koristiti ako imaš 16 godina ili više. Navedi tačne podatke i održavaj ih ažurnim.",
+          "Nalog je lični. Čuvaj lozinku i ne deli pristup drugima. Odgovoran si za sve radnje preduzete preko svog naloga.",
+          "Ako posumnjaš da je neko preuzeo tvoj nalog, odmah promeni lozinku i piši nam na support@runcast.app."
+        ]
+      },
+      {
+        "heading": "Prihvatljivo korišćenje",
+        "paragraphs": [
+          "Aplikaciju možeš koristiti samo u dozvoljene svrhe. Zabranjeni su pokušaji pristupa tuđim nalozima, ometanje rada usluge, automatizovano prikupljanje podataka, obrnuti inženjering (osim ako je izričito dozvoljen zakonom) i svaki oblik zloupotrebe.",
+          "Zabranjeno je uneti uvredljiv, nezakonit ili obmanjujući sadržaj, lažna trčanja na rang listi i predstavljanje kao druga osoba. Sadržaj koji krši pravila možemo ukloniti, a nalog privremeno obustaviti ili trajno zatvoriti."
+        ]
+      },
+      {
+        "heading": "Zdravlje i bezbednost",
+        "paragraphs": [
+          "RunCast nije medicinski savet i ne zamenjuje razgovor sa lekarom. Pre početka programa treninga, posebno ako imaš zdravstvenih tegoba ili povrede, posavetuj se sa lekarom.",
+          "Trčanje i trening nose rizik od povreda. Slušaj svoje telo i prekini trening ako osetiš bol, vrtoglavicu, bol u grudima, gubitak daha ili druge znake upozorenja, i potraži lekarsku pomoć.",
+          "Vremenski uslovi (vrućina, hladnoća i oluje) dodatno povećavaju rizik. Proceni uslove i po potrebi skrati, odloži ili preskoči trening. Trčanje je tvoja odluka i tvoj rizik."
+        ]
+      },
+      {
+        "heading": "Tačnost vremenske prognoze",
+        "paragraphs": [
+          "Prognoza i geokodiranje dolaze od servisa Open-Meteo. Ne garanujemo da su podaci tačni, potpuni ili pravovremeni, niti da su predlozi treninga zasnovani na vremenu odgovarajući za tvoje uslove.",
+          "Pre treninga proveri stvarne uslove na terenu i prilagodi plan sebi."
+        ]
+      },
+      {
+        "heading": "Tvoj sadržaj i intelektualna svojina",
+        "paragraphs": [
+          "Sadržaj koji uneseš (napomene, avatar i slično) ostaje tvoj. Daješ nam ograničenu dozvolu da ga čuvamo, obrađujemo i prikazujemo u okviru usluge, na primer da prikažemo ime i avatar na rang listi ako uključiš javni profil.",
+          "Ime RunCast, logo, dizajn i kod aplikacije pripadaju nama. Bez dozvole ne smeš ih kopirati, menjati niti distribuirati."
+        ]
+      },
+      {
+        "heading": "Dostupnost usluge",
+        "paragraphs": [
+          "Usluga se pruža takva kakva jeste i u skladu sa raspoloživošću. Ne garanujemo neprekidan i bezgrešan rad, niti određene rezultate na treningu ili trci.",
+          "Rad možemo privremeno prekinuti zbog održavanja, mrežnih problema ili radova kod pružalaca usluga. Zakonska prava koja se ne mogu isključiti ostaju na snazi."
+        ]
+      },
+      {
+        "heading": "Obustava i prestanak",
+        "paragraphs": [
+          "Nalog možemo privremeno obustaviti ili zatvoriti ako se krše ovi uslovi ili ako je to potrebno radi zaštite korisnika i usluge.",
+          "Ako želiš da prekineš korišćenje, obriši nalog u aplikaciji ili nam piši na support@runcast.app. Obaveze koje po svojoj prirodi traju i posle prestanka (intelektualna svojina i odgovornost) ostaju na snazi."
+        ]
+      },
+      {
+        "heading": "Ograničenje odgovornosti",
+        "paragraphs": [
+          "U meri u kojoj zakon dozvoljava, ne odgovaramo za posrednu i neposrednu štetu nastalu zbog treninga, povreda, izgubljenih podataka ili odluka donetih na osnovu plana i prognoze.",
+          "Ovo ne isključuje odgovornost koja se po zakonu ne može isključiti, kao ni prava koja imaš kao potrošač."
+        ]
+      },
+      {
+        "heading": "Primenjivo pravo",
+        "paragraphs": [
+          "Na ove uslove primenjuje se pravo Republike Srbije. Za sporove je nadležan sud u Republici Srbiji, osim ako te obavezni propisi o zaštiti potrošača štite drugačije."
+        ]
+      },
+      {
+        "heading": "Kontakt",
+        "paragraphs": ["Za sva pitanja o uslovima piši na support@runcast.app."]
+      }
+    ]
+  }
+}

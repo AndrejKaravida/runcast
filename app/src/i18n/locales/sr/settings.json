@@ -114,7 +114,9 @@
     "install": "Instaliraj Health Connect",
     "xiaomiIos": "Xiaomi: Mi Fitness → Profile → Third-party data → Health (uključi cloud sync).",
     "xiaomiAndroid": "Xiaomi: Mi Fitness/Zepp Life → Third-party data → Google Fit, pa Google Fit → Sync with Health Connect.",
-    "privacy": "Podaci ostaju na telefonu. RunCast upisuje samo datum, distancu i trajanje trčanja."
+    "privacy": "Podaci ostaju na telefonu. RunCast upisuje samo datum, distancu i trajanje trčanja.",
+    "consent": "Uvoz je dobrovoljan i pokrećeš ga sam. Uvezena trčanja ostaju vezana za tvoj nalog.",
+    "consentLink": "Politika privatnosti"
   },
   "push": {
     "label": "Notifikacije",
@@ -163,6 +165,28 @@
   },
   "account": {
     "label": "Nalog",
+    "emailHint": "Email se koristi za prijavu i nikada se ne prikazuje drugima.",
+    "legalGroup": "Pravno",
+    "dataGroup": "Podaci",
+    "exportButton": "Preuzmi moje podatke",
+    "exportHint": "Preuzimaš JSON fajl sa profilom, planom, treninzima, dnevnikom trčanja i opremom.",
+    "exportDone": "Podaci su preuzeti.",
+    "exportFailed": "Preuzimanje nije uspelo. Probaj ponovo.",
+    "deleteTitle": "Obriši nalog",
+    "deleteWarning": "Brisanjem naloga trajno se brišu:",
+    "deleteList": {
+      "profile": "profil",
+      "plan": "plan i treninzi",
+      "logs": "dnevnik trčanja",
+      "shoes": "patike",
+      "avatar": "avatar",
+      "notifications": "notifikacije"
+    },
+    "deleteIrreversible": "Ova radnja je nepovratna. Nalog i svi podaci se brišu odmah.",
+    "deleteButton": "Obriši nalog",
+    "deleteConfirmLabel": "OBRIŠI",
+    "deleteConfirmHint": "Upiši OBRIŠI da potvrdiš brisanje.",
+    "deleteFailed": "Brisanje nije uspelo. Probaj ponovo.",
     "signOut": "Odjavi se"
   },
   "cancel": "Otkaži",

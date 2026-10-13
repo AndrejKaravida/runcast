@@ -1,0 +1,13 @@
+{
+  "label": "Pravno",
+  "title": "Licence otvorenog koda",
+  "intro": "RunCast koristi sledeće biblioteke otvorenog koda...",
+  "sources": {
+    "title": "Izvori podataka",
+    "attribution": "Podaci o vremenu i geokodiranje:",
+    "license": "CC BY 4.0"
+  },
+  "libraries": {
+    "title": "Biblioteke"
+  }
+}

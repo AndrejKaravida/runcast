@@ -19,6 +19,18 @@ export const router = createBrowserRouter([
     lazy: async () => ({ Component: (await import('@/pages/ResetPasswordPage')).ResetPasswordPage }),
   },
   {
+    path: '/licenses',
+    lazy: async () => ({ Component: (await import('@/pages/LicensesPage')).LicensesPage }),
+  },
+  {
+    path: '/privacy',
+    lazy: async () => ({ Component: (await import('@/pages/PrivacyPage')).PrivacyPage }),
+  },
+  {
+    path: '/terms',
+    lazy: async () => ({ Component: (await import('@/pages/TermsPage')).TermsPage }),
+  },
+  {
     element: <RequireAuth />,
     children: [
       {
@@ -59,6 +71,10 @@ export const router = createBrowserRouter([
               {
                 path: '/settings/gear',
                 lazy: async () => ({ Component: (await import('@/pages/SettingsGearPage')).SettingsGearPage }),
+              },
+              {
+                path: '/settings/account',
+                lazy: async () => ({ Component: (await import('@/pages/SettingsAccountPage')).SettingsAccountPage }),
               },
             ],
           },

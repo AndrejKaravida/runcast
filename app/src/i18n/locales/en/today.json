@@ -52,7 +52,8 @@
   "weather": {
     "best": "Best window today: {{from}}–{{to}}h · score {{score}}",
     "earlier": "Suggestion: run before {{hour}}h",
-    "conditions": "{{pct}}% rain · wind {{wind}} km/h"
+    "conditions": "{{pct}}% rain · wind {{wind}} km/h",
+    "attribution": "Data:"
   },
   "rangeError": "Part of the plan didn't load."
 }

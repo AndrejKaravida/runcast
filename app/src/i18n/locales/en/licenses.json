@@ -1,0 +1,13 @@
+{
+  "label": "Legal",
+  "title": "Open source licenses",
+  "intro": "RunCast uses the following open source libraries...",
+  "sources": {
+    "title": "Data sources",
+    "attribution": "Weather and geocoding data:",
+    "license": "CC BY 4.0"
+  },
+  "libraries": {
+    "title": "Libraries"
+  }
+}

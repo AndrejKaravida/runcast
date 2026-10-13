@@ -1,0 +1,175 @@
+{
+  "privacyTitle": "Privacy Policy",
+  "termsTitle": "Terms of Use",
+  "version": "Version {{version}}",
+  "backToLogin": "Back to sign in",
+  "backToApp": "Back to the app",
+  "privacy": {
+    "sections": [
+      {
+        "heading": "Who we are and how to contact us",
+        "paragraphs": [
+          "RunCast is a marathon and half-marathon training app. It is run by an individual developer based in Serbia, acting as the data controller under the Serbian Law on Personal Data Protection.",
+          "For questions about privacy, access to your data or account deletion, email support@runcast.app. We reply within 30 days at the latest."
+        ]
+      },
+      {
+        "heading": "What data we collect and why",
+        "paragraphs": [
+          "Account data: email address, display name and avatar if you choose one. This is used for sign-in, display in the app and, if you enable the public profile, display on the weekly leaderboard.",
+          "Plan and forecast data: city and coordinates, preferred time of day for training, goal race, goal time, generated plan and workouts. We use it to build your plan and adapt it to weather conditions.",
+          "Run data: workout records, distance, duration, pace, rate of perceived exertion, notes, shoes and achievements. This is used for progress tracking and statistics.",
+          "Body data (height, weight, birth year and sex) is optional and used only for plan calculations.",
+          "If you enable notifications, we store a technical push endpoint and the data needed to send them. We never send notifications without your permission.",
+          "We do not use your data for advertising and we do not sell it."
+        ]
+      },
+      {
+        "heading": "Legal bases for processing",
+        "paragraphs": [
+          "We process data to perform our contract with you (your account and the training service), to meet legal obligations, on the basis of legitimate interest (security, abuse prevention and technical maintenance) and with your explicit consent for special categories of data.",
+          "We process health and body data only with your explicit consent, given through voluntary entry or import. You can withdraw consent at any time by deleting that data or your account."
+        ]
+      },
+      {
+        "heading": "Health data",
+        "paragraphs": [
+          "Import from Apple Health or Health Connect is voluntary and started by you. We import runs (date, distance and duration) and use them only for training history and statistics in the app.",
+          "We never use health data for advertising, we never sell it and we never share it with third parties. Deleting imported runs or your account deletes that data as well.",
+          "Body data you enter manually can be changed or deleted in your profile at any time."
+        ]
+      },
+      {
+        "heading": "Processors we share data with",
+        "paragraphs": [
+          "Supabase: authentication, database, file storage and transactional email.",
+          "Cloudflare: hosting and content delivery (CDN).",
+          "Open-Meteo: weather forecast and geocoding. It receives coordinates or a place query, with no account data.",
+          "Browser push services (FCM or APNs through the browser vendor): only if you enable notifications.",
+          "We do not use analytics, advertising, data sales or third-party artificial intelligence tools."
+        ]
+      },
+      {
+        "heading": "Cookies and local storage",
+        "paragraphs": [
+          "RunCast does not use tracking cookies. In browser local storage we keep only your theme, chosen language, fueling reminder toggle and the time of the last health import.",
+          "That data stays on your device and is not sent to us. Clearing your browser data clears it."
+        ]
+      },
+      {
+        "heading": "Retention and account deletion",
+        "id": "brisanje-naloga",
+        "paragraphs": [
+          "We keep your data while your account is active. After account deletion, data is removed from active systems within 30 days and from backups within 90 days at the latest.",
+          "You can delete your account in the app: Settings → Account → Delete account. This deletes your account and related data, including imported runs.",
+          "You can also request deletion by email at support@runcast.app from the address you registered with. We handle requests within 30 days at the latest."
+        ]
+      },
+      {
+        "heading": "Your rights",
+        "paragraphs": [
+          "You have the right to access, export (portability), rectification and erasure of your data, as well as restriction of processing and objection. Send a request to support@runcast.app and we will reply within 30 days at the latest.",
+          "If you believe we process your data unlawfully, you can lodge a complaint with the Commissioner for Information of Public Importance and Personal Data Protection in Serbia."
+        ]
+      },
+      {
+        "heading": "Children under 16",
+        "paragraphs": [
+          "RunCast is intended for people aged 16 and older. We do not knowingly collect data from children under 16. If we learn that such an account was created, we will delete it."
+        ]
+      },
+      {
+        "heading": "Security",
+        "paragraphs": [
+          "Data is transmitted over a secure connection (HTTPS) and protected by access controls and row-level rules in the database. Your password is handled by Supabase Auth and we never see it."
+        ]
+      },
+      {
+        "heading": "Changes to this policy",
+        "paragraphs": [
+          "We may update this policy from time to time. A new version takes effect on the day it is published and is always marked with the date at the top of the page. We will notify you in the app about significant changes.",
+          "If you do not agree with the changes, you can delete your account."
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "sections": [
+      {
+        "heading": "What RunCast does",
+        "paragraphs": [
+          "RunCast is an app for marathon, half-marathon and shorter race preparation. It builds a training plan from your goals and fitness, suggests workout swaps based on the weather forecast and guides you through workouts, statistics and race day preparation.",
+          "The service is available as a web app and as a mobile app for Android and iOS."
+        ]
+      },
+      {
+        "heading": "Account rules",
+        "paragraphs": [
+          "You can use RunCast if you are 16 or older. Provide accurate information and keep it up to date.",
+          "Your account is personal. Keep your password safe and do not share access with others. You are responsible for all activity carried out through your account.",
+          "If you suspect someone has taken over your account, change your password immediately and email us at support@runcast.app."
+        ]
+      },
+      {
+        "heading": "Acceptable use",
+        "paragraphs": [
+          "You may use the app only for its intended purposes. Attempts to access other people's accounts, disrupt the service, scrape data automatically, reverse engineer the app (unless explicitly permitted by law) and any other misuse are prohibited.",
+          "You must not submit offensive, unlawful or misleading content, fake runs on the leaderboard or impersonate another person. We may remove content that breaks these rules and suspend or permanently close the account."
+        ]
+      },
+      {
+        "heading": "Health and safety",
+        "paragraphs": [
+          "RunCast is not medical advice and does not replace a conversation with a doctor. Before starting a training program, especially if you have a health condition or injury, consult a doctor.",
+          "Running and training carry a risk of injury. Listen to your body and stop the workout if you feel pain, dizziness, chest pain, shortness of breath or other warning signs, and seek medical help.",
+          "Weather conditions (heat, cold and storms) add to the risk. Assess the conditions and shorten, postpone or skip the workout when needed. Running is your decision and your risk."
+        ]
+      },
+      {
+        "heading": "Weather forecast accuracy",
+        "paragraphs": [
+          "The forecast and geocoding come from the Open-Meteo service. We do not guarantee that the data is accurate, complete or timely, nor that weather-based workout suggestions fit your conditions.",
+          "Before running, check the actual conditions around you and adjust the plan to yourself."
+        ]
+      },
+      {
+        "heading": "Your content and intellectual property",
+        "paragraphs": [
+          "Content you enter (notes, avatar and similar) remains yours. You give us a limited permission to store, process and display it as part of the service, for example to show your name and avatar on the leaderboard if you enable the public profile.",
+          "The RunCast name, logo, design and app code belong to us. You may not copy, modify or distribute them without permission."
+        ]
+      },
+      {
+        "heading": "Service availability",
+        "paragraphs": [
+          "The service is provided as is and as available. We do not guarantee uninterrupted or error-free operation, nor specific training or race results.",
+          "We may pause the service for maintenance, network issues or work by our providers. Statutory rights that cannot be excluded remain in force."
+        ]
+      },
+      {
+        "heading": "Suspension and termination",
+        "paragraphs": [
+          "We may suspend or close your account if these terms are broken or if it is necessary to protect users and the service.",
+          "If you want to stop using RunCast, delete your account in the app or email us at support@runcast.app. Obligations that by their nature survive termination (intellectual property and liability) remain in force."
+        ]
+      },
+      {
+        "heading": "Limitation of liability",
+        "paragraphs": [
+          "To the extent permitted by law, we are not liable for indirect or direct damage caused by training, injuries, lost data or decisions made based on the plan and forecast.",
+          "This does not exclude liability that cannot be excluded by law, nor your rights as a consumer."
+        ]
+      },
+      {
+        "heading": "Governing law",
+        "paragraphs": [
+          "These terms are governed by the law of the Republic of Serbia. Disputes are handled by a court in the Republic of Serbia, unless mandatory consumer protection rules give you different rights."
+        ]
+      },
+      {
+        "heading": "Contact",
+        "paragraphs": ["For any questions about these terms, email support@runcast.app."]
+      }
+    ]
+  }
+}

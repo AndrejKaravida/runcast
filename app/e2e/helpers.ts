@@ -14,6 +14,7 @@ export async function register(page: Page, email: string) {
   await page.getByLabel('Email', { exact: true }).fill(email);
   await page.getByLabel('Lozinka', { exact: true }).fill('testtest123');
   await page.getByLabel('Potvrdi lozinku', { exact: true }).fill('testtest123');
+  await page.getByTestId('accept-terms').check();
   await page.getByRole('button', { name: 'Napravi nalog' }).click();
   await page.waitForURL('**/onboarding');
 }

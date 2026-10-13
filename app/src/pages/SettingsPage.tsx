@@ -1,7 +1,6 @@
-import { Bell, CalendarDays, ChevronRight, Footprints, HeartPulse, LogOut } from 'lucide-react';
+import { Bell, CalendarDays, ChevronRight, Footprints, HeartPulse, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
 import { Avatar } from '@/components/ui/Avatar';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
@@ -13,7 +12,7 @@ import { useAuth } from '@/auth/AuthProvider';
 import { setLanguage, type AppLanguage } from '@/i18n';
 
 export function SettingsPage() {
-  const { session, signOut } = useAuth();
+  const { session } = useAuth();
   const { t, i18n } = useTranslation('settings');
   const { data: profile } = useProfile();
 
@@ -32,7 +31,6 @@ export function SettingsPage() {
         />
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-medium">{profile?.display_name ?? session?.user.email}</span>
-          <span className="block break-all text-caption text-text-muted">{session?.user.email}</span>
         </span>
         <ChevronRight className="h-4 w-4 shrink-0 text-text-muted" aria-hidden />
       </Link>
@@ -94,21 +92,14 @@ export function SettingsPage() {
         </div>
       </section>
 
-      <section className="space-y-2">
-        <SectionHeader label={t('account.label')} />
-        <AppCard>
-          <AppButton
-            variant="danger"
-            size="sm"
-            className="self-start"
-            onClick={() => {
-              void signOut();
-            }}
-          >
-            <LogOut className="h-4 w-4" aria-hidden /> {t('account.signOut')}
-          </AppButton>
-        </AppCard>
-      </section>
+      <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface shadow-card">
+        <SettingsRow
+          to="/settings/account"
+          icon={UserRound}
+          label={t('account.label')}
+          subtitle={session?.user.email ?? ''}
+        />
+      </div>
     </div>
   );
 }

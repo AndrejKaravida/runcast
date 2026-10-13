@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
@@ -120,6 +121,12 @@ export function HealthIntegrations() {
         )}
       </div>
       <p className="text-caption text-text-muted">{t('integrations.subtitle')}</p>
+      <p className="text-caption text-text-muted">
+        {t('integrations.consent')}{' '}
+        <Link to="/privacy" className="underline hover:text-text">
+          {t('integrations.consentLink')}
+        </Link>
+      </p>
 
       {available === 'needs-install' ? (
         <div className="space-y-2">

@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router';
 import { z } from 'zod';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
+import { TERMS_VERSION } from '@/features/legal/legal';
 import { authErrorMessage } from '@/lib/auth-errors';
 import { supabase } from '@/lib/supabase';
 
@@ -17,6 +18,7 @@ function registerSchema(t: TFunction<'auth'>) {
       email: z.string().email(t('validation.email')),
       password: z.string().min(8, t('validation.passwordMin')),
       confirm: z.string(),
+      accepted: z.boolean().refine((value) => value, { message: t('validation.acceptTerms') }),
     })
     .refine((values) => values.password === values.confirm, {
       message: t('validation.passwordMismatch'),
@@ -33,6 +35,7 @@ export function RegisterPage() {
   const [confirmationSent, setConfirmationSent] = useState(false);
   const { register, handleSubmit, formState } = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema(t)),
+    defaultValues: { accepted: false },
   });
 
   const onSubmit = handleSubmit(async ({ displayName, email, password }) => {
@@ -40,7 +43,13 @@ export function RegisterPage() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { display_name: displayName } },
+      options: {
+        data: {
+          terms_version: TERMS_VERSION,
+          terms_accepted_at: new Date().toISOString(),
+          display_name: displayName,
+        },
+      },
     });
     if (error) {
       setServerError(t(authErrorMessage(error.message, error.code)));
@@ -109,6 +118,29 @@ export function RegisterPage() {
           error={formState.errors.confirm?.message}
           {...register('confirm')}
         />
+        <div>
+          <label className="flex items-start gap-2.5 text-sm text-text-secondary">
+            <input
+              type="checkbox"
+              data-testid="accept-terms"
+              className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
+              {...register('accepted')}
+            />
+            <span>
+              {t('register.consentPrefix')}{' '}
+              <Link to="/terms" className="font-medium text-primary-ink hover:text-primary-ink-hover">
+                {t('register.consentTerms')}
+              </Link>{' '}
+              {t('register.consentAnd')}{' '}
+              <Link to="/privacy" className="font-medium text-primary-ink hover:text-primary-ink-hover">
+                {t('register.consentPrivacy')}
+              </Link>
+            </span>
+          </label>
+          {formState.errors.accepted ? (
+            <p className="mt-1 text-xs text-danger-ink">{formState.errors.accepted.message}</p>
+          ) : null}
+        </div>
         {serverError ? (
           <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">
             {serverError}

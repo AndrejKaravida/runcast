@@ -5,6 +5,8 @@ import benchmarkEn from './locales/en/benchmark.json';
 import commonEn from './locales/en/common.json';
 import contentEn from './locales/en/content.json';
 import guidedEn from './locales/en/guided.json';
+import legalEn from './locales/en/legal.json';
+import licensesEn from './locales/en/licenses.json';
 import onboardingEn from './locales/en/onboarding.json';
 import planEn from './locales/en/plan.json';
 import raceEn from './locales/en/race.json';
@@ -17,6 +19,8 @@ import benchmarkSr from './locales/sr/benchmark.json';
 import commonSr from './locales/sr/common.json';
 import contentSr from './locales/sr/content.json';
 import guidedSr from './locales/sr/guided.json';
+import legalSr from './locales/sr/legal.json';
+import licensesSr from './locales/sr/licenses.json';
 import onboardingSr from './locales/sr/onboarding.json';
 import planSr from './locales/sr/plan.json';
 import raceSr from './locales/sr/race.json';
@@ -43,6 +47,8 @@ export const NAMESPACES = [
   'race',
   'benchmark',
   'content',
+  'licenses',
+  'legal',
 ] as const;
 
 const LOCALE_BY_LANGUAGE: Record<AppLanguage, string> = {
@@ -76,6 +82,8 @@ const resources = {
     common: commonEn,
     content: contentEn,
     guided: guidedEn,
+    legal: legalEn,
+    licenses: licensesEn,
     onboarding: onboardingEn,
     plan: planEn,
     race: raceEn,
@@ -90,6 +98,8 @@ const resources = {
     common: commonSr,
     content: contentSr,
     guided: guidedSr,
+    legal: legalSr,
+    licenses: licensesSr,
     onboarding: onboardingSr,
     plan: planSr,
     race: raceSr,

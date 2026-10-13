@@ -31,6 +31,8 @@ test('registracija → onboarding → plan → trening → statistika → logout
   await page.getByRole('link', { name: 'Podešavanja', exact: true }).click();
   await page.waitForURL('**/settings');
   await expect(page.getByText(email)).toBeVisible();
+  await page.getByRole('link', { name: /Nalog/ }).click();
+  await page.waitForURL('**/settings/account');
   await page.getByRole('button', { name: 'Odjavi se' }).click();
   await page.waitForURL('**/login');
 
@@ -102,6 +104,7 @@ test('validacije: registracija i onboarding', async ({ page }) => {
   await expect(page.getByText('Lozinke se ne poklapaju')).toBeVisible();
 
   await page.getByLabel('Potvrdi lozinku', { exact: true }).fill('testtest123');
+  await page.getByTestId('accept-terms').check();
   await page.getByRole('button', { name: 'Napravi nalog' }).click();
   await page.waitForURL('**/onboarding');
 

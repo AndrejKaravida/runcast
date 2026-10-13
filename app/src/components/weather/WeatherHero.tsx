@@ -5,6 +5,7 @@ import { weatherIcon } from '@/components/weather/weather-utils';
 import type { WeatherData } from '@/features/weather/queries';
 
 const STRIP_HOURS = 4;
+const OPEN_METEO_URL = 'https://open-meteo.com';
 
 function hourNumber(time: string): number {
   return Number(time.slice(11, 13));
@@ -79,6 +80,17 @@ export function WeatherHero({ data, isError, date, runWindow }: WeatherHeroProps
           </div>
         ))}
       </div>
+      <p data-testid="weather-attribution" className="text-caption text-text-muted">
+        {t('weather.attribution')}{' '}
+        <a
+          href={OPEN_METEO_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-text-secondary hover:text-text"
+        >
+          Open-Meteo
+        </a>
+      </p>
     </AppCard>
   );
 }

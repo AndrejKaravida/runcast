@@ -10,6 +10,7 @@ import {
 } from '@runcast/shared';
 import { useAuth } from '@/auth/AuthProvider';
 import { workoutSteps } from '@/features/workouts/utils';
+import { downloadBlob } from '@/lib/download';
 import { supabase } from '@/lib/supabase';
 import type { WorkoutsRow } from '@/types';
 
@@ -31,18 +32,6 @@ export function toIcsWorkout(row: WorkoutsRow): IcsWorkout {
   };
 }
 
-function downloadTextFile(filename: string, text: string): void {
-  const blob = new Blob([text], { type: 'text/calendar;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 0);
-}
-
 export function useExportPlanIcs() {
   const { session } = useAuth();
   const userId = session?.user.id;
@@ -56,7 +45,7 @@ export function useExportPlanIcs() {
         .order('workout_date', { ascending: true });
       if (error) throw error;
       const events = buildPlanEvents((data ?? []).map(toIcsWorkout), { runWindow, paces });
-      downloadTextFile('runcast-plan.ics', buildIcs(events));
+      downloadBlob('runcast-plan.ics', new Blob([buildIcs(events)], { type: 'text/calendar;charset=utf-8' }));
     },
   });
 }

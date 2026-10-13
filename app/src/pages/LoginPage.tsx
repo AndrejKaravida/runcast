@@ -94,6 +94,15 @@ export function LoginPage() {
       <Link className="mt-4 text-center text-sm text-text-secondary hover:text-text" to="/forgot-password">
         {t('login.forgot')}
       </Link>
+      <p className="mt-6 flex items-center justify-center gap-2 text-caption text-text-muted">
+        <Link to="/privacy" className="hover:text-text">
+          {t('login.privacy')}
+        </Link>
+        <span aria-hidden>·</span>
+        <Link to="/terms" className="hover:text-text">
+          {t('login.terms')}
+        </Link>
+      </p>
     </div>
   );
 }
