@@ -70,3 +70,10 @@ Postojeći `app/e2e/app.spec.ts` i `app/e2e/responsive.spec.ts` MORAJU da prolaz
 5. Ako dodaješ E2E: ime fajla `app/e2e/<feature>.spec.ts`.
 
 Bez novih npm dependency-ja (Web Audio / Speech Synthesis / Wake Lock su browser API-ji).
+
+## CI: E2E job
+
+- `e2e` job u `.github/workflows/ci.yml` (posle `checks` i `migrations`) pokreće ceo Playwright suite na ubuntu-latest: `supabase start`, `app/.env.local` iz `supabase status -o json` (`API_URL` + `ANON_KEY`), chromium, `npx playwright test` sa `CI=true`.
+- Artefakti samo na pad: `playwright-report` (HTML) + `app/test-results` (trace), 7 dana.
+- Lokalno kao CI: `cd app && CI=true npx playwright test` (port 5173 mora biti slobodan jer dev server diže sam test; retries 1, trace samo na prvom retry-ju, bez trace-a na uspeh).
+- Paralelni lokalni runovi: `PLAYWRIGHT_OUTPUT_DIR=/tmp/pw-run npx playwright test` u `app/` da se `test-results` artefakti ne sudaraju.
