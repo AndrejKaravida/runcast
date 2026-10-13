@@ -126,7 +126,9 @@
     "xiaomiAndroid": "Xiaomi: Mi Fitness/Zepp Life → Third-party data → Google Fit, pa Google Fit → Sync with Health Connect.",
     "privacy": "Podaci ostaju na telefonu. RunCast upisuje samo datum, distancu i trajanje trčanja.",
     "consent": "Uvoz je dobrovoljan i pokrećeš ga sam. Uvezena trčanja ostaju vezana za tvoj nalog.",
-    "consentLink": "Politika privatnosti"
+    "consentLink": "Politika privatnosti",
+    "readinessToggle": "Readiness uvoz",
+    "readinessHint": "San, HRV i puls u miru čitaju se samo kad je ovo uključeno. Obrađuju se lokalno na telefonu i nikada ne napuštaju uređaj."
   },
   "push": {
     "label": "Notifikacije",

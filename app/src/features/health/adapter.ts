@@ -1,17 +1,27 @@
 import { Capacitor } from '@capacitor/core';
-import type { HealthRun } from '@runcast/shared';
+import type { HealthDataType, HealthSample } from '@capgo/capacitor-health';
+import type { HealthRun, ReadinessSnapshot } from '@runcast/shared';
 
 export type HealthAvailability = 'available' | 'needs-install' | 'unavailable';
 
 export interface HealthSource {
   isAvailable(): Promise<HealthAvailability>;
   requestPermissions(): Promise<boolean>;
+  requestReadinessPermissions(): Promise<boolean>;
   fetchRuns(sinceIso: string): Promise<HealthRun[]>;
+  fetchReadiness(sinceIso: string): Promise<ReadinessSnapshot | null>;
+}
+
+export interface HealthReadinessMock {
+  sleepHours?: number | null;
+  restingHr?: number | null;
+  hrv?: number | null;
 }
 
 export interface HealthMock {
   available?: HealthAvailability;
   runs?: HealthRun[];
+  readiness?: HealthReadinessMock | null;
 }
 
 declare global {
@@ -21,9 +31,27 @@ declare global {
 }
 
 const RUNNING_WORKOUT_TYPES = ['running', 'runningTreadmill'];
+const ASLEEP_STAGES = new Set(['asleep', 'rem', 'deep', 'light']);
+const READINESS_TYPES: HealthDataType[] = ['sleep', 'restingHeartRate', 'heartRateVariability'];
 
 function isRunningWorkoutType(type: string): boolean {
   return RUNNING_WORKOUT_TYPES.includes(type);
+}
+
+function asleepMinutes(samples: HealthSample[]): number {
+  let minutes = 0;
+  for (const sample of samples) {
+    if (sample.stages && sample.stages.length > 0) {
+      for (const stage of sample.stages) {
+        if (ASLEEP_STAGES.has(stage.stage)) minutes += stage.durationMinutes;
+      }
+      continue;
+    }
+    if (sample.sleepState === undefined || ASLEEP_STAGES.has(sample.sleepState)) {
+      minutes += sample.value;
+    }
+  }
+  return minutes;
 }
 
 function roundKm(meters: number): number {
@@ -49,6 +77,51 @@ export class CapacitorHealthSource implements HealthSource {
     } catch {
       return false;
     }
+  }
+
+  async requestReadinessPermissions(): Promise<boolean> {
+    const { Health } = await import('@capgo/capacitor-health');
+    try {
+      await Health.requestAuthorization({ read: READINESS_TYPES, write: [] });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async fetchReadiness(sinceIso: string): Promise<ReadinessSnapshot | null> {
+    const endIso = new Date().toISOString();
+    const [sleepHours, restingHr, hrv] = await Promise.all([
+      this.readSleepHours(sinceIso, endIso).catch(() => null),
+      this.readLatestValue('restingHeartRate', sinceIso, endIso).catch(() => null),
+      this.readLatestValue('heartRateVariability', sinceIso, endIso).catch(() => null),
+    ]);
+    return {
+      sleepHours,
+      restingHr,
+      hrv,
+      source: this.platform === 'ios' ? 'healthkit' : 'healthconnect',
+    };
+  }
+
+  private async readSleepHours(startIso: string, endIso: string): Promise<number | null> {
+    const { Health } = await import('@capgo/capacitor-health');
+    const { samples } = await Health.readSamples({
+      dataType: 'sleep',
+      startDate: startIso,
+      endDate: endIso,
+      limit: 500,
+    });
+    const minutes = asleepMinutes(samples);
+    return minutes > 0 ? Math.round((minutes / 60) * 10) / 10 : null;
+  }
+
+  private async readLatestValue(dataType: HealthDataType, startIso: string, endIso: string): Promise<number | null> {
+    const { Health } = await import('@capgo/capacitor-health');
+    const { samples } = await Health.readSamples({ dataType, startDate: startIso, endDate: endIso, limit: 10 });
+    if (samples.length === 0) return null;
+    const latest = samples.reduce((best, sample) => (sample.startDate > best.startDate ? sample : best));
+    return Number.isFinite(latest.value) ? latest.value : null;
   }
 
   async fetchRuns(sinceIso: string): Promise<HealthRun[]> {
@@ -90,8 +163,23 @@ export class MockHealthSource implements HealthSource {
     return true;
   }
 
+  async requestReadinessPermissions(): Promise<boolean> {
+    return true;
+  }
+
   async fetchRuns(): Promise<HealthRun[]> {
     return this.mock.runs ?? [];
+  }
+
+  async fetchReadiness(): Promise<ReadinessSnapshot | null> {
+    const readiness = this.mock.readiness;
+    if (!readiness) return null;
+    return {
+      sleepHours: readiness.sleepHours ?? null,
+      restingHr: readiness.restingHr ?? null,
+      hrv: readiness.hrv ?? null,
+      source: 'healthkit',
+    };
   }
 }
 
@@ -104,8 +192,16 @@ export class WebStubSource implements HealthSource {
     return false;
   }
 
+  async requestReadinessPermissions(): Promise<boolean> {
+    return false;
+  }
+
   async fetchRuns(): Promise<HealthRun[]> {
     return [];
+  }
+
+  async fetchReadiness(): Promise<ReadinessSnapshot | null> {
+    return null;
   }
 }
 

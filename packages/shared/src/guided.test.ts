@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { buildStepTimeline, cueTextFor, elapsedAfterSkip, isGuidedRunType, parsePaceLabel, segmentAt } from './guided';
+import {
+  buildStepTimeline,
+  cueTextFor,
+  cueVariantIndex,
+  elapsedAfterSkip,
+  isGuidedRunType,
+  parsePaceLabel,
+  segmentAt,
+} from './guided';
 import type { PlanPaces, WorkoutStep } from './types';
 
 const paces: PlanPaces = {
@@ -172,5 +180,59 @@ describe('guided timeline', () => {
       key: 'content:guided.cue.split',
       params: { km: 2, pace: '5:00' },
     });
+  });
+});
+
+describe('guided audio cues', () => {
+  it('bira brief varijantu deterministički iz konteksta', () => {
+    const context = { workoutType: 'Intervali', distanceKm: 7.6, paceLabel: '4:20' };
+    const first = cueTextFor('BRIEF', context);
+    expect(first).toEqual(cueTextFor('BRIEF', context));
+    expect(first.key).toMatch(/^content:guided\.cue\.brief\.[0-2]$/);
+    expect(first.params).toEqual({ type: 'Intervali', km: 7.6, pace: '4:20' });
+  });
+
+  it('vezuje coach liniju za tip treninga uz determinističnu varijantu', () => {
+    const tempo = cueTextFor('COACH', { workoutType: 'TEMPO', label: 'Tempo 20 min' });
+    expect(tempo).toEqual(cueTextFor('COACH', { workoutType: 'TEMPO', label: 'Tempo 20 min' }));
+    expect(tempo.key).toMatch(/^content:guided\.cue\.coach\.tempo\.[0-2]$/);
+    expect(cueTextFor('COACH', { workoutType: 'INTERVALS', label: '1000 m' }).key).toMatch(
+      /^content:guided\.cue\.coach\.intervals\.[0-2]$/,
+    );
+    expect(cueTextFor('COACH', { workoutType: 'EASY', label: 'E tempo' }).key).toMatch(
+      /^content:guided\.cue\.coach\.easy\.[0-2]$/,
+    );
+    expect(cueTextFor('COACH', { workoutType: 'LONG', label: 'Dugi trk' }).key).toMatch(
+      /^content:guided\.cue\.coach\.long\.[0-2]$/,
+    );
+    expect(cueTextFor('COACH', { workoutType: 'REPETITIONS', label: '200 m @ R' }).key).toMatch(
+      /^content:guided\.cue\.coach\.repetitions\.[0-2]$/,
+    );
+    expect(cueTextFor('COACH', {}).key).toBe('content:guided.cue.coach.default.0');
+  });
+
+  it('vraća encourage i fuel ključeve', () => {
+    expect(cueTextFor('ENCOURAGE', { workoutType: 'LONG' })).toEqual(cueTextFor('ENCOURAGE', { workoutType: 'LONG' }));
+    expect(cueTextFor('ENCOURAGE', { workoutType: 'LONG' }).key).toMatch(/^content:guided\.cue\.encourage\.[0-2]$/);
+    expect(cueTextFor('FUEL', { workoutType: 'LONG' }).key).toMatch(/^content:guided\.cue\.fuel\.[0-1]$/);
+  });
+
+  it('spaja finish i distancu u summary sa i bez tempa', () => {
+    const withPace = cueTextFor('SUMMARY', { elapsedSec: 3661, distanceKm: 10.5, paceLabel: '5:30' });
+    expect(withPace).toEqual(cueTextFor('SUMMARY', { elapsedSec: 3661, distanceKm: 10.5, paceLabel: '5:30' }));
+    expect(withPace.key).toMatch(/^content:guided\.cue\.summary\.withPace\.[0-2]$/);
+    expect(withPace.params).toEqual({ elapsed: '1:01:01', km: 10.5, pace: '5:30' });
+
+    const plain = cueTextFor('SUMMARY', { elapsedSec: 60, distanceKm: 2 });
+    expect(plain.key).toMatch(/^content:guided\.cue\.summary\.plain\.[0-2]$/);
+    expect(plain.params).toEqual({ elapsed: '1:00', km: 2 });
+  });
+
+  it('računa indeks varijante bez slučajnosti', () => {
+    expect(cueVariantIndex('ENCOURAGE', { workoutType: 'LONG' }, 3)).toBe(
+      cueVariantIndex('ENCOURAGE', { workoutType: 'LONG' }, 3),
+    );
+    expect(cueVariantIndex('FUEL', { workoutType: 'LONG' }, 1)).toBe(0);
+    expect(cueVariantIndex('COACH', { workoutType: 'TEMPO' }, 3)).toBeLessThan(3);
   });
 });

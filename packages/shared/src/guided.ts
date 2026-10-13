@@ -16,7 +16,12 @@ export type GuidedCueKind =
   | 'SKIP'
   | 'FINISH'
   | 'DISTANCE'
-  | 'SPLIT';
+  | 'SPLIT'
+  | 'BRIEF'
+  | 'COACH'
+  | 'ENCOURAGE'
+  | 'FUEL'
+  | 'SUMMARY';
 
 export interface GuidedWorkoutInput {
   type: string;
@@ -60,6 +65,7 @@ export interface GuidedCueContext {
   elapsedSec?: number;
   distanceKm?: number;
   km?: number;
+  workoutType?: string;
 }
 
 const ZONE_FIELD: Record<PaceZone, keyof PlanPaces> = {
@@ -183,6 +189,31 @@ export function elapsedAfterSkip(timeline: GuidedTimeline, segmentIndex: number)
   return Math.min(total, timeline.totalDurationSec);
 }
 
+const BRIEF_VARIANTS = 3;
+const COACH_VARIANTS = 3;
+const ENCOURAGE_VARIANTS = 3;
+const FUEL_VARIANTS = 2;
+const SUMMARY_VARIANTS = 3;
+
+const COACH_TYPE_KEYS: Record<string, string> = {
+  EASY: 'easy',
+  LONG: 'long',
+  TEMPO: 'tempo',
+  INTERVALS: 'intervals',
+  REPETITIONS: 'repetitions',
+};
+
+export function cueVariantIndex(kind: GuidedCueKind, context: GuidedCueContext = {}, count: number): number {
+  if (count <= 1) return 0;
+  const seed = [kind, context.workoutType ?? '', context.label ?? '', context.paceLabel ?? ''].join('|');
+  let hash = 2166136261;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash ^= seed.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0) % count;
+}
+
 export function cueTextFor(kind: GuidedCueKind, context: GuidedCueContext = {}): LocalizedText {
   switch (kind) {
     case 'START':
@@ -216,5 +247,31 @@ export function cueTextFor(kind: GuidedCueKind, context: GuidedCueContext = {}):
       return { key: 'content:guided.cue.distance', params: { km: context.distanceKm ?? 0 } };
     case 'SPLIT':
       return { key: 'content:guided.cue.split', params: { km: context.km ?? 1, pace: context.paceLabel ?? '' } };
+    case 'BRIEF':
+      return {
+        key: `content:guided.cue.brief.${cueVariantIndex('BRIEF', context, BRIEF_VARIANTS)}`,
+        params: { type: context.workoutType ?? '', km: context.distanceKm ?? 0, pace: context.paceLabel ?? '' },
+      };
+    case 'COACH': {
+      const typeKey = COACH_TYPE_KEYS[context.workoutType ?? ''] ?? 'default';
+      const count = typeKey === 'default' ? 1 : COACH_VARIANTS;
+      return { key: `content:guided.cue.coach.${typeKey}.${cueVariantIndex('COACH', context, count)}` };
+    }
+    case 'ENCOURAGE':
+      return { key: `content:guided.cue.encourage.${cueVariantIndex('ENCOURAGE', context, ENCOURAGE_VARIANTS)}` };
+    case 'FUEL':
+      return { key: `content:guided.cue.fuel.${cueVariantIndex('FUEL', context, FUEL_VARIANTS)}` };
+    case 'SUMMARY': {
+      const pace = context.paceLabel ?? '';
+      const withPace = pace !== '';
+      return {
+        key: `content:guided.cue.summary.${withPace ? 'withPace' : 'plain'}.${cueVariantIndex('SUMMARY', context, SUMMARY_VARIANTS)}`,
+        params: {
+          elapsed: formatDuration(context.elapsedSec ?? 0),
+          km: context.distanceKm ?? 0,
+          ...(withPace ? { pace } : {}),
+        },
+      };
+    }
   }
 }

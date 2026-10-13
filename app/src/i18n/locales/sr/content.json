@@ -188,7 +188,63 @@
       "skipFallback": "Prelazimo na: sledeći korak.",
       "finish": "Gotovo! {{elapsed}} u nogama.",
       "distance": "GPS distanca: {{km, number(maximumFractionDigits: 2)}} kilometara.",
-      "split": "Kilometar {{km}} za {{pace}}."
+      "split": "Kilometar {{km}} za {{pace}}.",
+      "brief": {
+        "0": "Danas radimo {{type}}. Cilj je {{km, number(maximumFractionDigits: 1)}} km u tempu {{pace}}.",
+        "1": "Pred nama je {{type}}. Držimo {{km, number(maximumFractionDigits: 1)}} km, tempo oko {{pace}}.",
+        "2": "Plan za danas: {{type}}, {{km, number(maximumFractionDigits: 1)}} km, ciljni tempo {{pace}}."
+      },
+      "coach": {
+        "easy": {
+          "0": "Lagano je danas. Diši opušteno i uživaj u ritmu.",
+          "1": "Ovo je trčanje za bazu. Korak lagan, puls nizak.",
+          "2": "Drži prijatan tempo u kojem možeš da razgovaraš."
+        },
+        "long": {
+          "0": "Dugi trk. Počni mirno, snaga dolazi kasnije.",
+          "1": "Štedi se za drugu polovinu. Ritam stabilan, bez jurnjave.",
+          "2": "Gradimo izdržljivost. Pij redovno i ne juri."
+        },
+        "tempo": {
+          "0": "Tempo zona. Ramena opuštena, korak miran i odlučan.",
+          "1": "Ovo je radna zona. Diši ravnomerno i drži tempo.",
+          "2": "Tempo nije sprint. Kontrolisano jako, sve vreme."
+        },
+        "intervals": {
+          "0": "Intervali su za brzinu. Korak kratak i čest, ramena opuštena.",
+          "1": "Sada je brzinski deo. Drži formu i diši ravnomerno.",
+          "2": "Radna zona. Guraj jako, ali ostani gladak."
+        },
+        "repetitions": {
+          "0": "Repeticije su za brzinu. Kratko, ali kvalitetno.",
+          "1": "Sprint deo. Forma iznad svega, pun gas.",
+          "2": "Brzo i opušteno. Noge rade, ramena popuštaju."
+        },
+        "default": {
+          "0": "Radni deo. Drži formu i diši ravnomerno."
+        }
+      },
+      "encourage": {
+        "0": "Prošao si više od pola. Samo nastavi.",
+        "1": "Preko pola je. Ritam je tvoj, drži ga.",
+        "2": "Većina je za nama. Ostani strpljiv do kraja."
+      },
+      "fuel": {
+        "0": "Četrdeset pet minuta. Popij gutljaj i uzmi gel ako imaš.",
+        "1": "Vreme je za gorivo. Voda i gel, sada."
+      },
+      "summary": {
+        "withPace": {
+          "0": "Kraj treninga! Ukupno {{elapsed}}, {{km, number(maximumFractionDigits: 2)}} km, prosečan tempo {{pace}}. Svaka čast!",
+          "1": "Gotovo! {{elapsed}} rada, {{km, number(maximumFractionDigits: 2)}} km, prosek {{pace}}. Odlično odrađeno!",
+          "2": "Završeno! {{elapsed}}, {{km, number(maximumFractionDigits: 2)}} km, tempo {{pace}}. Lepa sesija."
+        },
+        "plain": {
+          "0": "Kraj treninga! Ukupno {{elapsed}}, {{km, number(maximumFractionDigits: 2)}} km. Svaka čast!",
+          "1": "Gotovo! {{elapsed}} rada i {{km, number(maximumFractionDigits: 2)}} km za nama. Odlično!",
+          "2": "Završeno! {{elapsed}}, {{km, number(maximumFractionDigits: 2)}} km. Lepa sesija."
+        }
+      }
     }
   },
   "achievements": {

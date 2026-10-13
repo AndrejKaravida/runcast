@@ -124,6 +124,20 @@ je zatvoren.
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
 
+## v1.9 — audio coach, readiness, više trka, adherence rang lista
+
+- **Audio coach** (F21): TTS naracija u vođenoj trci — BRIEF (cilj, distanca, pace zona),
+  COACH po segmentima, ENCOURAGE na 60%, FUEL na 45 min dugih trka, SUMMARY na kraju
+  (vreme, distanca, avg pace); deterministički izbor varijanti teksta, sr/en.
+- **Readiness** (F22): san + HRV/RHR iz Health-a (opt-in toggle, lokalna obrada, baseline iz
+  28 dana) → kartica na Danas (Svež/Normalan/Umoran + hintovi), skeleton; proširena politika
+  privatnosti i Health Connect permisije.
+- **Više trka** (F23): lista trka u Settings → Plan (dodaj/uredi/obriši, oznaka „Cilj plana",
+  blokirano brisanje ciljne), izbor ciljne trke pri generisanju plana.
+- **Adherence rang lista** (F24): rangiranje po pridržavanju plana (urađeno/propisano %) uz
+  prebacivanje metrike „Kilometraža"/„Pridržavanje" u globalnoj i friends listi — diferencijator
+  u odnosu na volumen-liste konkurencije.
+
 ## v1.8 — watch export, poravnanje plana, plan oporavka
 
 - **TCX izvoz za sat** (F18): svaki trening se izvozi kao TCX sa strukturiranim koracima i pace

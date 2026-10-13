@@ -35,6 +35,7 @@
         "heading": "Health data",
         "paragraphs": [
           "Import from Apple Health or Health Connect is voluntary and started by you. We import runs (date, distance and duration) and use them only for training history and statistics in the app.",
+          "When you enable readiness import in settings, RunCast also reads sleep (duration and stages), heart rate variability (HRV) and resting heart rate. That data is processed only locally on your phone, is never sent to a server and is used only to show readiness and a local average.",
           "We never use health data for advertising, we never sell it and we never share it with third parties. Deleting imported runs or your account deletes that data as well.",
           "Body data you enter manually can be changed or deleted in your profile at any time."
         ]
@@ -60,7 +61,7 @@
       {
         "heading": "Cookies and local storage",
         "paragraphs": [
-          "RunCast does not use tracking cookies. In browser local storage we keep only your theme, chosen language, fueling reminder toggle and the time of the last health import.",
+          "RunCast does not use tracking cookies. In browser local storage we keep only your theme, chosen language, fueling reminder toggle, the time of the last health import and, when readiness import is on, a local history of sleep, HRV and resting heart rate.",
           "That data stays on your device and is not sent to us. Clearing your browser data clears it."
         ]
       },

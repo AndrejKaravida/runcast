@@ -107,6 +107,13 @@
     "emptyAction": "Otvori podešavanja",
     "sessionsOne": "{{count}} trening",
     "sessionsMany": "{{count}} treninga",
+    "metricKm": "Kilometraža",
+    "metricAdherence": "Pridržavanje",
+    "adherenceBadge": "{{percent}}%",
+    "adherenceCaption": "{{done}}/{{prescribed}} treninga · {{km}} km",
+    "adherenceEmptyTitle": "Nema dovoljno podataka o planu ove nedelje.",
+    "adherenceEmptyDescription": "Rang lista prati koliko se držiš plana. Potrebna su bar dva trčanja iz plana u ovoj nedelji.",
+    "adherenceSelfEmpty": "Tvoj plan ove nedelje još nema bar dva trčanja.",
     "tabGlobal": "Globalno",
     "tabFriends": "Prijatelji",
     "tabFeed": "Feed"

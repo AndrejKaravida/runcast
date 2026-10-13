@@ -18,7 +18,7 @@ import { useGuidedClock, type GuidedPhase } from '@/components/guided/useGuidedC
 import { useLiveTrack } from '@/components/guided/useLiveTrack';
 import { useSpeechCues } from '@/components/guided/useSpeechCues';
 import { useWakeLock } from '@/components/guided/useWakeLock';
-import { workoutSteps } from '@/features/workouts/utils';
+import { typeLabel, workoutPaceLabel, workoutSteps } from '@/features/workouts/utils';
 import type { RunLogsRow, WorkoutsRow } from '@/types';
 
 interface GuidedRunnerOptions {
@@ -26,6 +26,14 @@ interface GuidedRunnerOptions {
   paces: PlanPaces | null;
   logs: RunLogsRow[];
   timeScale: number;
+}
+
+const ENCOURAGE_FRACTION = 0.6;
+const FUEL_AT_SEC = 45 * 60;
+const WARMUP_LABEL_RE = /zagrevanje|hlađenje|warm ?up|cool ?down/i;
+
+function isWorkSegment(segment: TimelineSegment): boolean {
+  return !WARMUP_LABEL_RE.test(segment.label);
 }
 
 export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunnerOptions) {
@@ -50,6 +58,12 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
     );
   }, [workout, paces]);
 
+  const workoutType = workout?.type ?? '';
+  const plannedDistanceKm = workout && workout.distance_km > 0 ? workout.distance_km : (timeline?.totalDistanceKm ?? 0);
+  const briefPaceLabel = workout
+    ? (workoutPaceLabel(workout, paces) ?? timeline?.segments.find((segment) => segment.paceLabel)?.paceLabel ?? '')
+    : '';
+
   const clock = useGuidedClock(timeline?.totalDurationSec ?? 0, timeScale);
   const speech = useSpeechCues();
   const [gpsEnabled, setGpsEnabled] = useState(true);
@@ -73,6 +87,9 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
   const prevPhaseRef = useRef<GuidedPhase>('idle');
   const segmentIndexRef = useRef(-1);
   const halfwaySpokenRef = useRef(false);
+  const encourageSpokenRef = useRef(false);
+  const fuelSpokenRef = useRef(false);
+  const lastCoachRef = useRef('');
   const finishedCueRef = useRef(false);
   const fuelingIndexRef = useRef(0);
 
@@ -86,6 +103,41 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
   const logSource: 'gps' | 'manual' = trackedDistanceKm !== null ? 'gps' : 'manual';
   const avgPaceSecPerKm =
     trackedDistanceKm !== null && trackedDistanceKm > 0.2 ? Math.round(clock.elapsedSec / trackedDistanceKm) : null;
+  const avgPaceLabel = avgPaceSecPerKm !== null ? formatPace(avgPaceSecPerKm) : null;
+  const summaryDistanceKm = trackedDistanceKm ?? plannedDistanceKm;
+
+  const coachCue = useCallback(
+    (segment: TimelineSegment): string | null => {
+      if (!isWorkSegment(segment)) {
+        lastCoachRef.current = '';
+        return null;
+      }
+      const line = cueText('COACH', {
+        workoutType,
+        label: segment.label,
+        paceLabel: segment.paceLabel ?? null,
+      });
+      if (line === lastCoachRef.current) return null;
+      lastCoachRef.current = line;
+      return line;
+    },
+    [cueText, workoutType],
+  );
+
+  const segmentSpeech = useCallback(
+    (segment: TimelineSegment) => {
+      const main =
+        segment.repeatIndex !== undefined && segment.repeatTotal !== undefined
+          ? cueText('REPEAT', segment)
+          : cueText('SEGMENT_START', segment);
+      const parts = [main];
+      if (segment.paceLabel) parts.push(cueText('PACE', { paceLabel: segment.paceLabel }));
+      const coach = coachCue(segment);
+      if (coach) parts.push(coach);
+      return parts.join(' ');
+    },
+    [coachCue, cueText],
+  );
 
   useEffect(() => {
     const phase = clock.phase;
@@ -93,7 +145,20 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
     if (phase === previous) return;
     prevPhaseRef.current = phase;
     if (phase === 'running' && previous === 'countdown') {
-      speech.speak(cueText('START'));
+      const first = timeline?.segments[0];
+      const parts = [
+        cueText('START'),
+        cueText('BRIEF', {
+          workoutType: typeLabel(t, workoutType),
+          distanceKm: plannedDistanceKm,
+          paceLabel: briefPaceLabel,
+        }),
+      ];
+      if (first) {
+        parts.push(segmentSpeech(first));
+        segmentIndexRef.current = first.index;
+      }
+      speech.speak(parts.join(' '));
       speech.beep(880);
       return;
     }
@@ -107,13 +172,30 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
     }
     if (phase === 'finished' && !finishedCueRef.current) {
       finishedCueRef.current = true;
-      const base = cueText('FINISH', { elapsedSec: clock.elapsedSec });
-      const text =
-        trackedDistanceKm !== null ? `${base} ${cueText('DISTANCE', { distanceKm: trackedDistanceKm })}` : base;
-      speech.speak(text);
+      speech.speak(
+        cueText('SUMMARY', {
+          workoutType,
+          elapsedSec: clock.elapsedSec,
+          distanceKm: summaryDistanceKm,
+          paceLabel: avgPaceLabel,
+        }),
+      );
       speech.beep(880, 250);
     }
-  }, [clock.phase, clock.elapsedSec, trackedDistanceKm, speech, cueText]);
+  }, [
+    clock.phase,
+    clock.elapsedSec,
+    timeline,
+    speech,
+    cueText,
+    segmentSpeech,
+    workoutType,
+    plannedDistanceKm,
+    briefPaceLabel,
+    summaryDistanceKm,
+    avgPaceLabel,
+    t,
+  ]);
 
   useEffect(() => {
     if (clock.phase !== 'countdown') return;
@@ -127,11 +209,7 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
     if (current.segment.index !== segmentIndexRef.current) {
       const isForward = segmentIndexRef.current >= 0 && current.segment.index > segmentIndexRef.current;
       segmentIndexRef.current = current.segment.index;
-      const segment = current.segment;
-      const isRepeat = segment.repeatIndex !== undefined && segment.repeatTotal !== undefined;
-      const main = isRepeat ? cueText('REPEAT', segment) : cueText('SEGMENT_START', segment);
-      const text = segment.paceLabel ? `${main} ${cueText('PACE', { paceLabel: segment.paceLabel })}` : main;
-      speech.speak(text);
+      speech.speak(segmentSpeech(current.segment));
       speech.beep(isForward ? 660 : 880, 100);
     }
     if (
@@ -143,7 +221,24 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
       speech.speak(cueText('HALFWAY'));
       speech.beep(880, 120);
     }
-  }, [clock.phase, clock.elapsedSec, timeline, speech, cueText]);
+  }, [clock.phase, clock.elapsedSec, timeline, speech, cueText, segmentSpeech]);
+
+  useEffect(() => {
+    if (clock.phase !== 'running' || !timeline || timeline.totalDurationSec <= 0) return;
+    if (encourageSpokenRef.current) return;
+    if (clock.elapsedSec < timeline.totalDurationSec * ENCOURAGE_FRACTION) return;
+    encourageSpokenRef.current = true;
+    speech.speak(cueText('ENCOURAGE', { workoutType }));
+    speech.beep(760, 120);
+  }, [clock.phase, clock.elapsedSec, timeline, workoutType, speech, cueText]);
+
+  useEffect(() => {
+    if (clock.phase !== 'running' || workoutType !== 'LONG') return;
+    if (fuelSpokenRef.current || clock.elapsedSec < FUEL_AT_SEC) return;
+    fuelSpokenRef.current = true;
+    speech.speak(cueText('FUEL', { workoutType }));
+    speech.beep(660, 120);
+  }, [clock.phase, clock.elapsedSec, workoutType, speech, cueText]);
 
   useEffect(() => {
     if (clock.phase !== 'running' || fuelingCues.length === 0) return;
@@ -205,11 +300,12 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
     : segmentCue;
   const halfwayReached =
     Boolean(timeline && timeline.totalDurationSec > 0) && clock.elapsedSec >= (timeline?.totalDurationSec ?? 0) / 2;
-  const finishedCue = cueText('FINISH', { elapsedSec: clock.elapsedSec });
-  const finishedCueWithDistance =
-    trackedDistanceKm !== null
-      ? `${finishedCue} ${cueText('DISTANCE', { distanceKm: trackedDistanceKm })}`
-      : finishedCue;
+  const finishedCue = cueText('SUMMARY', {
+    workoutType,
+    elapsedSec: clock.elapsedSec,
+    distanceKm: summaryDistanceKm,
+    paceLabel: avgPaceLabel,
+  });
   const bannerText =
     clock.phase === 'idle'
       ? t('guided:ready')
@@ -218,7 +314,7 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
         : clock.phase === 'paused'
           ? cueText('PAUSE')
           : clock.phase === 'finished'
-            ? finishedCueWithDistance
+            ? finishedCue
             : halfwayReached
               ? `${segmentCueWithPace} ${cueText('HALFWAY')}`
               : segmentCueWithPace;

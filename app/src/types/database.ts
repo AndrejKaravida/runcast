@@ -479,6 +479,20 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      adherence_weekly_leaderboard: {
+        Args: { p_week_start: string };
+        Returns: {
+          adherence: number;
+          avatar_url: string;
+          display_name: string;
+          distance_km: number;
+          done: number;
+          is_public: boolean;
+          prescribed: number;
+          rank: number;
+          user_id: string;
+        }[];
+      };
       apply_week_plan: { Args: { p_assignments: Json }; Returns: number };
       can_view_profile: { Args: { p_profile_id: string }; Returns: boolean };
       can_view_run_log: { Args: { p_run_log_id: string }; Returns: boolean };
@@ -505,6 +519,20 @@ export type Database = {
           avatar_url: string;
           display_name: string;
           id: string;
+        }[];
+      };
+      friends_adherence_leaderboard: {
+        Args: { p_week_start: string };
+        Returns: {
+          adherence: number;
+          avatar_url: string;
+          display_name: string;
+          distance_km: number;
+          done: number;
+          is_public: boolean;
+          prescribed: number;
+          rank: number;
+          user_id: string;
         }[];
       };
       friends_weekly_leaderboard: {

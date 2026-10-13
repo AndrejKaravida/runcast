@@ -6,6 +6,8 @@ import type { Database } from '@/types';
 
 export type LeaderboardEntry = Database['public']['Functions']['weekly_leaderboard']['Returns'][number];
 export type FriendsLeaderboardEntry = Database['public']['Functions']['friends_weekly_leaderboard']['Returns'][number];
+export type AdherenceLeaderboardEntry =
+  Database['public']['Functions']['adherence_weekly_leaderboard']['Returns'][number];
 
 type FriendshipsRow = Database['public']['Tables']['friendships']['Row'];
 
@@ -36,6 +38,21 @@ export function useFriendsLeaderboard(weekStart: string) {
     queryKey: ['friends-leaderboard', weekStart],
     queryFn: async (): Promise<FriendsLeaderboardEntry[]> => {
       const { data, error } = await supabase.rpc('friends_weekly_leaderboard', { p_week_start: weekStart });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useAdherenceLeaderboard(weekStart: string, scope: 'global' | 'friends', enabled = true) {
+  return useQuery({
+    queryKey: ['adherence-leaderboard', scope, weekStart],
+    enabled,
+    queryFn: async (): Promise<AdherenceLeaderboardEntry[]> => {
+      const { data, error } =
+        scope === 'global'
+          ? await supabase.rpc('adherence_weekly_leaderboard', { p_week_start: weekStart })
+          : await supabase.rpc('friends_adherence_leaderboard', { p_week_start: weekStart });
       if (error) throw error;
       return data;
     },
@@ -156,6 +173,7 @@ async function invalidateSocial(queryClient: ReturnType<typeof useQueryClient>) 
     queryClient.invalidateQueries({ queryKey: ['friends'] }),
     queryClient.invalidateQueries({ queryKey: ['friends-feed'] }),
     queryClient.invalidateQueries({ queryKey: ['friends-leaderboard'] }),
+    queryClient.invalidateQueries({ queryKey: ['adherence-leaderboard'] }),
   ]);
 }
 

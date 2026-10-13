@@ -16,6 +16,7 @@ import { CalendarDays, Flame } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AchievementToast } from '@/components/achievements/AchievementToast';
 import { RaceChip } from '@/components/today/RaceChip';
+import { ReadinessCard } from '@/components/today/ReadinessCard';
 import { TodayHeroCard } from '@/components/today/TodayHeroCard';
 import { WeekBoard } from '@/components/today/WeekBoard';
 import { AppButton } from '@/components/ui/AppButton';
@@ -324,6 +325,8 @@ export function TodayPage() {
         date={today}
         runWindow={runWindow}
       />
+
+      <ReadinessCard />
 
       <RaceChip plan={plan} daysToRace={daysToRace} planWeek={planWeek} />
 

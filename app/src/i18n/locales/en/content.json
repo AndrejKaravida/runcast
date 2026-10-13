@@ -197,7 +197,63 @@
       "skipFallback": "Moving on to: the next step.",
       "finish": "Done! {{elapsed}} in the legs.",
       "distance": "GPS distance: {{km, number(maximumFractionDigits: 2)}} kilometres.",
-      "split": "Kilometre {{km}} in {{pace}}."
+      "split": "Kilometre {{km}} in {{pace}}.",
+      "brief": {
+        "0": "Today we do {{type}}. The goal is {{km, number(maximumFractionDigits: 1)}} km at {{pace}}.",
+        "1": "Up next: {{type}}. We hold {{km, number(maximumFractionDigits: 1)}} km, pace around {{pace}}.",
+        "2": "Today's plan: {{type}}, {{km, number(maximumFractionDigits: 1)}} km, goal pace {{pace}}."
+      },
+      "coach": {
+        "easy": {
+          "0": "Easy day. Breathe relaxed and enjoy the rhythm.",
+          "1": "This is base running. Light stride, low pulse.",
+          "2": "Keep a comfortable pace where you can still talk."
+        },
+        "long": {
+          "0": "The long run. Start calm, strength comes later.",
+          "1": "Save yourself for the second half. Steady rhythm, no rushing.",
+          "2": "Building endurance. Drink regularly and don't chase the clock."
+        },
+        "tempo": {
+          "0": "Tempo zone. Shoulders relaxed, stride calm and decisive.",
+          "1": "This is the working zone. Breathe evenly and hold the pace.",
+          "2": "Tempo is not a sprint. Controlled and strong the whole way."
+        },
+        "intervals": {
+          "0": "Intervals are for speed. Short quick steps, shoulders relaxed.",
+          "1": "Speed section now. Hold form and breathe evenly.",
+          "2": "Working zone. Push hard but stay smooth."
+        },
+        "repetitions": {
+          "0": "Repetitions are for speed. Short but quality.",
+          "1": "Sprint section. Form above all, full gas.",
+          "2": "Fast and relaxed. Legs work, shoulders let go."
+        },
+        "default": {
+          "0": "Working section. Hold form and breathe evenly."
+        }
+      },
+      "encourage": {
+        "0": "You are past halfway. Just keep going.",
+        "1": "More than half done. The rhythm is yours, hold it.",
+        "2": "Most of it is behind you. Stay patient to the end."
+      },
+      "fuel": {
+        "0": "Forty five minutes. Take a sip and a gel if you have one.",
+        "1": "Time to fuel. Water and a gel, now."
+      },
+      "summary": {
+        "withPace": {
+          "0": "Session done! Total {{elapsed}}, {{km, number(maximumFractionDigits: 2)}} km, average pace {{pace}}. Well done!",
+          "1": "Done! {{elapsed}} of work, {{km, number(maximumFractionDigits: 2)}} km, average {{pace}}. Great job!",
+          "2": "Finished! {{elapsed}}, {{km, number(maximumFractionDigits: 2)}} km, pace {{pace}}. A lovely session."
+        },
+        "plain": {
+          "0": "Session done! Total {{elapsed}}, {{km, number(maximumFractionDigits: 2)}} km. Well done!",
+          "1": "Done! {{elapsed}} of work and {{km, number(maximumFractionDigits: 2)}} km behind you. Great job!",
+          "2": "Finished! {{elapsed}}, {{km, number(maximumFractionDigits: 2)}} km. A lovely session."
+        }
+      }
     }
   },
   "achievements": {

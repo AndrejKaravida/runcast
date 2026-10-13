@@ -55,5 +55,21 @@
     "conditions": "{{pct}}% kiše · vetar {{wind}} km/h",
     "attribution": "Podaci:"
   },
+  "readiness": {
+    "title": "Spremnost",
+    "sleep": "San {{hours}} h",
+    "hrv": "HRV {{value}} ms",
+    "rhr": "Puls u miru {{value}}",
+    "level": {
+      "fresh": "Svež",
+      "normal": "Normalan",
+      "tired": "Umoran"
+    },
+    "hints": {
+      "sleepShort": "San je bio kratak ({{hours}} h). Danas razmisli o lakšem tempu.",
+      "hrvLow": "HRV ti je {{pct}}% ispod proseka. Razmisli o lakšem treningu.",
+      "rhrHigh": "Puls u miru je {{bpm}} otkucaja iznad proseka. Telo možda traži lakši dan."
+    }
+  },
   "rangeError": "Deo plana nije učitan."
 }

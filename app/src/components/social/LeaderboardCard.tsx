@@ -5,19 +5,18 @@ import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { Avatar } from '@/components/ui/Avatar';
 import { EmptyState } from '@/components/ui/EmptyState';
-import type { LeaderboardEntry } from '@/features/social/queries';
+import type { AdherenceLeaderboardEntry, LeaderboardEntry } from '@/features/social/queries';
+
+type LeaderboardCardEntry = LeaderboardEntry | AdherenceLeaderboardEntry;
 
 interface LeaderboardCardProps {
-  entries: LeaderboardEntry[];
+  entries: LeaderboardCardEntry[];
   currentUserId: string;
+  metric?: 'km' | 'adherence';
 }
 
-function Row({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
+function Row({ entry, isMe }: { entry: LeaderboardCardEntry; isMe: boolean }) {
   const { t } = useTranslation('stats');
-  const sessions =
-    entry.sessions === 1
-      ? t('leaderboard.sessionsOne', { count: entry.sessions })
-      : t('leaderboard.sessionsMany', { count: entry.sessions });
   return (
     <div
       data-testid="leaderboard-row"
@@ -31,22 +30,40 @@ function Row({ entry, isMe }: { entry: LeaderboardEntry; isMe: boolean }) {
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium">{entry.display_name ?? t('leaderboard.anonymous')}</p>
         <p className="num text-caption text-text-muted">
-          {entry.distance_km} km · {sessions}
+          {'adherence' in entry
+            ? t('leaderboard.adherenceCaption', {
+                done: entry.done,
+                prescribed: entry.prescribed,
+                km: entry.distance_km,
+              })
+            : `${entry.distance_km} km · ${
+                entry.sessions === 1
+                  ? t('leaderboard.sessionsOne', { count: entry.sessions })
+                  : t('leaderboard.sessionsMany', { count: entry.sessions })
+              }`}
         </p>
       </div>
+      {'adherence' in entry ? (
+        <AppBadge tone="primary">{t('leaderboard.adherenceBadge', { percent: entry.adherence })}</AppBadge>
+      ) : null}
       {isMe ? <AppBadge tone="primary">{t('leaderboard.you')}</AppBadge> : null}
     </div>
   );
 }
 
-export function LeaderboardCard({ entries, currentUserId }: LeaderboardCardProps) {
+export function LeaderboardCard({ entries, currentUserId, metric = 'km' }: LeaderboardCardProps) {
   const { t } = useTranslation('stats');
   const publicEntries = entries.filter((entry) => entry.is_public);
   const me = entries.find((entry) => entry.user_id === currentUserId) ?? null;
   const meOutsideTop = publicEntries.length > 20 && me?.is_public === true;
 
   if (publicEntries.length === 0) {
-    return (
+    return metric === 'adherence' ? (
+      <EmptyState
+        title={t('leaderboard.adherenceEmptyTitle')}
+        description={t('leaderboard.adherenceEmptyDescription')}
+      />
+    ) : (
       <EmptyState
         title={t('leaderboard.emptyTitle')}
         description={t('leaderboard.emptyDescription')}
@@ -81,19 +98,23 @@ export function LeaderboardCard({ entries, currentUserId }: LeaderboardCardProps
         ) : null}
       </div>
       <p className="text-caption text-text-muted">
-        {me?.is_public ? (
-          me.distance_km > 0 ? (
-            t('leaderboard.rank', { rank: me.rank })
-          ) : (
-            t('leaderboard.noKm')
-          )
-        ) : (
+        {me && !me.is_public ? (
           <>
             {t('leaderboard.notPublic')}{' '}
             <Link to="/settings" className="font-medium text-primary-ink">
               {t('leaderboard.emptyAction')}
             </Link>
           </>
+        ) : me ? (
+          'adherence' in me ? (
+            t('leaderboard.rank', { rank: me.rank })
+          ) : me.distance_km > 0 ? (
+            t('leaderboard.rank', { rank: me.rank })
+          ) : (
+            t('leaderboard.noKm')
+          )
+        ) : (
+          t('leaderboard.adherenceSelfEmpty')
         )}
       </p>
     </div>

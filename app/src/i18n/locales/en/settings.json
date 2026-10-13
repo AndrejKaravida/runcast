@@ -126,7 +126,9 @@
     "xiaomiAndroid": "Xiaomi: Mi Fitness/Zepp Life → Third-party data → Google Fit, then Google Fit → Sync with Health Connect.",
     "privacy": "Data stays on your phone. RunCast stores only the date, distance and duration of a run.",
     "consent": "Importing is voluntary and started by you. Imported runs stay linked to your account.",
-    "consentLink": "Privacy Policy"
+    "consentLink": "Privacy Policy",
+    "readinessToggle": "Readiness import",
+    "readinessHint": "Sleep, HRV and resting heart rate are read only when this is on. They are processed locally on your phone and never leave the device."
   },
   "push": {
     "label": "Notifications",

@@ -70,5 +70,27 @@
   "errors": {
     "daysCount": "Izaberi tačno {{count}} dana za trening.",
     "longRunDayMissing": "Dan dugog trčanja mora biti među izabranim danima."
+  },
+  "races": {
+    "title": "Trke",
+    "empty": "Još nemaš trka. Dodaj prvu i koristi je kao cilj plana.",
+    "add": "Dodaj trku",
+    "addTitle": "Nova trka",
+    "added": "Trka je dodata.",
+    "addFailed": "Dodavanje trke nije uspelo. Proveri podatke i probaj ponovo.",
+    "planTarget": "Cilj plana",
+    "inDaysOne": "za {{days}} dan",
+    "inDaysMany": "za {{days}} dana",
+    "passed": "prošla",
+    "meta": "{{date}} · {{distance}} km",
+    "delete": "Obriši",
+    "deleteTitle": "Obriši trku?",
+    "deleteText": "Trka {{name}} se briše iz kalendara. Ova radnja ne može da se vrati.",
+    "deleted": "Trka je obrisana.",
+    "deleteBlocked": "Ova trka je cilj aktivnog plana i ne može da se obriše. Izaberi drugu trku kao cilj plana, pa probaj ponovo.",
+    "deleteFailed": "Brisanje trke nije uspelo. Probaj ponovo.",
+    "targetLabel": "Ciljna trka",
+    "targetNew": "Nova trka",
+    "targetOption": "{{name}} · {{date}}"
   }
 }

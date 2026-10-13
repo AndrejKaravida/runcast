@@ -55,5 +55,21 @@
     "conditions": "{{pct}}% rain · wind {{wind}} km/h",
     "attribution": "Data:"
   },
+  "readiness": {
+    "title": "Readiness",
+    "sleep": "Sleep {{hours}} h",
+    "hrv": "HRV {{value}} ms",
+    "rhr": "Resting HR {{value}}",
+    "level": {
+      "fresh": "Fresh",
+      "normal": "Normal",
+      "tired": "Tired"
+    },
+    "hints": {
+      "sleepShort": "Short sleep ({{hours}} h). Consider an easier pace today.",
+      "hrvLow": "Your HRV is {{pct}}% below your average. Consider an easier workout.",
+      "rhrHigh": "Your resting HR is {{bpm}} bpm above your average. Your body may need an easier day."
+    }
+  },
   "rangeError": "Part of the plan didn't load."
 }

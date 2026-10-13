@@ -107,6 +107,13 @@
     "emptyAction": "Open settings",
     "sessionsOne": "{{count}} session",
     "sessionsMany": "{{count}} sessions",
+    "metricKm": "Distance",
+    "metricAdherence": "Adherence",
+    "adherenceBadge": "{{percent}}%",
+    "adherenceCaption": "{{done}}/{{prescribed}} sessions · {{km}} km",
+    "adherenceEmptyTitle": "Not enough plan data for this week.",
+    "adherenceEmptyDescription": "This board tracks how closely you stick to your plan. It needs at least two planned runs this week.",
+    "adherenceSelfEmpty": "Your plan does not have at least two runs for this week yet.",
     "tabGlobal": "Global",
     "tabFriends": "Friends",
     "tabFeed": "Feed"

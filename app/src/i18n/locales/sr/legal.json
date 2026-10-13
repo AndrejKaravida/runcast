@@ -35,6 +35,7 @@
         "heading": "Zdravstveni podaci",
         "paragraphs": [
           "Uvoz iz Apple Health ili Health Connect je dobrovoljan i pokrećeš ga sam. Uvoze se trčanja (datum, distanca i trajanje) i koristimo ih samo za istoriju treninga i statistiku u aplikaciji.",
+          "Kad uključiš uvoz spremnosti u podešavanjima, RunCast čita i san (trajanje i faze), varijabilnost pulsa (HRV) i puls u miru. Ti podaci se obrađuju isključivo lokalno na tvom telefonu, ne šalju se na server i služe samo za prikaz spremnosti i lokalni prosek.",
           "Zdravstvene podatke nikada ne koristimo za oglašavanje, ne prodajemo ih i ne delimo sa trećim licima. Brisanjem uvezenih trčanja ili naloga brišemo i te podatke.",
           "Telesne podatke koje uneseš ručno možeš izmeniti ili obrisati u profilu u svakom trenutku."
         ]
@@ -60,7 +61,7 @@
       {
         "heading": "Kolačići i lokalno skladište",
         "paragraphs": [
-          "RunCast ne koristi kolačiće za praćenje. U lokalnom skladištu pregledača (localStorage) čuvamo samo temu, izabrani jezik, uključenost podsetnika za gorivo i vreme poslednjeg uvoza iz zdravstvenih aplikacija.",
+          "RunCast ne koristi kolačiće za praćenje. U lokalnom skladištu pregledača (localStorage) čuvamo samo temu, izabrani jezik, uključenost podsetnika za gorivo, vreme poslednjeg uvoza iz zdravstvenih aplikacija i, ako je uključen uvoz spremnosti, lokalnu istoriju sna, HRV i pulsa u miru.",
           "Ti podaci ostaju na tvom uređaju i ne šalju se nama. Brisanjem podataka pregledača brišeš ih."
         ]
       },

@@ -11,10 +11,16 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/auth/AuthProvider';
-import { useFriendsFeed, useFriendsLeaderboard, useLeaderboard } from '@/features/social/queries';
+import {
+  useAdherenceLeaderboard,
+  useFriendsFeed,
+  useFriendsLeaderboard,
+  useLeaderboard,
+} from '@/features/social/queries';
 import { startOfWeekIso, todayIso } from '@/lib/dates';
 
 type LeaderboardTab = 'global' | 'friends' | 'feed';
+type LeaderboardMetric = 'km' | 'adherence';
 
 function LeaderboardSkeleton() {
   return (
@@ -42,9 +48,13 @@ export function LeaderboardPage() {
   const navigate = useNavigate();
   const { session } = useAuth();
   const [tab, setTab] = useState<LeaderboardTab>('global');
+  const [metric, setMetric] = useState<LeaderboardMetric>('km');
   const weekStart = startOfWeekIso(todayIso());
+  const adherenceActive = metric === 'adherence' && tab !== 'feed';
   const global = useLeaderboard(weekStart);
   const friends = useFriendsLeaderboard(weekStart);
+  const globalAdherence = useAdherenceLeaderboard(weekStart, 'global', adherenceActive);
+  const friendsAdherence = useAdherenceLeaderboard(weekStart, 'friends', adherenceActive);
   const feed = useFriendsFeed();
 
   return (
@@ -75,8 +85,27 @@ export function LeaderboardPage() {
         ]}
       />
 
+      {tab !== 'feed' ? (
+        <SegmentedControl
+          value={metric}
+          onChange={setMetric}
+          options={[
+            { value: 'km', label: t('leaderboard.metricKm') },
+            { value: 'adherence', label: t('leaderboard.metricAdherence') },
+          ]}
+        />
+      ) : null}
+
       {tab === 'global' ? (
-        global.isLoading ? (
+        adherenceActive ? (
+          globalAdherence.isLoading ? (
+            <LeaderboardSkeleton />
+          ) : globalAdherence.isError ? (
+            <QueryError onRetry={() => void globalAdherence.refetch()} />
+          ) : session ? (
+            <LeaderboardCard entries={globalAdherence.data ?? []} currentUserId={session.user.id} metric="adherence" />
+          ) : null
+        ) : global.isLoading ? (
           <LeaderboardSkeleton />
         ) : global.isError ? (
           <QueryError onRetry={() => void global.refetch()} />
@@ -84,7 +113,19 @@ export function LeaderboardPage() {
           <LeaderboardCard entries={global.data ?? []} currentUserId={session.user.id} />
         ) : null
       ) : tab === 'friends' ? (
-        friends.isLoading ? (
+        adherenceActive ? (
+          friendsAdherence.isLoading ? (
+            <LeaderboardSkeleton />
+          ) : friendsAdherence.isError ? (
+            <QueryError onRetry={() => void friendsAdherence.refetch()} />
+          ) : session ? (
+            <FriendsLeaderboardCard
+              entries={friendsAdherence.data ?? []}
+              currentUserId={session.user.id}
+              metric="adherence"
+            />
+          ) : null
+        ) : friends.isLoading ? (
           <LeaderboardSkeleton />
         ) : friends.isError ? (
           <QueryError onRetry={() => void friends.refetch()} />

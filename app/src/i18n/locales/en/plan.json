@@ -70,5 +70,27 @@
   "errors": {
     "daysCount": "Pick exactly {{count}} training days.",
     "longRunDayMissing": "The long run day must be one of the selected days."
+  },
+  "races": {
+    "title": "Races",
+    "empty": "No races yet. Add your first one and use it as the plan goal.",
+    "add": "Add race",
+    "addTitle": "New race",
+    "added": "The race has been added.",
+    "addFailed": "Adding the race failed. Check the details and try again.",
+    "planTarget": "Plan goal",
+    "inDaysOne": "in {{days}} day",
+    "inDaysMany": "in {{days}} days",
+    "passed": "passed",
+    "meta": "{{date}} · {{distance}} km",
+    "delete": "Delete",
+    "deleteTitle": "Delete race?",
+    "deleteText": "The race {{name}} will be removed from your calendar. This cannot be undone.",
+    "deleted": "The race has been deleted.",
+    "deleteBlocked": "This race is the goal of your active plan and can't be deleted. Choose another race as the plan goal and try again.",
+    "deleteFailed": "Deleting the race failed. Please try again.",
+    "targetLabel": "Goal race",
+    "targetNew": "New race",
+    "targetOption": "{{name}} · {{date}}"
   }
 }

@@ -1,22 +1,27 @@
 import { useState } from 'react';
 import { defaultRunDays, formatDuration, isRunType, type RunWindow, type VolumeBand } from '@runcast/shared';
-import { Download, Pencil, RefreshCw } from 'lucide-react';
+import { Download, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
-import { AppInput } from '@/components/ui/AppInput';
 import { AppModal } from '@/components/ui/AppModal';
+import { AppSelect } from '@/components/ui/AppSelect';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { SettingsSubpage } from '@/components/settings/SettingsSubpage';
 import { PlanFields } from '@/components/forms/PlanFields';
+import { RaceForm } from '@/components/forms/RaceForm';
 import { useExportPlanIcs } from '@/features/plans/export';
 import { planPaces } from '@/features/plans/plan-data';
 import {
+  RaceDeleteBlockedError,
   useActivePlan,
+  useAddRace,
+  useDeleteRace,
   useGeneratePlan,
+  useRaces,
   useUpdateRace,
   useWorkoutsRange,
   type GeneratePlanInput,
@@ -30,7 +35,7 @@ import {
   type PlanDraft,
   type PlanDraftError,
 } from '@/lib/plan-form';
-import type { WorkoutsRow } from '@/types';
+import type { RacesRow, WorkoutsRow } from '@/types';
 
 const QUALITY_TYPES = ['TEMPO', 'INTERVALS', 'REPETITIONS'];
 
@@ -49,6 +54,21 @@ function planRunDays(workouts: WorkoutsRow[], daysPerWeek: number, fallback: num
   return chosen ? [...chosen.days].sort((a, b) => a - b) : fallback;
 }
 
+function emptyRaceDraft(): PlanDraft {
+  return {
+    raceName: '',
+    raceDate: '',
+    distanceKm: '42.195',
+    goalTime: '',
+    recentDistanceKm: '',
+    recentTime: '',
+    daysPerWeek: 4,
+    longRunDay: 6,
+    runDays: defaultRunDays(4, 6),
+    experience: 'first',
+  };
+}
+
 function PlanSettingsSkeleton() {
   return (
     <div data-testid="plan-settings-skeleton" className="space-y-6">
@@ -62,17 +82,26 @@ export function SettingsPlanPage() {
   const { t } = useTranslation('settings');
   const { data: profile } = useProfile();
   const { data: plan, isLoading: planLoading } = useActivePlan();
+  const { data: races = [] } = useRaces();
   const { data: planWorkouts = [] } = useWorkoutsRange(plan?.start_date ?? todayIso(), plan?.race_date ?? todayIso());
   const generatePlan = useGeneratePlan();
   const updateRace = useUpdateRace();
+  const addRace = useAddRace();
+  const deleteRace = useDeleteRace();
   const exportPlan = useExportPlanIcs();
 
   const [planForm, setPlanForm] = useState<PlanDraft | null>(null);
-  const [raceForm, setRaceForm] = useState<PlanDraft | null>(null);
+  const [raceTarget, setRaceTarget] = useState('');
+  const [raceForm, setRaceForm] = useState<{ id: string; draft: PlanDraft } | null>(null);
   const [raceDraft, setRaceDraft] = useState<PlanDraft | null>(null);
+  const [raceAddForm, setRaceAddForm] = useState<PlanDraft | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<RacesRow | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [pendingInput, setPendingInput] = useState<GeneratePlanInput | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const futureRaces = races.filter((race) => dayDiff(todayIso(), race.race_date) > 0);
 
   function buildPlanForm(): PlanDraft {
     const race = plan?.races ?? null;
@@ -90,6 +119,16 @@ export function SettingsPlanPage() {
       longRunDay,
       runDays: planWorkouts.length > 0 ? planRunDays(planWorkouts, daysPerWeek, fallbackDays) : fallbackDays,
       experience: profile?.experience === 'experienced' ? 'experienced' : 'first',
+    };
+  }
+
+  function buildRaceDraft(race: RacesRow): PlanDraft {
+    return {
+      ...buildPlanForm(),
+      raceName: race.name ?? '',
+      raceDate: race.race_date,
+      distanceKm: String(race.distance_km),
+      goalTime: race.goal_time_sec ? formatDuration(race.goal_time_sec) : '',
     };
   }
 
@@ -124,46 +163,115 @@ export function SettingsPlanPage() {
     }
   }
 
+  function openPlanForm() {
+    setPlanForm(buildPlanForm());
+    setRaceTarget(plan?.races && dayDiff(todayIso(), plan.races.race_date) > 0 ? plan.races.id : '');
+  }
+
+  function handleRaceTargetChange(id: string) {
+    if (!planForm) return;
+    setRaceTarget(id);
+    const race = races.find((item) => item.id === id);
+    if (!race) return;
+    setPlanForm({
+      ...planForm,
+      raceName: race.name ?? '',
+      raceDate: race.race_date,
+      distanceKm: String(race.distance_km),
+      goalTime: race.goal_time_sec ? formatDuration(race.goal_time_sec) : '',
+    });
+  }
+
   function handleGenerateClick(draft: PlanDraft | null = planForm) {
     if (!draft) return;
     const input = collectPlanInput(draft);
     if (!input) return;
+    const withTarget: GeneratePlanInput = { ...input, raceId: raceTarget || undefined };
     const usesBasePlan = !input.recentRace && !input.race?.goalTimeSec;
     if (usesBasePlan) {
-      setPendingInput(input);
+      setPendingInput(withTarget);
       return;
     }
-    void runGenerate(input);
+    void runGenerate(withTarget);
+  }
+
+  function openRaceEdit(race: RacesRow) {
+    setError(null);
+    setNotice(null);
+    setRaceForm({ id: race.id, draft: buildRaceDraft(race) });
   }
 
   function handleRaceRegenerate() {
-    if (raceDraft) handleGenerateClick(raceDraft);
+    if (!raceDraft || !plan?.races?.id) return;
+    const input = collectPlanInput(raceDraft);
+    if (!input) return;
+    void runGenerate({ ...input, raceId: plan.races.id });
   }
 
   async function handleRaceSave() {
-    if (!raceForm || !plan?.races) return;
+    if (!raceForm) return;
     setError(null);
     setNotice(null);
-    const draftError = validatePlanDraft(raceForm, ['raceDate', 'goalTime'], todayIso());
+    const draftError = validatePlanDraft(raceForm.draft, ['raceDate', 'goalTime'], todayIso());
     if (draftError) {
-      setError(planErrorText(raceForm, draftError));
+      setError(planErrorText(raceForm.draft, draftError));
       return;
     }
     try {
       await updateRace.mutateAsync({
-        id: plan.races.id,
-        name: raceForm.raceName.trim() || null,
-        raceDate: raceForm.raceDate,
-        distanceKm: Number(raceForm.distanceKm),
-        goalTimeSec: parseOptionalTime(raceForm.goalTime),
+        id: raceForm.id,
+        name: raceForm.draft.raceName.trim() || null,
+        raceDate: raceForm.draft.raceDate,
+        distanceKm: Number(raceForm.draft.distanceKm),
+        goalTimeSec: parseOptionalTime(raceForm.draft.goalTime),
       });
     } catch {
       setError(t('plan.raceEditFailed'));
       return;
     }
-    setRaceDraft(raceForm);
+    setRaceDraft(plan?.races?.id === raceForm.id ? raceForm.draft : null);
     setRaceForm(null);
     setNotice(t('plan.raceEdited'));
+  }
+
+  async function handleRaceAdd() {
+    if (!raceAddForm) return;
+    setError(null);
+    setNotice(null);
+    const draftError = validatePlanDraft(raceAddForm, ['raceDate', 'goalTime'], todayIso());
+    if (draftError) {
+      setError(planErrorText(raceAddForm, draftError));
+      return;
+    }
+    try {
+      await addRace.mutateAsync({
+        name: raceAddForm.raceName.trim() || null,
+        raceDate: raceAddForm.raceDate,
+        distanceKm: Number(raceAddForm.distanceKm),
+        goalTimeSec: parseOptionalTime(raceAddForm.goalTime),
+      });
+    } catch {
+      setError(t('plan:races.addFailed'));
+      return;
+    }
+    setRaceAddForm(null);
+    setNotice(t('plan:races.added'));
+  }
+
+  async function handleRaceDelete() {
+    if (!deleteTarget) return;
+    setDeleteError(null);
+    setNotice(null);
+    try {
+      await deleteRace.mutateAsync(deleteTarget.id);
+    } catch (deleteFailure) {
+      setDeleteError(
+        deleteFailure instanceof RaceDeleteBlockedError ? t('plan:races.deleteBlocked') : t('plan:races.deleteFailed'),
+      );
+      return;
+    }
+    setDeleteTarget(null);
+    setNotice(t('plan:races.deleted'));
   }
 
   async function handleExportPlan() {
@@ -215,16 +323,6 @@ export function SettingsPlanPage() {
                   {t('plan.benchmarkCta')}
                 </Link>
               </div>
-              {plan.races ? (
-                <AppButton
-                  variant="secondary"
-                  className="w-full"
-                  disabled={planForm !== null}
-                  onClick={() => setRaceForm(buildPlanForm())}
-                >
-                  <Pencil className="h-4 w-4" aria-hidden /> {t('plan.editRace')}
-                </AppButton>
-              ) : null}
               <AppButton
                 variant="secondary"
                 className="w-full"
@@ -239,9 +337,96 @@ export function SettingsPlanPage() {
               <p className="text-sm text-text-muted">{t('plan.noPlan')}</p>
             </AppCard>
           )}
+
+          <AppCard className="space-y-3">
+            <p className="section-label">{t('plan:races.title')}</p>
+            {races.length > 0 ? (
+              <ul className="space-y-2">
+                {races.map((race) => {
+                  const daysUntil = dayDiff(todayIso(), race.race_date);
+                  const isPlanTarget = plan?.races?.id === race.id;
+                  return (
+                    <li key={race.id} data-testid="race-row" className="rounded-xl bg-surface-elevated p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">{race.name ?? t('plan.raceFallback')}</p>
+                          <p className="num text-caption text-text-muted">
+                            {t('plan:races.meta', {
+                              date: formatDateShort(race.race_date),
+                              distance: race.distance_km,
+                            })}
+                          </p>
+                          <p className="text-caption text-text-muted">
+                            {daysUntil < 0
+                              ? t('plan:races.passed')
+                              : t(daysUntil === 1 ? 'plan:races.inDaysOne' : 'plan:races.inDaysMany', {
+                                  days: daysUntil,
+                                })}
+                          </p>
+                        </div>
+                        {isPlanTarget ? <AppBadge tone="primary">{t('plan:races.planTarget')}</AppBadge> : null}
+                      </div>
+                      <div className="mt-2 flex gap-2">
+                        <AppButton size="sm" variant="secondary" className="w-auto" onClick={() => openRaceEdit(race)}>
+                          <Pencil className="h-4 w-4" aria-hidden /> {t('plan.editRace')}
+                        </AppButton>
+                        <AppButton
+                          size="sm"
+                          variant="ghost"
+                          className="w-auto"
+                          onClick={() => {
+                            setDeleteError(null);
+                            setDeleteTarget(race);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden /> {t('plan:races.delete')}
+                        </AppButton>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="text-sm text-text-muted">{t('plan:races.empty')}</p>
+            )}
+            {raceAddForm ? (
+              <div className="space-y-3 rounded-xl bg-surface-elevated p-3">
+                <p className="text-sm font-medium">{t('plan:races.addTitle')}</p>
+                <RaceForm value={raceAddForm} onChange={(patch) => setRaceAddForm({ ...raceAddForm, ...patch })} />
+                <div className="flex gap-3">
+                  <AppButton variant="secondary" className="flex-1" onClick={() => setRaceAddForm(null)}>
+                    {t('cancel')}
+                  </AppButton>
+                  <AppButton className="flex-1" loading={addRace.isPending} onClick={() => void handleRaceAdd()}>
+                    {t('plan.raceSave')}
+                  </AppButton>
+                </div>
+              </div>
+            ) : (
+              <AppButton variant="secondary" className="w-full" onClick={() => setRaceAddForm(emptyRaceDraft())}>
+                <Plus className="h-4 w-4" aria-hidden /> {t('plan:races.add')}
+              </AppButton>
+            )}
+          </AppCard>
+
           {planForm ? (
             <AppCard className="space-y-3">
               <p className="text-sm font-medium">{t('plan.newPlan')}</p>
+              <AppSelect
+                label={t('plan:races.targetLabel')}
+                value={raceTarget}
+                onChange={(event) => handleRaceTargetChange(event.target.value)}
+              >
+                <option value="">{t('plan:races.targetNew')}</option>
+                {futureRaces.map((race) => (
+                  <option key={race.id} value={race.id}>
+                    {t('plan:races.targetOption', {
+                      name: race.name ?? t('plan.raceFallback'),
+                      date: formatDateShort(race.race_date),
+                    })}
+                  </option>
+                ))}
+              </AppSelect>
               <PlanFields
                 variant="settings"
                 groups={['race', 'goal', 'schedule', 'experience']}
@@ -258,7 +443,7 @@ export function SettingsPlanPage() {
               </div>
             </AppCard>
           ) : (
-            <AppButton variant="secondary" className="w-full" onClick={() => setPlanForm(buildPlanForm())}>
+            <AppButton variant="secondary" className="w-full" onClick={openPlanForm}>
               <RefreshCw className="h-4 w-4" aria-hidden /> {t('plan.generateNew')}
             </AppButton>
           )}
@@ -287,22 +472,9 @@ export function SettingsPlanPage() {
       <AppModal open={raceForm !== null} onClose={() => setRaceForm(null)} title={t('plan.raceEditTitle')}>
         {raceForm ? (
           <div className="space-y-3">
-            <AppInput
-              label={t('plan.raceName')}
-              value={raceForm.raceName}
-              onChange={(event) => setRaceForm({ ...raceForm, raceName: event.target.value })}
-            />
-            <PlanFields
-              variant="settings"
-              groups={['race']}
-              value={raceForm}
-              onChange={(patch) => setRaceForm({ ...raceForm, ...patch })}
-            />
-            <AppInput
-              label={t('plan.goalTime')}
-              placeholder="3:45:00"
-              value={raceForm.goalTime}
-              onChange={(event) => setRaceForm({ ...raceForm, goalTime: event.target.value })}
+            <RaceForm
+              value={raceForm.draft}
+              onChange={(patch) => setRaceForm({ ...raceForm, draft: { ...raceForm.draft, ...patch } })}
             />
             <div className="flex gap-3">
               <AppButton variant="secondary" className="flex-1" onClick={() => setRaceForm(null)}>
@@ -328,6 +500,23 @@ export function SettingsPlanPage() {
           if (input) void runGenerate(input);
         }}
         onClose={() => setPendingInput(null)}
+      />
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title={t('plan:races.deleteTitle')}
+        description={t('plan:races.deleteText', {
+          name: deleteTarget?.name ?? t('plan.raceFallback'),
+        })}
+        confirmLabel={t('plan:races.delete')}
+        tone="danger"
+        loading={deleteRace.isPending}
+        error={deleteError ?? undefined}
+        onConfirm={() => void handleRaceDelete()}
+        onClose={() => {
+          setDeleteTarget(null);
+          setDeleteError(null);
+        }}
       />
     </SettingsSubpage>
   );

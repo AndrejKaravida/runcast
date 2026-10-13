@@ -5,19 +5,27 @@ import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { Avatar } from '@/components/ui/Avatar';
 import { EmptyState } from '@/components/ui/EmptyState';
-import type { FriendsLeaderboardEntry } from '@/features/social/queries';
+import type { AdherenceLeaderboardEntry, FriendsLeaderboardEntry } from '@/features/social/queries';
+
+type FriendsLeaderboardCardEntry = FriendsLeaderboardEntry | AdherenceLeaderboardEntry;
 
 interface FriendsLeaderboardCardProps {
-  entries: FriendsLeaderboardEntry[];
+  entries: FriendsLeaderboardCardEntry[];
   currentUserId: string;
+  metric?: 'km' | 'adherence';
 }
 
-export function FriendsLeaderboardCard({ entries, currentUserId }: FriendsLeaderboardCardProps) {
+export function FriendsLeaderboardCard({ entries, currentUserId, metric = 'km' }: FriendsLeaderboardCardProps) {
   const { t } = useTranslation('stats');
   const { t: tSocial } = useTranslation('social');
 
   if (entries.length <= 1) {
-    return (
+    return metric === 'adherence' ? (
+      <EmptyState
+        title={t('leaderboard.adherenceEmptyTitle')}
+        description={t('leaderboard.adherenceEmptyDescription')}
+      />
+    ) : (
       <EmptyState
         title={tSocial('friends.emptyTitle')}
         description={tSocial('friends.emptyDescription')}
@@ -33,10 +41,6 @@ export function FriendsLeaderboardCard({ entries, currentUserId }: FriendsLeader
   return (
     <div className="space-y-2">
       {entries.map((entry) => {
-        const sessions =
-          entry.sessions === 1
-            ? t('leaderboard.sessionsOne', { count: entry.sessions })
-            : t('leaderboard.sessionsMany', { count: entry.sessions });
         const isMe = entry.user_id === currentUserId;
         return (
           <div
@@ -52,9 +56,22 @@ export function FriendsLeaderboardCard({ entries, currentUserId }: FriendsLeader
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{entry.display_name ?? t('leaderboard.anonymous')}</p>
               <p className="num text-caption text-text-muted">
-                {entry.distance_km} km · {sessions}
+                {'adherence' in entry
+                  ? t('leaderboard.adherenceCaption', {
+                      done: entry.done,
+                      prescribed: entry.prescribed,
+                      km: entry.distance_km,
+                    })
+                  : `${entry.distance_km} km · ${
+                      entry.sessions === 1
+                        ? t('leaderboard.sessionsOne', { count: entry.sessions })
+                        : t('leaderboard.sessionsMany', { count: entry.sessions })
+                    }`}
               </p>
             </div>
+            {'adherence' in entry ? (
+              <AppBadge tone="primary">{t('leaderboard.adherenceBadge', { percent: entry.adherence })}</AppBadge>
+            ) : null}
             {isMe ? <AppBadge tone="primary">{t('leaderboard.you')}</AppBadge> : null}
           </div>
         );

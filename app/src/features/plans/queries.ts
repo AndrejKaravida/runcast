@@ -10,10 +10,11 @@ import {
 import { useAuth } from '@/auth/AuthProvider';
 import { addDaysIso, todayIso } from '@/lib/dates';
 import { supabase } from '@/lib/supabase';
-import type { Json, PlansRow, WorkoutsRow } from '@/types';
+import type { Json, PlansRow, RacesRow, WorkoutsRow } from '@/types';
 
 export interface GeneratePlanInput {
   race: { name: string | null; raceDate: string; distanceKm: number; goalTimeSec: number | null } | null;
+  raceId?: string;
   recentRace: { distanceKm: number; timeSec: number } | null;
   daysPerWeek: 3 | 4 | 5 | 6;
   longRunDay: number;
@@ -117,15 +118,18 @@ export function useGeneratePlan() {
       };
       const draft = generatePlan(config);
 
-      const { data, error } = await supabase.rpc('create_plan_with_workouts', {
-        p_race: (input.race
+      const racePayload =
+        input.race && !input.raceId
           ? {
               name: input.race.name,
               raceDate: input.race.raceDate,
               distanceKm: input.race.distanceKm,
               goalTimeSec: input.race.goalTimeSec,
             }
-          : null) as Json,
+          : null;
+
+      const { data, error } = await supabase.rpc('create_plan_with_workouts', {
+        p_race: racePayload as Json,
         p_start_date: startDate,
         p_race_date: raceDate,
         p_weeks: draft.weeks,
@@ -138,6 +142,21 @@ export function useGeneratePlan() {
         p_workouts: draft.workouts as unknown as Json,
       });
       if (error) throw error;
+
+      if (input.raceId && input.race) {
+        const { error: raceError } = await supabase
+          .from('races')
+          .update({
+            name: input.race.name,
+            race_date: input.race.raceDate,
+            distance_km: input.race.distanceKm,
+            goal_time_sec: input.race.goalTimeSec,
+          })
+          .eq('id', input.raceId);
+        if (raceError) throw raceError;
+        const { error: linkError } = await supabase.from('plans').update({ race_id: input.raceId }).eq('id', data);
+        if (linkError) throw linkError;
+      }
       return data;
     },
     onSuccess: () => {
@@ -211,6 +230,84 @@ export function useUpdateRace() {
       queryClient.invalidateQueries({ queryKey: ['plans'] });
       queryClient.invalidateQueries({ queryKey: ['plan'] });
       queryClient.invalidateQueries({ queryKey: ['races'] });
+    },
+  });
+}
+
+export function useRaces() {
+  const { session } = useAuth();
+  const userId = session?.user.id;
+  return useQuery({
+    queryKey: ['races', userId],
+    enabled: Boolean(userId),
+    queryFn: async (): Promise<RacesRow[]> => {
+      const { data, error } = await supabase
+        .from('races')
+        .select('*')
+        .eq('user_id', userId as string)
+        .order('race_date', { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export interface AddRaceInput {
+  name: string | null;
+  raceDate: string;
+  distanceKm: number;
+  goalTimeSec: number | null;
+}
+
+export function useAddRace() {
+  const { session } = useAuth();
+  const userId = session?.user.id;
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: AddRaceInput) => {
+      if (!userId) throw new Error('not authenticated');
+      const { error } = await supabase.from('races').insert({
+        user_id: userId,
+        name: input.name,
+        race_date: input.raceDate,
+        distance_km: input.distanceKm,
+        goal_time_sec: input.goalTimeSec,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['races'] });
+      queryClient.invalidateQueries({ queryKey: ['plans'] });
+      queryClient.invalidateQueries({ queryKey: ['plan'] });
+    },
+  });
+}
+
+export class RaceDeleteBlockedError extends Error {
+  constructor() {
+    super('race is the target of the active plan');
+    this.name = 'RaceDeleteBlockedError';
+  }
+}
+
+export function useDeleteRace() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data: plan, error: planError } = await supabase
+        .from('plans')
+        .select('race_id')
+        .eq('status', 'ACTIVE')
+        .maybeSingle();
+      if (planError) throw planError;
+      if (plan?.race_id === id) throw new RaceDeleteBlockedError();
+      const { error } = await supabase.from('races').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['races'] });
+      queryClient.invalidateQueries({ queryKey: ['plans'] });
+      queryClient.invalidateQueries({ queryKey: ['plan'] });
     },
   });
 }
