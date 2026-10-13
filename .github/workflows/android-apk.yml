@@ -29,8 +29,13 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: android-actions/setup-android@v3
       - run: npm ci
+      - name: Ensure Android SDK packages
+        run: |
+          SDK=/usr/local/lib/android/sdk
+          TOOLS=$(ls -d $SDK/cmdline-tools/*/bin | head -1)
+          yes | "$TOOLS/sdkmanager" --licenses > /dev/null 2>&1 || true
+          "$TOOLS/sdkmanager" "platforms;android-36" "build-tools;36.0.0" > /dev/null 2>&1 || true
       - run: npm run build -w app
         env:
           VITE_SUPABASE_URL: https://zhwqqcewxccjhtdkvck.supabase.co
@@ -39,6 +44,9 @@ jobs:
         working-directory: app
       - run: chmod +x gradlew && ./gradlew assembleDebug
         working-directory: app/android
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
       - uses: actions/upload-artifact@v4
         with:
           name: runcast-debug-apk
