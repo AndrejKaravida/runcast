@@ -33,6 +33,7 @@
     "done": "Urađeno",
     "skipped": "Preskočeno"
   },
+  "appName": "RunCast",
   "loading": "Učitavanje",
   "queryError": {
     "title": "Ne mogu da učitam podatke",

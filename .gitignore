@@ -10,6 +10,25 @@ supabase/.branches/
 playwright-report/
 test-results/
 coverage/
+
+# Capacitor native
+app/android/.gradle/
+app/android/build/
+app/android/app/build/
+app/android/local.properties
+app/android/app/src/main/assets/public/
+app/android/app/src/main/assets/capacitor.config.json
+app/android/app/src/main/assets/capacitor.plugins.json
+app/android/capacitor-cordova-android-plugins/
+app/ios/App/build/
+app/ios/App/DerivedData/
+app/ios/App/App/public/
+app/ios/App/App/capacitor.config.json
+app/ios/App/Pods/
+app/ios/App/.capacitor/
+app/ios/capacitor-cordova-ios-plugins/
+.DS_Store
+
 .agents/
 
 skills-lock.json

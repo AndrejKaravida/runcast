@@ -5,3 +5,6 @@ supabase/.branches/
 playwright-report/
 test-results/
 package-lock.json
+app/android/
+app/ios/
+app/resources/

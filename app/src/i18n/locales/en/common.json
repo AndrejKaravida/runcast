@@ -33,6 +33,7 @@
     "done": "Done",
     "skipped": "Skipped"
   },
+  "appName": "RunCast",
   "loading": "Loading",
   "queryError": {
     "title": "Couldn't load data",
