@@ -71,5 +71,10 @@
       "rhrHigh": "Puls u miru je {{bpm}} otkucaja iznad proseka. Telo možda traži lakši dan."
     }
   },
+  "readinessAssessment": {
+    "title": "Umoran si, a danas je kvalitetan trening",
+    "description": "Telo traži lakši dan. Razmisli da današnji trening odradiš lagano.",
+    "swapAction": "Zameni laganim danom"
+  },
   "rangeError": "Deo plana nije učitan."
 }

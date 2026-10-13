@@ -60,6 +60,7 @@
     "raceDay": "Race day strategy",
     "googleCalendar": "Add to Google Calendar",
     "exportTcx": "Export for watch (.tcx)",
+    "exportFit": "Garmin (.fit)",
     "error": "Action failed. Try again"
   },
   "skip": {

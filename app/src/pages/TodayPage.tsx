@@ -32,6 +32,7 @@ import { LogWorkoutModal } from '@/components/workouts/LogWorkoutModal';
 import { NextWorkoutCard } from '@/components/workouts/NextWorkoutCard';
 import { RecentActivityCard } from '@/components/workouts/RecentActivityCard';
 import { useAchievementCelebration } from '@/features/achievements/seen';
+import { useReadiness } from '@/features/health/queries';
 import { useCompleteWorkout, useRunLogs } from '@/features/logs/queries';
 import { planPaces } from '@/features/plans/plan-data';
 import { nextWorkout, runStreak, weekProgress } from '@/features/plans/progress';
@@ -40,6 +41,7 @@ import { useProfile } from '@/features/profile/queries';
 import { useWeather } from '@/features/weather/queries';
 import { heroStats } from '@/features/workouts/utils';
 import { addDaysIso, dayDiff, endOfWeekIso, startOfWeekIso, todayIso } from '@/lib/dates';
+import type { WorkoutsRow } from '@/types';
 
 function greetingKey(): string {
   const hour = new Date().getHours();
@@ -52,6 +54,21 @@ function streakClasses(streak: number): string {
   if (streak >= 7) return 'bg-warning-soft text-warning-ink';
   if (streak >= 3) return 'bg-primary-soft text-primary-ink';
   return 'bg-surface-elevated text-text-muted';
+}
+
+const READINESS_QUALITY_TYPES: ReadonlySet<WorkoutType> = new Set(['TEMPO', 'INTERVALS', 'REPETITIONS']);
+
+function pickWeekSwapCandidate(target: WorkoutsRow, weekWorkouts: WorkoutsRow[], today: string): WorkoutsRow | null {
+  const picked = pickSwapCandidate(
+    { id: target.id, date: today, type: target.type as WorkoutType, status: target.status as WorkoutStatus },
+    weekWorkouts.map((workout) => ({
+      id: workout.id,
+      date: workout.workout_date,
+      type: workout.type as WorkoutType,
+      status: workout.status as WorkoutStatus,
+    })),
+  );
+  return picked ? (weekWorkouts.find((workout) => workout.id === picked.id) ?? null) : null;
 }
 
 function TodaySkeleton() {
@@ -86,6 +103,7 @@ export function TodayPage() {
   } = useWorkoutsRange(plan?.start_date ?? today, plan?.race_date ?? today);
   const { data: logs = [], isLoading: logsLoading } = useRunLogs();
   const weather = useWeather();
+  const readiness = useReadiness();
   const swapWorkouts = useSwapWorkouts();
   const completeWorkout = useCompleteWorkout();
   const { achievement, dismiss } = useAchievementCelebration(planWorkouts, logs, profile);
@@ -106,6 +124,12 @@ export function TodayPage() {
   const todayWorkout = weekWorkouts.find((workout) => workout.workout_date === today) ?? null;
   const runWindow: RunWindow = (profile?.run_window as RunWindow | undefined) ?? 'morning';
   const window = runWindowHours(runWindow);
+  const readinessTired = Boolean(
+    readiness.data &&
+    readiness.data.readiness.level === 'tired' &&
+    todayWorkout?.status === 'PLANNED' &&
+    READINESS_QUALITY_TYPES.has(todayWorkout.type as WorkoutType),
+  );
 
   const assessment = useMemo(() => {
     if (!todayWorkout || !weather.data) return null;
@@ -121,22 +145,13 @@ export function TodayPage() {
 
   const candidate = useMemo(() => {
     if (!todayWorkout || !assessment || (assessment.severity !== 'swap' && assessment.severity !== 'warn')) return null;
-    const picked = pickSwapCandidate(
-      {
-        id: todayWorkout.id,
-        date: today,
-        type: todayWorkout.type as WorkoutType,
-        status: todayWorkout.status as WorkoutStatus,
-      },
-      weekWorkouts.map((workout) => ({
-        id: workout.id,
-        date: workout.workout_date,
-        type: workout.type as WorkoutType,
-        status: workout.status as WorkoutStatus,
-      })),
-    );
-    return picked ? (weekWorkouts.find((workout) => workout.id === picked.id) ?? null) : null;
+    return pickWeekSwapCandidate(todayWorkout, weekWorkouts, today);
   }, [todayWorkout, assessment, weekWorkouts, today]);
+
+  const readinessCandidate = useMemo(() => {
+    if (!todayWorkout || !readinessTired) return null;
+    return pickWeekSwapCandidate(todayWorkout, weekWorkouts, today);
+  }, [todayWorkout, readinessTired, weekWorkouts, today]);
 
   const suggestion = useMemo(() => {
     if (!todayWorkout || !weather.data) return null;
@@ -213,6 +228,10 @@ export function TodayPage() {
   const reschedule =
     suggestion && suggestion.todayScore < RESCHEDULE_GOOD_SCORE && suggestion.options.length > 0 ? suggestion : null;
   const showReschedule = Boolean(reschedule && !bannerDismissed && !isStrength);
+  const readinessVerdict =
+    readinessTired && !verdict && !reschedule
+      ? { title: t('readinessAssessment.title'), description: t('readinessAssessment.description') }
+      : null;
   const isTrainingDay = Boolean(todayWorkout && todayWorkout.type !== 'REST' && todayWorkout.status === 'PLANNED');
   const weatherDate = isTrainingDay ? today : addDaysIso(today, 1);
   const showNextWorkout = Boolean(
@@ -221,11 +240,11 @@ export function TodayPage() {
   const firstName = profile?.display_name?.trim().split(/\s+/)[0] ?? null;
   const stats = todayWorkout ? heroStats(t, todayWorkout, planPaces(plan)) : [];
 
-  async function handleSwap() {
-    if (!todayWorkout || !candidate) return;
+  async function handleSwapWith(second: WorkoutsRow | null) {
+    if (!todayWorkout || !second) return;
     try {
       setSwapError(null);
-      await swapWorkouts.mutateAsync({ first: todayWorkout, second: candidate });
+      await swapWorkouts.mutateAsync({ first: todayWorkout, second });
     } catch {
       setSwapError(t('verdict.swapError'));
     }
@@ -296,7 +315,9 @@ export function TodayPage() {
           weatherLoading={weather.isLoading}
           verdict={showVerdict ? verdict : null}
           reschedule={showReschedule ? reschedule : null}
+          readinessVerdict={readinessVerdict}
           candidate={candidate}
+          readinessCandidate={readinessCandidate}
           promptDismissed={promptDismissed}
           rescheduleApplied={rescheduleApplied}
           swapPending={swapWorkouts.isPending}
@@ -304,7 +325,8 @@ export function TodayPage() {
           completePending={completeWorkout.isPending}
           completeError={completeError}
           onApplyOption={(option) => void handleApplyOption(option)}
-          onLegacySwap={() => void handleSwap()}
+          onLegacySwap={() => void handleSwapWith(candidate)}
+          onReadinessSwap={() => void handleSwapWith(readinessCandidate)}
           onLegacyStay={() => setBannerDismissed(true)}
           onDismissPrompt={dismissPrompt}
           onComplete={() => void handleComplete()}
@@ -326,7 +348,7 @@ export function TodayPage() {
         runWindow={runWindow}
       />
 
-      <ReadinessCard />
+      <ReadinessCard hideHints={readinessVerdict !== null} />
 
       <RaceChip plan={plan} daysToRace={daysToRace} planWeek={planWeek} />
 

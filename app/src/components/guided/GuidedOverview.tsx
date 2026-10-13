@@ -14,10 +14,12 @@ interface GuidedOverviewProps {
   wakeLockSupported: boolean;
   gpsEnabled: boolean;
   exporting: boolean;
+  exportingFit: boolean;
   onBack: () => void;
   onStart: () => void;
   onToggleGps: () => void;
   onExport: () => void;
+  onExportFit: () => void;
 }
 
 export function GuidedOverview({
@@ -27,10 +29,12 @@ export function GuidedOverview({
   wakeLockSupported,
   gpsEnabled,
   exporting,
+  exportingFit,
   onBack,
   onStart,
   onToggleGps,
   onExport,
+  onExportFit,
 }: GuidedOverviewProps) {
   const { t } = useTranslation('guided');
   const paceSegment = timeline.segments.find((segment) => segment.paceLabel);
@@ -116,6 +120,15 @@ export function GuidedOverview({
           onClick={onExport}
         >
           <Watch className="h-4 w-4" aria-hidden /> {t('overview.exportTcx')}
+        </AppButton>
+        <AppButton
+          data-testid="guided-export-fit"
+          variant="secondary"
+          className="w-full"
+          loading={exportingFit}
+          onClick={onExportFit}
+        >
+          <Watch className="h-4 w-4" aria-hidden /> {t('overview.exportFit')}
         </AppButton>
       </div>
     </div>

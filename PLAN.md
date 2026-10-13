@@ -124,6 +124,17 @@ je zatvoren.
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
 
+## v2.0 — FIT export, readiness u proceni, kontinuitet trka
+
+- **FIT export** (F25): pravi strukturirani workout fajl za Garmin (FileId/Workout/WorkoutStep
+  sa pace targetima u mm/s, CRC-16) — encoder u čistom TS-u bez zavisnosti; dugme „Garmin
+  (.fit)" pored TCX-a.
+- **Readiness u dnevnoj proceni** (F26): „Umoran" + quality trening danas → predlog u hero
+  kartici („Zameni laganim danom" ili upozorenje); vremenski banner ima prioritet; ReadinessCard
+  ne duplira isti hint.
+- **Kontinuitet trka** (F27): posle plana oporavka, kartica „Sledeći cilj" vodi na generisanje
+  plana sa unapred izabranom budućom trkom iz kalendara (`/settings/plan?race=...`).
+
 ## v1.9 — audio coach, readiness, više trka, adherence rang lista
 
 - **Audio coach** (F21): TTS naracija u vođenoj trci — BRIEF (cilj, distanca, pace zona),

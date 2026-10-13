@@ -10,7 +10,8 @@
     "start": "Start guided run",
     "gpsOn": "GPS on",
     "gpsOff": "GPS off",
-    "exportTcx": "Export for watch (.tcx)"
+    "exportTcx": "Export for watch (.tcx)",
+    "exportFit": "Garmin (.fit)"
   },
   "session": {
     "step": "Step {{index}}/{{total}}",

@@ -38,6 +38,7 @@ import { WhyCard } from '@/components/workouts/WhyCard';
 import { WorkoutTypeIcon } from '@/components/workouts/WorkoutTypeIcon';
 import { useCompleteWorkout, useRunLogs, useSkipWorkout } from '@/features/logs/queries';
 import { buildGoogleCalendarUrlForWorkout } from '@/features/plans/export';
+import { useExportWorkoutFit } from '@/features/plans/export-fit';
 import { useExportWorkoutTcx } from '@/features/plans/export-tcx';
 import { planPaces } from '@/features/plans/plan-data';
 import { useActivePlan, useMoveWorkout, useWorkout } from '@/features/plans/queries';
@@ -126,6 +127,7 @@ export function WorkoutPage() {
   const completeWorkout = useCompleteWorkout();
   const moveWorkout = useMoveWorkout();
   const exportTcx = useExportWorkoutTcx();
+  const exportFit = useExportWorkoutFit();
   const [logOpen, setLogOpen] = useState(false);
   const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
   const [skipError, setSkipError] = useState<string | null>(null);
@@ -299,6 +301,20 @@ export function WorkoutPage() {
             >
               <Watch className="h-4 w-4" aria-hidden />
               <span className="hidden sm:inline">{t('workout:actions.exportTcx')}</span>
+            </AppButton>
+          ) : null}
+          {workout.type !== 'REST' ? (
+            <AppButton
+              variant="ghost"
+              size="sm"
+              className="w-auto"
+              aria-label={t('workout:actions.exportFit')}
+              data-testid="export-fit"
+              loading={exportFit.isPending}
+              onClick={() => exportFit.mutate({ workout, plan })}
+            >
+              <Watch className="h-4 w-4" aria-hidden />
+              <span className="hidden sm:inline">{t('workout:actions.exportFit')}</span>
             </AppButton>
           ) : null}
           {canMove ? (

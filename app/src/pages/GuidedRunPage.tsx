@@ -12,6 +12,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { QueryError } from '@/components/ui/QueryError';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useRunLogs } from '@/features/logs/queries';
+import { useExportWorkoutFit } from '@/features/plans/export-fit';
 import { useExportWorkoutTcx } from '@/features/plans/export-tcx';
 import { planPaces } from '@/features/plans/plan-data';
 import { useActivePlan, useWorkout } from '@/features/plans/queries';
@@ -38,6 +39,7 @@ export function GuidedRunPage() {
   const [finishOpen, setFinishOpen] = useState(false);
   const runner = useGuidedRunner({ workout: workout ?? null, paces: planPaces(plan), logs, timeScale });
   const exportTcx = useExportWorkoutTcx();
+  const exportFit = useExportWorkoutFit();
   const { clock, speech, geo, timeline } = runner;
 
   if (isLoading) {
@@ -90,10 +92,12 @@ export function GuidedRunPage() {
         wakeLockSupported={runner.wakeLockSupported}
         gpsEnabled={runner.gpsEnabled}
         exporting={exportTcx.isPending}
+        exportingFit={exportFit.isPending}
         onBack={() => navigate(-1)}
         onStart={runner.handleStart}
         onToggleGps={() => runner.setGpsEnabled((current) => !current)}
         onExport={() => exportTcx.mutate({ workout, plan })}
+        onExportFit={() => exportFit.mutate({ workout, plan })}
       />
     );
   }

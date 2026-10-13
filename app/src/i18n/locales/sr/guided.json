@@ -10,7 +10,8 @@
     "start": "Počni vođeno trčanje",
     "gpsOn": "GPS uključen",
     "gpsOff": "GPS isključen",
-    "exportTcx": "Izvezi za sat (.tcx)"
+    "exportTcx": "Izvezi za sat (.tcx)",
+    "exportFit": "Garmin (.fit)"
   },
   "session": {
     "step": "Korak {{index}}/{{total}}",

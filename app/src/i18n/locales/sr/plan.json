@@ -67,6 +67,13 @@
     "success": "Plan oporavka je spreman.",
     "error": "Plan oporavka nije napravljen. Pokušaj ponovo"
   },
+  "nextGoal": {
+    "title": "Sledeći cilj: {{name}}",
+    "subtitle": "{{date}} · za {{days}} dana",
+    "subtitleOne": "{{date}} · za {{days}} dan",
+    "unnamed": "Trka bez naziva",
+    "action": "Generiši plan za ovu trku"
+  },
   "errors": {
     "daysCount": "Izaberi tačno {{count}} dana za trening.",
     "longRunDayMissing": "Dan dugog trčanja mora biti među izabranim danima."

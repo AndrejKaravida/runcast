@@ -23,5 +23,6 @@ export * from './raceday';
 export * from './fueling';
 export * from './ics';
 export * from './tcx';
+export * from './fit';
 export * from './health';
 export * from './readiness';

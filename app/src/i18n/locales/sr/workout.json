@@ -60,6 +60,7 @@
     "raceDay": "Strategija za dan trke",
     "googleCalendar": "Dodaj u Google kalendar",
     "exportTcx": "Izvezi za sat (.tcx)",
+    "exportFit": "Garmin (.fit)",
     "error": "Akcija nije uspela. Pokušaj ponovo"
   },
   "skip": {

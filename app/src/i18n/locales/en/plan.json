@@ -67,6 +67,13 @@
     "success": "Your recovery plan is ready.",
     "error": "Recovery plan failed. Try again"
   },
+  "nextGoal": {
+    "title": "Next goal: {{name}}",
+    "subtitle": "{{date}} · in {{days}} days",
+    "subtitleOne": "{{date}} · in {{days}} day",
+    "unnamed": "Unnamed race",
+    "action": "Generate a plan for this race"
+  },
   "errors": {
     "daysCount": "Pick exactly {{count}} training days.",
     "longRunDayMissing": "The long run day must be one of the selected days."

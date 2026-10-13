@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { defaultRunDays, formatDuration, isRunType, type RunWindow, type VolumeBand } from '@runcast/shared';
 import { Download, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
@@ -80,6 +80,8 @@ function PlanSettingsSkeleton() {
 
 export function SettingsPlanPage() {
   const { t } = useTranslation('settings');
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { data: profile } = useProfile();
   const { data: plan, isLoading: planLoading } = useActivePlan();
   const { data: races = [] } = useRaces();
@@ -90,8 +92,8 @@ export function SettingsPlanPage() {
   const deleteRace = useDeleteRace();
   const exportPlan = useExportPlanIcs();
 
-  const [planForm, setPlanForm] = useState<PlanDraft | null>(null);
-  const [raceTarget, setRaceTarget] = useState('');
+  const [planFormDraft, setPlanFormDraft] = useState<PlanDraft | null>(null);
+  const [raceTargetExplicit, setRaceTargetExplicit] = useState('');
   const [raceForm, setRaceForm] = useState<{ id: string; draft: PlanDraft } | null>(null);
   const [raceDraft, setRaceDraft] = useState<PlanDraft | null>(null);
   const [raceAddForm, setRaceAddForm] = useState<PlanDraft | null>(null);
@@ -100,14 +102,26 @@ export function SettingsPlanPage() {
   const [pendingInput, setPendingInput] = useState<GeneratePlanInput | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [initialRaceParam] = useState(() => searchParams.get('race'));
+  const [raceParamDismissed, setRaceParamDismissed] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('race')) navigate('/settings/plan', { replace: true });
+  }, [searchParams, navigate]);
 
   const futureRaces = races.filter((race) => dayDiff(todayIso(), race.race_date) > 0);
+  const paramRace =
+    initialRaceParam && !raceParamDismissed ? (futureRaces.find((race) => race.id === initialRaceParam) ?? null) : null;
+  const planForm = planFormDraft ?? (paramRace ? buildRaceDraft(paramRace) : null);
+  const raceTarget = planFormDraft ? raceTargetExplicit : (paramRace?.id ?? '');
 
   function buildPlanForm(): PlanDraft {
     const race = plan?.races ?? null;
     const daysPerWeek = (plan?.days_per_week as 3 | 4 | 5 | 6) ?? 4;
     const longRunDay = plan?.long_run_day ?? 6;
     const fallbackDays = defaultRunDays(daysPerWeek, longRunDay);
+    const runDays = planWorkouts.length > 0 ? planRunDays(planWorkouts, daysPerWeek, fallbackDays) : fallbackDays;
+    const hasValidSchedule = runDays.length === daysPerWeek && runDays.includes(longRunDay);
     return {
       raceName: race?.name ?? '',
       raceDate: race?.race_date ?? plan?.race_date ?? '',
@@ -117,7 +131,7 @@ export function SettingsPlanPage() {
       recentTime: '',
       daysPerWeek,
       longRunDay,
-      runDays: planWorkouts.length > 0 ? planRunDays(planWorkouts, daysPerWeek, fallbackDays) : fallbackDays,
+      runDays: hasValidSchedule ? runDays : fallbackDays,
       experience: profile?.experience === 'experienced' ? 'experienced' : 'first',
     };
   }
@@ -155,7 +169,8 @@ export function SettingsPlanPage() {
   async function runGenerate(input: GeneratePlanInput) {
     try {
       await generatePlan.mutateAsync(input);
-      setPlanForm(null);
+      setPlanFormDraft(null);
+      setRaceParamDismissed(true);
       setRaceDraft(null);
       setNotice(t('plan.generated'));
     } catch {
@@ -164,16 +179,21 @@ export function SettingsPlanPage() {
   }
 
   function openPlanForm() {
-    setPlanForm(buildPlanForm());
-    setRaceTarget(plan?.races && dayDiff(todayIso(), plan.races.race_date) > 0 ? plan.races.id : '');
+    setPlanFormDraft(buildPlanForm());
+    setRaceTargetExplicit(plan?.races && dayDiff(todayIso(), plan.races.race_date) > 0 ? plan.races.id : '');
+  }
+
+  function closePlanForm() {
+    setPlanFormDraft(null);
+    setRaceParamDismissed(true);
   }
 
   function handleRaceTargetChange(id: string) {
     if (!planForm) return;
-    setRaceTarget(id);
+    setRaceTargetExplicit(id);
     const race = races.find((item) => item.id === id);
     if (!race) return;
-    setPlanForm({
+    setPlanFormDraft({
       ...planForm,
       raceName: race.name ?? '',
       raceDate: race.race_date,
@@ -431,10 +451,10 @@ export function SettingsPlanPage() {
                 variant="settings"
                 groups={['race', 'goal', 'schedule', 'experience']}
                 value={planForm}
-                onChange={(patch) => setPlanForm({ ...planForm, ...patch })}
+                onChange={(patch) => setPlanFormDraft({ ...planForm, ...patch })}
               />
               <div className="flex gap-3">
-                <AppButton variant="secondary" className="flex-1" onClick={() => setPlanForm(null)}>
+                <AppButton variant="secondary" className="flex-1" onClick={closePlanForm}>
                   {t('cancel')}
                 </AppButton>
                 <AppButton className="flex-1" loading={generatePlan.isPending} onClick={() => handleGenerateClick()}>

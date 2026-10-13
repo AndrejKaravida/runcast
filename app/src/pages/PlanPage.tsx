@@ -25,7 +25,13 @@ import { QueryError } from '@/components/ui/QueryError';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { scoreDotClass } from '@/components/weather/weather-utils';
-import { useActivePlan, useApplyWeekPlan, useGenerateRecoveryPlan, useWorkoutsRange } from '@/features/plans/queries';
+import {
+  useActivePlan,
+  useApplyWeekPlan,
+  useGenerateRecoveryPlan,
+  useRaces,
+  useWorkoutsRange,
+} from '@/features/plans/queries';
 import { useProfile } from '@/features/profile/queries';
 import { useWeather } from '@/features/weather/queries';
 import { TONE_DOT_CLASSES, typeTone, workoutDurationSec } from '@/features/workouts/utils';
@@ -35,6 +41,7 @@ import {
   dayDiff,
   endOfWeekIso,
   firstDayOfMonth,
+  formatDateShort,
   formatMonth,
   lastDayOfMonth,
   startOfWeekIso,
@@ -198,6 +205,7 @@ export function PlanPage() {
   const { data: weather, isLoading: weatherLoading } = useWeather();
   const { data: currentWeekWorkouts = [] } = useWorkoutsRange(startOfWeekIso(today), endOfWeekIso(today));
   const { data: planWorkouts = [] } = useWorkoutsRange(plan?.start_date ?? today, plan?.race_date ?? today);
+  const { data: races = [] } = useRaces();
   const applyWeekPlan = useApplyWeekPlan();
   const generateRecovery = useGenerateRecoveryPlan();
   const [adaptOpen, setAdaptOpen] = useState(false);
@@ -281,6 +289,9 @@ export function PlanPage() {
   const showRecovery = racePassed;
   const showRealign = recentMissed >= 3 && !realignDismissed && !showRecovery;
   const showAdapt = missedWorkouts.length > 0 && !showRealign;
+  const isRecoveryPlan = plan.race_id === null && plan.weeks === 2;
+  const nextRace = isRecoveryPlan ? (races.find((race) => dayDiff(today, race.race_date) > 0) ?? null) : null;
+  const daysToNextRace = nextRace ? dayDiff(today, nextRace.race_date) : 0;
 
   async function handleRealign() {
     const assignments = [
@@ -452,6 +463,28 @@ export function PlanPage() {
             </AppButton>
           </div>
           {recoveryError ? <p className="text-caption text-danger-ink">{t('recovery.error')}</p> : null}
+        </AppCard>
+      ) : null}
+
+      {nextRace ? (
+        <AppCard
+          data-testid="next-goal-card"
+          className="space-y-3 border-primary/40 bg-gradient-to-b from-primary-soft to-transparent"
+        >
+          <div className="space-y-1">
+            <p className="text-sm font-medium">
+              {t('nextGoal.title', { name: nextRace.name ?? t('nextGoal.unnamed') })}
+            </p>
+            <p className="text-sm text-text-secondary">
+              {t(daysToNextRace === 1 ? 'nextGoal.subtitleOne' : 'nextGoal.subtitle', {
+                date: formatDateShort(nextRace.race_date),
+                days: daysToNextRace,
+              })}
+            </p>
+          </div>
+          <AppLinkButton className="w-full" data-testid="next-goal-action" to={`/settings/plan?race=${nextRace.id}`}>
+            {t('nextGoal.action')}
+          </AppLinkButton>
         </AppCard>
       ) : null}
 

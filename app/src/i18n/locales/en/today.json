@@ -71,5 +71,10 @@
       "rhrHigh": "Your resting HR is {{bpm}} bpm above your average. Your body may need an easier day."
     }
   },
+  "readinessAssessment": {
+    "title": "You're tired and today's workout is a quality session",
+    "description": "Your body needs an easier day. Consider taking today's workout easy.",
+    "swapAction": "Swap for an easy day"
+  },
   "rangeError": "Part of the plan didn't load."
 }

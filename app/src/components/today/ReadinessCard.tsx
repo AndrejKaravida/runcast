@@ -24,7 +24,11 @@ function ReadinessSkeleton() {
   );
 }
 
-export function ReadinessCard() {
+interface ReadinessCardProps {
+  hideHints?: boolean;
+}
+
+export function ReadinessCard({ hideHints = false }: ReadinessCardProps) {
   const { t } = useTranslation('today');
   const { data, isLoading, autosync } = useReadiness();
 
@@ -58,11 +62,13 @@ export function ReadinessCard() {
           ) : null}
         </div>
       ) : null}
-      {readiness.hints.map((hint) => (
-        <p key={hint.key} className="text-caption text-text-muted">
-          {t(hint.key, hint.params)}
-        </p>
-      ))}
+      {!hideHints
+        ? readiness.hints.map((hint) => (
+            <p key={hint.key} className="text-caption text-text-muted">
+              {t(hint.key, hint.params)}
+            </p>
+          ))
+        : null}
     </AppCard>
   );
 }

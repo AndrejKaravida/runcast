@@ -49,7 +49,9 @@ interface TodayHeroCardProps {
   weatherLoading: boolean;
   verdict: AssessmentText | null;
   reschedule: RescheduleSuggestion | null;
+  readinessVerdict: { title: string; description: string } | null;
   candidate: WorkoutsRow | null;
+  readinessCandidate: WorkoutsRow | null;
   promptDismissed: boolean;
   rescheduleApplied: boolean;
   swapPending: boolean;
@@ -58,6 +60,7 @@ interface TodayHeroCardProps {
   completeError: string | null;
   onApplyOption: (option: RescheduleSwapOption) => void;
   onLegacySwap: () => void;
+  onReadinessSwap: () => void;
   onLegacyStay: () => void;
   onDismissPrompt: () => void;
   onComplete: () => void;
@@ -72,7 +75,9 @@ export function TodayHeroCard({
   weatherLoading,
   verdict,
   reschedule,
+  readinessVerdict,
   candidate,
+  readinessCandidate,
   promptDismissed,
   rescheduleApplied,
   swapPending,
@@ -81,6 +86,7 @@ export function TodayHeroCard({
   completeError,
   onApplyOption,
   onLegacySwap,
+  onReadinessSwap,
   onLegacyStay,
   onDismissPrompt,
   onComplete,
@@ -160,6 +166,25 @@ export function TodayHeroCard({
           onLegacyStay={onLegacyStay}
           onDismissPrompt={onDismissPrompt}
         />
+      ) : readinessVerdict ? (
+        <div data-testid="readiness-banner" className="rounded-xl border-l-2 border-warning-ink bg-warning-soft p-3">
+          <p className="text-sm font-semibold">{readinessVerdict.title}</p>
+          <p className="mt-0.5 text-caption text-text-secondary">{readinessVerdict.description}</p>
+          {readinessCandidate ? (
+            <div className="mt-2">
+              <AppButton
+                type="button"
+                size="sm"
+                loading={swapPending}
+                data-testid="readiness-swap-button"
+                onClick={onReadinessSwap}
+              >
+                {t('readinessAssessment.swapAction')}
+              </AppButton>
+            </div>
+          ) : null}
+          {swapError ? <p className="mt-2 text-caption text-danger-ink">{swapError}</p> : null}
+        </div>
       ) : weatherLoading ? (
         <WeatherBannerSkeleton />
       ) : null}
