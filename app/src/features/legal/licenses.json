@@ -1,0 +1,140 @@
+[
+  {
+    "name": "@capacitor/android",
+    "version": "8.5.3",
+    "license": "MIT",
+    "url": "https://github.com/ionic-team/capacitor"
+  },
+  {
+    "name": "@capacitor/app",
+    "version": "8.1.2",
+    "license": "MIT",
+    "url": "https://github.com/ionic-team/capacitor-plugins"
+  },
+  {
+    "name": "@capacitor/cli",
+    "version": "8.5.3",
+    "license": "MIT",
+    "url": "https://github.com/ionic-team/capacitor"
+  },
+  {
+    "name": "@capacitor/core",
+    "version": "8.5.3",
+    "license": "MIT",
+    "url": "https://github.com/ionic-team/capacitor"
+  },
+  {
+    "name": "@capacitor/ios",
+    "version": "8.5.3",
+    "license": "MIT",
+    "url": "https://github.com/ionic-team/capacitor"
+  },
+  {
+    "name": "@capacitor/splash-screen",
+    "version": "8.0.2",
+    "license": "MIT",
+    "url": "https://github.com/ionic-team/capacitor-plugins"
+  },
+  {
+    "name": "@capacitor/status-bar",
+    "version": "8.0.4",
+    "license": "MIT",
+    "url": "https://github.com/ionic-team/capacitor-plugins"
+  },
+  {
+    "name": "@capgo/capacitor-health",
+    "version": "8.11.11",
+    "license": "MPL-2.0",
+    "url": "https://github.com/Cap-go/capacitor-health"
+  },
+  {
+    "name": "@fontsource-variable/inter",
+    "version": "5.3.0",
+    "license": "OFL-1.1",
+    "url": "https://github.com/fontsource/font-files"
+  },
+  {
+    "name": "@hookform/resolvers",
+    "version": "5.9.1",
+    "license": "MIT",
+    "url": "https://github.com/react-hook-form/resolvers"
+  },
+  {
+    "name": "@supabase/supabase-js",
+    "version": "2.117.3",
+    "license": "MIT",
+    "url": "https://github.com/supabase/supabase-js"
+  },
+  {
+    "name": "@tanstack/react-query",
+    "version": "5.104.2",
+    "license": "MIT",
+    "url": "https://github.com/TanStack/query"
+  },
+  {
+    "name": "clsx",
+    "version": "2.1.1",
+    "license": "MIT",
+    "url": "https://github.com/lukeed/clsx"
+  },
+  {
+    "name": "date-fns",
+    "version": "4.4.0",
+    "license": "MIT",
+    "url": "https://github.com/date-fns/date-fns"
+  },
+  {
+    "name": "i18next",
+    "version": "26.4.4",
+    "license": "MIT",
+    "url": "https://github.com/i18next/i18next"
+  },
+  {
+    "name": "lucide-react",
+    "version": "1.55.0",
+    "license": "ISC",
+    "url": "https://github.com/lucide-icons/lucide"
+  },
+  {
+    "name": "motion",
+    "version": "14.1.0",
+    "license": "MIT",
+    "url": "https://github.com/motiondivision/motion"
+  },
+  {
+    "name": "react",
+    "version": "19.3.0",
+    "license": "MIT",
+    "url": "https://github.com/react/react"
+  },
+  {
+    "name": "react-dom",
+    "version": "19.3.0",
+    "license": "MIT",
+    "url": "https://github.com/react/react"
+  },
+  {
+    "name": "react-hook-form",
+    "version": "7.90.0",
+    "license": "MIT",
+    "url": "https://github.com/react-hook-form/react-hook-form"
+  },
+  {
+    "name": "react-i18next",
+    "version": "17.0.16",
+    "license": "MIT",
+    "url": "https://github.com/i18next/react-i18next"
+  },
+  {
+    "name": "react-router",
+    "version": "8.4.0",
+    "license": "MIT",
+    "url": "https://github.com/remix-run/react-router"
+  },
+  {
+    "name": "zod",
+    "version": "3.25.76",
+    "license": "MIT",
+    "url": "https://github.com/colinhacks/zod"
+  }
+]
