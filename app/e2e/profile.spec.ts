@@ -6,7 +6,7 @@ test('avatar upload se čuva i prikazuje', async ({ page }) => {
   await register(page, email);
   await completeOnboarding(page);
 
-  await page.goto('/settings');
+  await page.goto('/settings/profile');
   await page.setInputFiles('[data-testid="avatar-input"]', 'e2e/fixtures/avatar.png');
 
   const avatar = page.locator('img[alt="Avatar"]');
@@ -33,7 +33,7 @@ test('javni profil uključuje i isključuje rang listu', async ({ page }) => {
   await page.getByRole('button', { name: 'Sačuvaj' }).click();
   await expect(page.getByText('Zabeleži trening')).toBeHidden();
 
-  await page.goto('/settings');
+  await page.goto('/settings/profile');
   await page.getByTestId('public-profile').getByRole('button', { name: 'Javno' }).click();
   await page.getByRole('button', { name: 'Sačuvaj profil' }).click();
   await expect(page.getByText('Profil je sačuvan.')).toBeVisible();
@@ -55,7 +55,7 @@ test('javni profil uključuje i isključuje rang listu', async ({ page }) => {
   await page.waitForURL('**/leaderboard');
   await expect(rows.first()).toContainText('E2E Trkač');
 
-  await page.goto('/settings');
+  await page.goto('/settings/profile');
   await page.getByTestId('public-profile').getByRole('button', { name: 'Privatno' }).click();
   await page.getByRole('button', { name: 'Sačuvaj profil' }).click();
   await expect(page.getByText('Profil je sačuvan.')).toBeVisible();

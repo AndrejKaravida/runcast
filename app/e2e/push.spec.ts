@@ -38,7 +38,7 @@ test.describe('push notifikacije', () => {
     await register(page, email);
     await completeOnboarding(page);
 
-    await page.goto('/settings');
+    await page.goto('/settings/notifications');
     await expect(page.getByText('Notifikacije', { exact: true })).toBeVisible();
 
     await page.getByTestId('push-master').getByRole('button', { name: 'Uključi' }).click();
@@ -68,7 +68,7 @@ test.describe('push notifikacije', () => {
     await register(page, email);
     await completeOnboarding(page);
 
-    await page.goto('/settings');
+    await page.goto('/settings/notifications');
     await page.getByTestId('push-master').getByRole('button', { name: 'Uključi' }).click();
     await expect(page.getByTestId('push-error')).toBeVisible();
   });

@@ -95,7 +95,7 @@ test('gorivo — isključeni podsetnici sklanjaju liniju u vođenju', async ({ p
   await register(page, email);
   await completeOnboarding(page);
 
-  await page.goto('/settings');
+  await page.goto('/settings/profile');
   await page.getByRole('button', { name: 'Isključeno' }).click();
   expect(await page.evaluate(() => localStorage.getItem('runcast.fueling'))).toBe('off');
 

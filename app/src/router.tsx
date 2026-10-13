@@ -38,6 +38,28 @@ export const router = createBrowserRouter([
                 path: '/settings',
                 lazy: async () => ({ Component: (await import('@/pages/SettingsPage')).SettingsPage }),
               },
+              {
+                path: '/settings/profile',
+                lazy: async () => ({ Component: (await import('@/pages/SettingsProfilePage')).SettingsProfilePage }),
+              },
+              {
+                path: '/settings/plan',
+                lazy: async () => ({ Component: (await import('@/pages/SettingsPlanPage')).SettingsPlanPage }),
+              },
+              {
+                path: '/settings/notifications',
+                lazy: async () => ({
+                  Component: (await import('@/pages/SettingsNotificationsPage')).SettingsNotificationsPage,
+                }),
+              },
+              {
+                path: '/settings/health',
+                lazy: async () => ({ Component: (await import('@/pages/SettingsHealthPage')).SettingsHealthPage }),
+              },
+              {
+                path: '/settings/gear',
+                lazy: async () => ({ Component: (await import('@/pages/SettingsGearPage')).SettingsGearPage }),
+              },
             ],
           },
           {

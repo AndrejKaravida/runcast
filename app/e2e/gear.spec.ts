@@ -6,7 +6,7 @@ test('oprema: kilometraža iz treninga, penzija i brisanje', async ({ page }) =>
   await register(page, email);
   await completeOnboarding(page);
 
-  await page.goto('/settings');
+  await page.goto('/settings/gear');
   const gear = page.getByTestId('gear-section');
   await expect(gear.getByTestId('gear-empty')).toBeVisible();
 
@@ -27,7 +27,7 @@ test('oprema: kilometraža iz treninga, penzija i brisanje', async ({ page }) =>
   await page.getByRole('button', { name: 'Sačuvaj' }).click();
   await expect(page.getByRole('heading', { name: 'Zabeleži trening' })).toBeHidden();
 
-  await page.goto('/settings');
+  await page.goto('/settings/gear');
   await expect(gear.getByTestId('shoe-km')).toHaveText('105.0 km');
 
   await page.goto('/plan');
@@ -43,7 +43,7 @@ test('oprema: kilometraža iz treninga, penzija i brisanje', async ({ page }) =>
   await page.getByRole('button', { name: 'Sačuvaj' }).click();
   await expect(page.getByRole('heading', { name: 'Zabeleži trening' })).toBeHidden();
 
-  await page.goto('/settings');
+  await page.goto('/settings/gear');
   await expect(gear.getByTestId('shoe-km')).toHaveText('105.0 km');
 
   await gear.getByRole('button', { name: 'Pošalji u penziju' }).click();

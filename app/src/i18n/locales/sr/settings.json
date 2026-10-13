@@ -7,6 +7,15 @@
   "appearance": {
     "label": "Izgled"
   },
+  "index": {
+    "trainingGroup": "Trening",
+    "connectionsGroup": "Povezivanje",
+    "planSubtitle": "Ciljna trka, izvoz i novi plan",
+    "notificationsSubtitle": "Podsetnici za treninge i trku",
+    "healthLabel": "Zdravlje i satovi",
+    "healthSubtitle": "Apple Health i Health Connect",
+    "gearSubtitle": "Patike i kilometraža"
+  },
   "profile": {
     "label": "Profil",
     "name": "Ime",

@@ -7,6 +7,15 @@
   "appearance": {
     "label": "Appearance"
   },
+  "index": {
+    "trainingGroup": "Training",
+    "connectionsGroup": "Connections",
+    "planSubtitle": "Goal race, export and a new plan",
+    "notificationsSubtitle": "Reminders for workouts and the race",
+    "healthLabel": "Health and watches",
+    "healthSubtitle": "Apple Health and Health Connect",
+    "gearSubtitle": "Shoes and mileage"
+  },
   "profile": {
     "label": "Profile",
     "name": "Name",

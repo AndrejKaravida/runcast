@@ -23,7 +23,7 @@ test('ICS izvoz — ceo plan u fajlu sa non-REST treninzima', async ({ page }) =
   await register(page, email);
   await completeOnboarding(page);
 
-  await page.goto('/settings');
+  await page.goto('/settings/plan');
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Izvezi plan (.ics)' }).click();
   const download = await downloadPromise;

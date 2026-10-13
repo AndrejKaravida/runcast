@@ -47,7 +47,7 @@ test('integracije: web prikazuje poruku bez dugmadi', async ({ page }) => {
   await register(page, email);
   await completeOnboarding(page);
 
-  await page.goto('/settings');
+  await page.goto('/settings/health');
   await expect(page.getByText('Integracije', { exact: true })).toBeVisible();
   await expect(page.getByTestId('health-web')).toContainText('Dostupno u mobilnoj aplikaciji');
   await expect(page.getByTestId('health-import')).toHaveCount(0);
@@ -60,7 +60,7 @@ test('uvoz trčanja povezuje današnji planirani trening', async ({ page }) => {
   await register(page, email);
   await completeOnboarding(page);
 
-  await page.goto('/settings');
+  await page.goto('/settings/health');
   await page.getByTestId('health-import').click();
   await expect(page.getByTestId('health-notice')).toContainText('Uvezeno 2');
   await expect(page.getByTestId('health-status')).toContainText('Povezano');
@@ -75,7 +75,7 @@ test('ponovni uvoz ne pravi duplikate', async ({ page }) => {
   await register(page, email);
   await completeOnboarding(page);
 
-  await page.goto('/settings');
+  await page.goto('/settings/health');
   await page.getByTestId('health-import').click();
   await expect(page.getByTestId('health-notice')).toContainText('Uvezeno 2');
 

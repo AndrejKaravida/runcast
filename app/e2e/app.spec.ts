@@ -140,13 +140,14 @@ test('workout detalj, preskoči, profil i regeneracija plana', async ({ page }) 
   await page.reload();
   await expect(page.getByText('Preskočeno').first()).toBeVisible();
 
-  await page.goto('/settings');
+  await page.goto('/settings/profile');
   await page.getByLabel('Ime', { exact: true }).fill('Novo Ime');
   await page.getByRole('button', { name: 'Sačuvaj profil' }).click();
   await expect(page.getByText('Profil je sačuvan.')).toBeVisible();
   await page.reload();
   await expect(page.getByLabel('Ime', { exact: true })).toHaveValue('Novo Ime');
 
+  await page.goto('/settings/plan');
   await page.getByRole('button', { name: /Generiši novi plan/ }).click();
   await page.getByLabel('Datum trke / ciljni datum').fill(isoFromNow(140));
   await page.getByRole('button', { name: 'Generiši', exact: true }).click();
