@@ -4,11 +4,13 @@ import { ChevronDown, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AppCard } from '@/components/ui/AppCard';
 import { IconButton } from '@/components/ui/IconButton';
+import { Skeleton } from '@/components/ui/Skeleton';
 import type { WeatherData } from '@/features/weather/queries';
 import { weatherIcon } from '@/components/weather/weather-utils';
 import { localeForLanguage } from '@/i18n';
 
 const OPEN_METEO_URL = 'https://open-meteo.com';
+const SKELETON_TILES = [0, 1, 2];
 
 interface WeatherSummaryCardProps {
   data: WeatherData | undefined;
@@ -27,6 +29,41 @@ function rowIcon(code: number | undefined) {
   if (code === undefined) return <RefreshCw className="h-5 w-5 shrink-0 text-text-muted" aria-hidden />;
   const Icon = weatherIcon(code);
   return <Icon className="h-5 w-5 shrink-0 text-text-secondary" aria-hidden />;
+}
+
+function WeatherSummaryRowSkeleton() {
+  return (
+    <div data-testid="weather-summary-skeleton" className="rounded-2xl border border-border bg-surface shadow-card">
+      <div className="flex items-center gap-1 px-2 py-1.5">
+        <div className="flex min-w-0 flex-1 items-center gap-3 px-2 py-2">
+          <Skeleton className="h-5 w-5 shrink-0" />
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
+          <Skeleton className="h-4 w-4 shrink-0" />
+        </div>
+        <Skeleton className="h-9 w-9 shrink-0" />
+      </div>
+    </div>
+  );
+}
+
+function WeatherSummaryCardSkeleton() {
+  return (
+    <AppCard data-testid="weather-summary-skeleton">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="h-8 w-8" />
+      </div>
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {SKELETON_TILES.map((tile) => (
+          <Skeleton key={tile} className="h-24" />
+        ))}
+      </div>
+      <Skeleton className="mt-2 h-4 w-32" />
+    </AppCard>
+  );
 }
 
 function hourTiles(hours: WeatherData['hours']) {
@@ -73,6 +110,10 @@ export function WeatherSummaryCard({
       })
     : '';
 
+  if (loading && hours.length === 0 && !isError) {
+    return variant === 'row' ? <WeatherSummaryRowSkeleton /> : <WeatherSummaryCardSkeleton />;
+  }
+
   if (variant === 'row') {
     const first = hours[0];
     const summary = isError
@@ -83,9 +124,7 @@ export function WeatherSummaryCard({
             rain: Math.round(first.precipProbabilityPct),
             time: first.time.slice(11, 16),
           })
-        : loading
-          ? t('weather.loading')
-          : t('weather.none');
+        : t('weather.none');
     return (
       <div className="rounded-2xl border border-border bg-surface shadow-card">
         <div className="flex items-center gap-1 px-2 py-1.5">
@@ -152,7 +191,7 @@ export function WeatherSummaryCard({
       {isError ? (
         <p className="mt-2 text-sm text-danger-ink">{t('weather.error')}</p>
       ) : hours.length === 0 ? (
-        <p className="mt-2 text-sm text-text-muted">{loading ? t('weather.loading') : t('weather.none')}</p>
+        <p className="mt-2 text-sm text-text-muted">{t('weather.none')}</p>
       ) : (
         <div className="mt-3 grid grid-cols-3 gap-2">{hourTiles(hours)}</div>
       )}

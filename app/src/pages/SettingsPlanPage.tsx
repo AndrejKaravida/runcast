@@ -7,6 +7,7 @@ import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { SettingsSubpage } from '@/components/settings/SettingsSubpage';
 import { PlanFields } from '@/components/forms/PlanFields';
 import { useExportPlanIcs } from '@/features/plans/export';
@@ -16,10 +17,19 @@ import { useProfile } from '@/features/profile/queries';
 import { dayDiff, formatDateShort, todayIso } from '@/lib/dates';
 import { buildPlanInput, validatePlanDraft, type PlanDraft } from '@/lib/plan-form';
 
+function PlanSettingsSkeleton() {
+  return (
+    <div data-testid="plan-settings-skeleton" className="space-y-6">
+      <Skeleton className="h-44" />
+      <Skeleton className="h-11" />
+    </div>
+  );
+}
+
 export function SettingsPlanPage() {
   const { t } = useTranslation('settings');
   const { data: profile } = useProfile();
-  const { data: plan } = useActivePlan();
+  const { data: plan, isLoading: planLoading } = useActivePlan();
   const generatePlan = useGeneratePlan();
   const exportPlan = useExportPlanIcs();
 
@@ -101,64 +111,70 @@ export function SettingsPlanPage() {
       title={t('plan.label')}
       action={plan ? <AppBadge tone="primary">{t('plan.weeks', { weeks: plan.weeks })}</AppBadge> : null}
     >
-      {plan ? (
-        <AppCard className="space-y-2 border-primary/40 bg-gradient-to-b from-primary-soft to-transparent">
-          <p className="section-label">{t('plan.goalRace')}</p>
-          <p className="text-sm font-medium">{plan.races?.name ?? t('plan.raceFallback')}</p>
-          {daysToRace !== null && daysToRace >= 0 ? (
-            <p className="flex items-baseline gap-2">
-              <span className="num text-hero font-bold text-primary-ink">{daysToRace}</span>
-              <span className="text-sm text-text-secondary">{t('plan.daysToRace')}</span>
-            </p>
-          ) : null}
-          <p className="num text-caption text-text-muted">
-            {t('plan.meta', { date: formatDateShort(plan.race_date), days: plan.days_per_week })}
-          </p>
-          <div className="rounded-xl bg-surface-elevated p-3">
-            <p className="text-sm text-text-secondary">{t('plan.benchmarkHint')}</p>
-            <Link
-              to="/benchmark"
-              className="mt-1 inline-block text-sm font-medium text-primary-ink hover:text-primary-ink-hover"
-            >
-              {t('plan.benchmarkCta')}
-            </Link>
-          </div>
-          <AppButton
-            variant="secondary"
-            className="w-full"
-            loading={exportPlan.isPending}
-            onClick={() => void handleExportPlan()}
-          >
-            <Download className="h-4 w-4" aria-hidden /> {t('plan.export')}
-          </AppButton>
-        </AppCard>
+      {planLoading ? (
+        <PlanSettingsSkeleton />
       ) : (
-        <AppCard>
-          <p className="text-sm text-text-muted">{t('plan.noPlan')}</p>
-        </AppCard>
-      )}
-      {planForm ? (
-        <AppCard className="space-y-3">
-          <p className="text-sm font-medium">{t('plan.newPlan')}</p>
-          <PlanFields
-            variant="settings"
-            groups={['race', 'goal', 'schedule', 'experience']}
-            value={planForm}
-            onChange={(patch) => setPlanForm({ ...planForm, ...patch })}
-          />
-          <div className="flex gap-3">
-            <AppButton variant="secondary" className="flex-1" onClick={() => setPlanForm(null)}>
-              {t('cancel')}
+        <>
+          {plan ? (
+            <AppCard className="space-y-2 border-primary/40 bg-gradient-to-b from-primary-soft to-transparent">
+              <p className="section-label">{t('plan.goalRace')}</p>
+              <p className="text-sm font-medium">{plan.races?.name ?? t('plan.raceFallback')}</p>
+              {daysToRace !== null && daysToRace >= 0 ? (
+                <p className="flex items-baseline gap-2">
+                  <span className="num text-hero font-bold text-primary-ink">{daysToRace}</span>
+                  <span className="text-sm text-text-secondary">{t('plan.daysToRace')}</span>
+                </p>
+              ) : null}
+              <p className="num text-caption text-text-muted">
+                {t('plan.meta', { date: formatDateShort(plan.race_date), days: plan.days_per_week })}
+              </p>
+              <div className="rounded-xl bg-surface-elevated p-3">
+                <p className="text-sm text-text-secondary">{t('plan.benchmarkHint')}</p>
+                <Link
+                  to="/benchmark"
+                  className="mt-1 inline-block text-sm font-medium text-primary-ink hover:text-primary-ink-hover"
+                >
+                  {t('plan.benchmarkCta')}
+                </Link>
+              </div>
+              <AppButton
+                variant="secondary"
+                className="w-full"
+                loading={exportPlan.isPending}
+                onClick={() => void handleExportPlan()}
+              >
+                <Download className="h-4 w-4" aria-hidden /> {t('plan.export')}
+              </AppButton>
+            </AppCard>
+          ) : (
+            <AppCard>
+              <p className="text-sm text-text-muted">{t('plan.noPlan')}</p>
+            </AppCard>
+          )}
+          {planForm ? (
+            <AppCard className="space-y-3">
+              <p className="text-sm font-medium">{t('plan.newPlan')}</p>
+              <PlanFields
+                variant="settings"
+                groups={['race', 'goal', 'schedule', 'experience']}
+                value={planForm}
+                onChange={(patch) => setPlanForm({ ...planForm, ...patch })}
+              />
+              <div className="flex gap-3">
+                <AppButton variant="secondary" className="flex-1" onClick={() => setPlanForm(null)}>
+                  {t('cancel')}
+                </AppButton>
+                <AppButton className="flex-1" loading={generatePlan.isPending} onClick={() => handleGenerateClick()}>
+                  <RefreshCw className="h-4 w-4" aria-hidden /> {t('plan.generate')}
+                </AppButton>
+              </div>
+            </AppCard>
+          ) : (
+            <AppButton variant="secondary" className="w-full" onClick={() => setPlanForm(buildPlanForm())}>
+              <RefreshCw className="h-4 w-4" aria-hidden /> {t('plan.generateNew')}
             </AppButton>
-            <AppButton className="flex-1" loading={generatePlan.isPending} onClick={() => handleGenerateClick()}>
-              <RefreshCw className="h-4 w-4" aria-hidden /> {t('plan.generate')}
-            </AppButton>
-          </div>
-        </AppCard>
-      ) : (
-        <AppButton variant="secondary" className="w-full" onClick={() => setPlanForm(buildPlanForm())}>
-          <RefreshCw className="h-4 w-4" aria-hidden /> {t('plan.generateNew')}
-        </AppButton>
+          )}
+        </>
       )}
 
       {notice ? (

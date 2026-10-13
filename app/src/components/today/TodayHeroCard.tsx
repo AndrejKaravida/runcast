@@ -9,6 +9,7 @@ import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppLinkButton } from '@/components/ui/AppLinkButton';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { StatRow } from '@/components/ui/StatRow';
 import { WeatherBanner } from '@/components/weather/WeatherBanner';
 import type { AssessmentText } from '@/components/weather/weather-utils';
@@ -27,11 +28,25 @@ import { formatDateLong } from '@/lib/dates';
 import { workoutTitle } from '@/lib/workout-title';
 import type { WorkoutsRow } from '@/types';
 
+function WeatherBannerSkeleton() {
+  return (
+    <div data-testid="weather-banner-skeleton" className="space-y-2 rounded-xl border-l-2 border-border p-3">
+      <Skeleton className="h-4 w-44" />
+      <Skeleton className="h-3 w-60" />
+      <div className="flex flex-wrap gap-2 pt-1">
+        <Skeleton className="h-9 w-28" />
+        <Skeleton className="h-9 w-20" />
+      </div>
+    </div>
+  );
+}
+
 interface TodayHeroCardProps {
   workout: WorkoutsRow;
   today: string;
   stats: HeroStat[];
   isStrength: boolean;
+  weatherLoading: boolean;
   verdict: AssessmentText | null;
   reschedule: RescheduleSuggestion | null;
   candidate: WorkoutsRow | null;
@@ -54,6 +69,7 @@ export function TodayHeroCard({
   today,
   stats,
   isStrength,
+  weatherLoading,
   verdict,
   reschedule,
   candidate,
@@ -144,6 +160,8 @@ export function TodayHeroCard({
           onLegacyStay={onLegacyStay}
           onDismissPrompt={onDismissPrompt}
         />
+      ) : weatherLoading ? (
+        <WeatherBannerSkeleton />
       ) : null}
 
       {stats.length >= 2 ? <StatRow items={stats} className="rounded-xl bg-surface-elevated py-1" /> : null}

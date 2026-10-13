@@ -3,11 +3,34 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { ListRow } from '@/components/ui/ListRow';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { formatDateShort } from '@/lib/dates';
 import type { RunLogsRow } from '@/types';
 
-export function RecentActivityCard({ logs }: { logs: RunLogsRow[] }) {
+const SKELETON_ROWS = [0, 1];
+
+function RecentActivitySkeleton() {
+  return (
+    <div data-testid="recent-activity-skeleton" className="space-y-2">
+      <Skeleton className="h-5 w-28" />
+      <div className="space-y-2">
+        {SKELETON_ROWS.map((row) => (
+          <div key={row} className="flex items-center gap-3 rounded-xl border border-border bg-surface px-3.5 py-3">
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <Skeleton className="h-2.5 w-16" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+            <Skeleton className="h-4 w-20 shrink-0" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function RecentActivityCard({ logs, isLoading = false }: { logs: RunLogsRow[]; isLoading?: boolean }) {
   const { t } = useTranslation('workout');
+  if (isLoading) return <RecentActivitySkeleton />;
   if (logs.length === 0) return null;
   return (
     <div data-testid="recent-activity" className="space-y-2">

@@ -53,6 +53,20 @@ function streakClasses(streak: number): string {
   return 'bg-surface-elevated text-text-muted';
 }
 
+function TodaySkeleton() {
+  return (
+    <div data-testid="today-skeleton" className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <Skeleton className="h-7 w-44" />
+        <Skeleton className="h-6 w-24" />
+      </div>
+      <Skeleton className="h-80" />
+      <Skeleton className="h-44" />
+      <Skeleton className="h-52" />
+    </div>
+  );
+}
+
 export function TodayPage() {
   const { t } = useTranslation('today');
   const { data: profile } = useProfile();
@@ -69,7 +83,7 @@ export function TodayPage() {
     isError: planRangeError,
     refetch: refetchPlanRange,
   } = useWorkoutsRange(plan?.start_date ?? today, plan?.race_date ?? today);
-  const { data: logs = [] } = useRunLogs();
+  const { data: logs = [], isLoading: logsLoading } = useRunLogs();
   const weather = useWeather();
   const swapWorkouts = useSwapWorkouts();
   const completeWorkout = useCompleteWorkout();
@@ -166,12 +180,7 @@ export function TodayPage() {
   );
 
   if (planLoading || workoutsLoading) {
-    return (
-      <div className="space-y-3">
-        <Skeleton className="h-48" />
-        <Skeleton className="h-24" />
-      </div>
-    );
+    return <TodaySkeleton />;
   }
 
   if (planError) return <QueryError onRetry={() => void refetchPlan()} />;
@@ -283,6 +292,7 @@ export function TodayPage() {
           today={today}
           stats={stats}
           isStrength={isStrength}
+          weatherLoading={weather.isLoading}
           verdict={showVerdict ? verdict : null}
           reschedule={showReschedule ? reschedule : null}
           candidate={candidate}
@@ -307,7 +317,13 @@ export function TodayPage() {
         />
       )}
 
-      <WeatherHero data={weather.data} isError={weather.isError} date={today} runWindow={runWindow} />
+      <WeatherHero
+        data={weather.data}
+        isError={weather.isError}
+        isLoading={weather.isLoading}
+        date={today}
+        runWindow={runWindow}
+      />
 
       <RaceChip plan={plan} daysToRace={daysToRace} planWeek={planWeek} />
 
@@ -337,7 +353,7 @@ export function TodayPage() {
         onRefresh={() => void weather.refetch()}
       />
 
-      <RecentActivityCard logs={logs} />
+      <RecentActivityCard logs={logs} isLoading={logsLoading} />
 
       <LogWorkoutModal workout={todayWorkout} open={logOpen} onClose={() => setLogOpen(false)} />
       <AchievementToast achievement={achievement} onDismiss={dismiss} />

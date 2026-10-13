@@ -49,6 +49,66 @@ function dotClass(workout: WorkoutsRow): string {
   return TONE_DOT_CLASSES[typeTone(workout.type)];
 }
 
+function PlanSkeleton() {
+  return (
+    <div data-testid="plan-skeleton" className="space-y-6">
+      <div className="space-y-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 space-y-1.5">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-6 w-44" />
+          </div>
+          <div className="shrink-0 space-y-1.5">
+            <Skeleton className="ml-auto h-3 w-20" />
+            <Skeleton className="ml-auto h-3 w-16" />
+          </div>
+        </div>
+        <Skeleton className="h-1.5 w-full" />
+        <Skeleton className="h-3 w-52" />
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <Skeleton className="h-3 w-20" />
+          <div className="flex items-center gap-1">
+            <Skeleton className="h-9 w-9" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-9 w-9" />
+          </div>
+        </div>
+        <div className="grid grid-cols-7 gap-1 text-center">
+          {DAY_KEYS.map((key) => (
+            <Skeleton key={key} className="mx-auto h-3 w-6" />
+          ))}
+        </div>
+        <div className="space-y-1">
+          {Array.from({ length: 6 }, (_, row) => (
+            <div key={row} className="grid grid-cols-7 gap-1">
+              {Array.from({ length: 7 }, (_, column) => (
+                <Skeleton key={column} className="h-10 rounded-lg" />
+              ))}
+            </div>
+          ))}
+        </div>
+        <Skeleton className="h-3 w-44" />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+        <Skeleton className="h-1.5 w-full" />
+        <div className="space-y-1.5">
+          {Array.from({ length: 7 }, (_, row) => (
+            <Skeleton key={row} className="h-[61px] w-full" />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function WeekRow({
   workout,
   date,
@@ -131,7 +191,7 @@ export function PlanPage() {
     refetch: refetchMonth,
   } = useWorkoutsRange(gridStart, gridEnd);
   const { data: profile } = useProfile();
-  const { data: weather } = useWeather();
+  const { data: weather, isLoading: weatherLoading } = useWeather();
   const { data: currentWeekWorkouts = [] } = useWorkoutsRange(startOfWeekIso(today), endOfWeekIso(today));
   const applyWeekPlan = useApplyWeekPlan();
   const [adaptOpen, setAdaptOpen] = useState(false);
@@ -173,7 +233,7 @@ export function PlanPage() {
     (workout) => workout.status === 'PLANNED' && workout.type !== 'REST' && workout.workout_date < today,
   );
 
-  if (planLoading || monthLoading) return <Skeleton className="h-96" />;
+  if (planLoading || monthLoading) return <PlanSkeleton />;
   if (planError) return <QueryError onRetry={() => void refetch()} />;
 
   if (!plan) {
@@ -356,6 +416,11 @@ export function PlanPage() {
                           aria-hidden
                           className={clsx('absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full', scoreDotClass(score))}
                         />
+                      ) : weatherLoading ? (
+                        <span
+                          aria-hidden
+                          className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-text-muted/30"
+                        />
                       ) : null}
                     </div>
                   );
@@ -381,6 +446,14 @@ export function PlanPage() {
         {weatherScores.size > 0 ? (
           <p data-testid="plan-weather-legend" className="flex items-center gap-1.5 text-caption text-text-muted">
             <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-success-ink" />
+            {t('weather.legend')}
+          </p>
+        ) : weatherLoading ? (
+          <p
+            data-testid="plan-weather-legend"
+            className="flex items-center gap-1.5 text-caption text-text-muted opacity-60"
+          >
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-text-muted/30" />
             {t('weather.legend')}
           </p>
         ) : null}

@@ -54,6 +54,63 @@ import {
 } from '@/features/workouts/utils';
 import { addDaysIso, dayDiff, formatDateLong, todayIso } from '@/lib/dates';
 
+function WorkoutSkeleton() {
+  return (
+    <div data-testid="workout-skeleton" className="space-y-5">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-9 w-24" />
+        <Skeleton className="h-9 w-28" />
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <Skeleton className="h-3 w-40" />
+          <Skeleton className="h-6 w-16" />
+        </div>
+        <div className="flex items-start justify-between gap-3">
+          <Skeleton className="h-8 w-52" />
+          <Skeleton className="h-6 w-20" />
+        </div>
+        <Skeleton className="h-4 w-44" />
+        <div className="grid grid-cols-3 divide-x divide-border rounded-2xl border border-border bg-surface py-1">
+          {Array.from({ length: 3 }, (_, index) => (
+            <div key={index} className="flex min-w-0 flex-col gap-1 px-3 py-2">
+              <Skeleton className="h-3 w-14" />
+              <Skeleton className="h-6 w-16" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <div className="flex items-center justify-between gap-2">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-3 w-12" />
+        </div>
+        <div className="divide-y divide-border">
+          {Array.from({ length: 4 }, (_, index) => (
+            <div key={index} className="flex items-center gap-3 py-3">
+              <Skeleton className="h-6 w-6 rounded-full" />
+              <Skeleton className="h-4 flex-1" />
+              <Skeleton className="h-4 w-14" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-3 rounded-2xl border border-border bg-surface p-4">
+        <div className="flex items-center justify-between gap-2">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-6 w-16" />
+        </div>
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+        <Skeleton className="h-4 w-2/3" />
+      </div>
+    </div>
+  );
+}
+
 export function WorkoutPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -80,9 +137,8 @@ export function WorkoutPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto w-full max-w-[560px] space-y-3 px-4 py-6">
-        <Skeleton className="h-40" />
-        <Skeleton className="h-24" />
+      <div className="mx-auto w-full max-w-[560px] px-4 py-6">
+        <WorkoutSkeleton />
       </div>
     );
   }

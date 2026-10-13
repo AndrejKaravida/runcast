@@ -101,7 +101,6 @@
     "refresh": "Osveži prognozu",
     "error": "Prognoza trenutno ćuti. Osveži je.",
     "inWindow": "U terminu: {{temp}}° · kiša {{rain}}% · od {{time}} h",
-    "loading": "Gledam prognozu…",
     "none": "Nema podataka za tvoj termin."
   },
   "assessment": {

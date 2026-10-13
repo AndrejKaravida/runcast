@@ -101,7 +101,6 @@
     "refresh": "Refresh forecast",
     "error": "The forecast is quiet right now. Refresh it.",
     "inWindow": "In your window: {{temp}}° · rain {{rain}}% · from {{time}} h",
-    "loading": "Checking the forecast…",
     "none": "No data for your workout window."
   },
   "assessment": {

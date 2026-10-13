@@ -6,12 +6,24 @@ import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppInput } from '@/components/ui/AppInput';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { useAddShoe, useDeleteShoe, useShoes, useUpdateShoe } from '@/features/gear/queries';
+import { useRunLogs } from '@/features/logs/queries';
 import type { ShoesRow } from '@/types';
+
+function GearSkeleton() {
+  return (
+    <div data-testid="gear-skeleton" className="space-y-2">
+      <Skeleton className="h-16" />
+      <Skeleton className="h-16" />
+    </div>
+  );
+}
 
 export function GearSection() {
   const { t } = useTranslation('settings');
-  const { data: shoes = [] } = useShoes();
+  const { data: shoes = [], isLoading: shoesLoading } = useShoes();
+  const { isLoading: logsLoading } = useRunLogs();
   const addShoe = useAddShoe();
   const updateShoe = useUpdateShoe();
   const deleteShoe = useDeleteShoe();
@@ -80,7 +92,9 @@ export function GearSection() {
         </AppButton>
       </form>
 
-      {shoes.length === 0 ? (
+      {shoesLoading || logsLoading ? (
+        <GearSkeleton />
+      ) : shoes.length === 0 ? (
         <p data-testid="gear-empty" className="text-sm text-text-muted">
           {t('gear.empty')}
         </p>

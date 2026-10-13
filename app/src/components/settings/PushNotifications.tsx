@@ -4,6 +4,7 @@ import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { Skeleton } from '@/components/ui/Skeleton';
 import {
   fetchPushPublicKey,
   useDeletePushSubscription,
@@ -42,9 +43,24 @@ function deviceTimeZone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Belgrade';
 }
 
+function PushSkeleton() {
+  return (
+    <div data-testid="push-skeleton" className="space-y-4">
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-11" />
+      </div>
+      <div className="space-y-1.5">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-11" />
+      </div>
+    </div>
+  );
+}
+
 export function PushNotifications() {
   const { t, i18n } = useTranslation('settings');
-  const { data: subscription } = usePushSubscription();
+  const { data: subscription, isLoading: subscriptionLoading } = usePushSubscription();
   const saveSubscription = useSavePushSubscription();
   const updatePreferences = useUpdatePushPreferences();
   const deleteSubscription = useDeletePushSubscription();
@@ -173,61 +189,67 @@ export function PushNotifications() {
         </p>
       ) : null}
 
-      <div data-testid="push-master" className="space-y-2">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-sm font-medium">{t('push.master')}</p>
-          {busy ? <p className="text-caption text-text-muted">{t('push.working')}</p> : null}
-        </div>
-        <SegmentedControl
-          value={subscription ? 'on' : 'off'}
-          onChange={(value) => {
-            if (value === 'on') void handleEnable();
-            else void handleDisable();
-          }}
-          options={options}
-        />
-        <p className="text-caption text-text-muted">{t('push.hint')}</p>
-      </div>
-
-      {subscription ? (
+      {subscriptionLoading ? (
+        <PushSkeleton />
+      ) : (
         <>
-          <p data-testid="push-status" className="text-sm text-success-ink">
-            {t('push.enabled')}
-          </p>
-          <AppSelect
-            data-testid="push-hour"
-            label={t('push.hour')}
-            value={String(subscription.remind_hour)}
-            onChange={(event) => handleHour(Number(event.target.value))}
-          >
-            {HOURS.map((hour) => (
-              <option key={hour} value={hour}>
-                {t('push.hourOption', { hour })}
-              </option>
-            ))}
-          </AppSelect>
-          {REMINDERS.map((reminder) => (
-            <div key={reminder.key} data-testid={reminder.testId}>
-              <p className="section-label mb-1.5">{t(reminder.labelKey)}</p>
-              <SegmentedControl
-                value={subscription[reminder.key] ? 'on' : 'off'}
-                onChange={(value) => handlePreference(reminder.key, value === 'on')}
-                options={options}
-              />
+          <div data-testid="push-master" className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-medium">{t('push.master')}</p>
+              {busy ? <p className="text-caption text-text-muted">{t('push.working')}</p> : null}
             </div>
-          ))}
-          <AppButton
-            type="button"
-            variant="secondary"
-            className="w-full"
-            data-testid="push-test"
-            loading={sendTest.isPending}
-            onClick={() => void handleTest()}
-          >
-            {t('push.test')}
-          </AppButton>
+            <SegmentedControl
+              value={subscription ? 'on' : 'off'}
+              onChange={(value) => {
+                if (value === 'on') void handleEnable();
+                else void handleDisable();
+              }}
+              options={options}
+            />
+            <p className="text-caption text-text-muted">{t('push.hint')}</p>
+          </div>
+
+          {subscription ? (
+            <>
+              <p data-testid="push-status" className="text-sm text-success-ink">
+                {t('push.enabled')}
+              </p>
+              <AppSelect
+                data-testid="push-hour"
+                label={t('push.hour')}
+                value={String(subscription.remind_hour)}
+                onChange={(event) => handleHour(Number(event.target.value))}
+              >
+                {HOURS.map((hour) => (
+                  <option key={hour} value={hour}>
+                    {t('push.hourOption', { hour })}
+                  </option>
+                ))}
+              </AppSelect>
+              {REMINDERS.map((reminder) => (
+                <div key={reminder.key} data-testid={reminder.testId}>
+                  <p className="section-label mb-1.5">{t(reminder.labelKey)}</p>
+                  <SegmentedControl
+                    value={subscription[reminder.key] ? 'on' : 'off'}
+                    onChange={(value) => handlePreference(reminder.key, value === 'on')}
+                    options={options}
+                  />
+                </div>
+              ))}
+              <AppButton
+                type="button"
+                variant="secondary"
+                className="w-full"
+                data-testid="push-test"
+                loading={sendTest.isPending}
+                onClick={() => void handleTest()}
+              >
+                {t('push.test')}
+              </AppButton>
+            </>
+          ) : null}
         </>
-      ) : null}
+      )}
 
       {notice ? (
         <p data-testid="push-notice" className="text-sm text-success-ink">

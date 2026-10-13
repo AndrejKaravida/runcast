@@ -7,6 +7,7 @@ import { AppCard } from '@/components/ui/AppCard';
 import { AppInput } from '@/components/ui/AppInput';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { SettingsSubpage } from '@/components/settings/SettingsSubpage';
 import { AvatarUpload } from '@/components/profile/AvatarUpload';
 import { CityPicker } from '@/components/forms/CityPicker';
@@ -52,9 +53,34 @@ function profileFormFrom(profile: ProfilesRow): ProfileForm {
   };
 }
 
+function ProfileSkeleton() {
+  return (
+    <AppCard className="space-y-4" data-testid="profile-skeleton">
+      <div className="flex items-center gap-4">
+        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full">
+          <Skeleton className="h-16 w-16" />
+        </div>
+        <Skeleton className="h-9 w-32" />
+      </div>
+      <Skeleton className="h-11" />
+      <Skeleton className="h-11" />
+      <div className="grid grid-cols-3 gap-3">
+        <Skeleton className="h-11" />
+        <Skeleton className="h-11" />
+        <Skeleton className="h-11" />
+      </div>
+      <Skeleton className="h-11" />
+      <Skeleton className="h-11" />
+      <Skeleton className="h-11" />
+      <Skeleton className="h-11" />
+      <Skeleton className="h-11" />
+    </AppCard>
+  );
+}
+
 export function SettingsProfilePage() {
   const { t } = useTranslation('settings');
-  const { data: profile } = useProfile();
+  const { data: profile, isLoading: profileLoading } = useProfile();
   const updateProfile = useUpdateProfile();
 
   const [profileForm, setProfileForm] = useState<ProfileForm | null>(null);
@@ -203,6 +229,8 @@ export function SettingsProfilePage() {
             {t('training.saveProfile')}
           </AppButton>
         </AppCard>
+      ) : profileLoading ? (
+        <ProfileSkeleton />
       ) : null}
 
       {notice ? (
