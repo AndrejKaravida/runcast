@@ -30,6 +30,10 @@
 	<string>RunCast čita tvoja trčanja iz Apple Health da bi ih uvozio u dnevnik treninga.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>RunCast upisuje trčanja u Apple Health samo kada to izričito zatražiš.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>RunCast koristi lokaciju da meri distancu i tempo tokom vođenog trčanja.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>RunCast koristi lokaciju da meri distancu i tempo tokom vođenog trčanja.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

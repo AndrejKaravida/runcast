@@ -74,6 +74,8 @@
     "recentDistance": "Ref. distanca (km)",
     "recentTime": "Ref. vreme (mm:ss, opciono)",
     "daysPerWeek": "Dani nedeljno",
+    "runDays": "Dani za trčanje",
+    "runDaysHint": "Klikni dan da ga uključiš ili isključiš. Dugo trčanje je označeno bojom.",
     "longRunDay": "Dan dugog trčanja",
     "experience": "Iskustvo",
     "experienceFirst": "Prvi put",
@@ -81,6 +83,13 @@
     "generate": "Generiši",
     "generateNew": "Generiši novi plan",
     "generated": "Novi plan je spreman, stari je arhiviran.",
+    "editRace": "Uredi",
+    "raceEditTitle": "Izmena trke",
+    "raceName": "Naziv trke (opciono)",
+    "raceSave": "Sačuvaj",
+    "raceEdited": "Trka je izmenjena.",
+    "raceRegenerate": "Regeneriši plan po novim podacima",
+    "raceEditFailed": "Čuvanje trke nije uspelo. Pokušaj ponovo.",
     "generateFailed": "Plan nije uspeo da se napravi. Hajde ponovo.",
     "baseConfirmTitle": "Generisati bazni plan?",
     "baseConfirmText": "Bez ciljnog vremena ili rezultata trke, plan nema kvalitetne treninge ni ciljne tempe. Dobijaš samo lagano trčanje. Nastaviti?",
@@ -218,6 +227,8 @@
     "goalTimeFormat": "Ciljno vreme unesi kao h:mm:ss (npr. 3:45:00)",
     "recentTimeRequired": "Unesi vreme poslednje trke",
     "recentTimeFormat": "Vreme trke unesi kao mm:ss (npr. 25:30)",
-    "recentDistanceRequired": "Izaberi distancu poslednje trke"
+    "recentDistanceRequired": "Izaberi distancu poslednje trke",
+    "daysCount": "Izaberi tačno {{count}} dana za trening.",
+    "longRunDayMissing": "Dan dugog trčanja mora biti među izabranim danima."
   }
 }

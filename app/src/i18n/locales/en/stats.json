@@ -106,6 +106,9 @@
     "emptyDescription": "Turn on your public profile and be first on the list.",
     "emptyAction": "Open settings",
     "sessionsOne": "{{count}} session",
-    "sessionsMany": "{{count}} sessions"
+    "sessionsMany": "{{count}} sessions",
+    "tabGlobal": "Global",
+    "tabFriends": "Friends",
+    "tabFeed": "Feed"
   }
 }

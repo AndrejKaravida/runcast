@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { addDays, dayDiff, weekdayOf } from './dates';
-import { generatePlan } from './plan-generator';
+import { defaultRunDays, generatePlan } from './plan-generator';
 import { isRunType, type PlanConfig, type PlanPhase, type VolumeBand, type WorkoutDraft } from './types';
 
 const QUALITY_TYPES = ['TEMPO', 'INTERVALS', 'REPETITIONS'];
@@ -403,6 +403,96 @@ describe('generatePlan long-run-first calibration', () => {
       const peakWeek = Math.max(...weekKms(plan.workouts));
       const peakLong = Math.max(...longKmByWeek(plan.workouts).values());
       expect(peakLong / peakWeek).toBeLessThanOrEqual(0.58);
+    }
+  });
+});
+
+describe('generatePlan custom run days', () => {
+  const customDays = [1, 3, 5, 6];
+
+  it('places every run on a selected day and the long run on longRunDay', () => {
+    const plan = generatePlan({ ...fullConfig, daysPerWeek: 4, longRunDay: 6, runDays: customDays });
+    for (const workout of plan.workouts) {
+      if (!isRunType(workout.type) || workout.date === fullConfig.raceDate) continue;
+      expect(customDays).toContain(weekdayOf(workout.date));
+    }
+    for (const workout of plan.workouts) {
+      if (workout.date === fullConfig.raceDate) continue;
+      if (weekdayOf(workout.date) === 6) expect(workout.type).toBe('LONG');
+    }
+  });
+
+  it('fills every non-quality selected day with easy runs', () => {
+    const plan = generatePlan({ ...fullConfig, daysPerWeek: 4, longRunDay: 6, runDays: customDays });
+    for (let week = 0; week < 5; week++) {
+      const runs = plan.workouts.filter((workout) => workout.weekIndex === week && isRunType(workout.type));
+      expect(runs).toHaveLength(4);
+      expect(runs.filter((workout) => workout.type === 'EASY')).toHaveLength(3);
+    }
+  });
+
+  it('picks quality days from the selected set by the default priority', () => {
+    const runDays = [0, 1, 3, 5, 6];
+    const plan = generatePlan({ ...fullConfig, daysPerWeek: 5, longRunDay: 6, runDays });
+    const quality = qualityPerWeek(plan.workouts);
+    expect(quality.get(5)).toHaveLength(2);
+    expect(new Set(quality.get(5)?.map((workout) => weekdayOf(workout.date)))).toEqual(new Set([1, 3]));
+  });
+
+  it('keeps quality on selected days even next to the long run', () => {
+    const plan = generatePlan({ ...fullConfig, daysPerWeek: 3, longRunDay: 6, runDays: [4, 5, 6] });
+    const quality = qualityPerWeek(plan.workouts);
+    expect(quality.get(5)).toHaveLength(1);
+    expect(weekdayOf(quality.get(5)?.[0].date as string)).toBe(4);
+  });
+
+  it('respects the selection in race week and in anchor-free base plans', () => {
+    const raceWeek = generatePlan({ ...fullConfig, daysPerWeek: 4, longRunDay: 6, runDays: customDays });
+    const raceWeekWorkouts = raceWeek.workouts.filter((workout) => workout.weekIndex === raceWeek.weeks - 1);
+    expect(raceWeekWorkouts.some((workout) => workout.type === 'RACE')).toBe(true);
+    for (const workout of raceWeekWorkouts) {
+      if (!isRunType(workout.type) || workout.type === 'RACE') continue;
+      expect(customDays).toContain(weekdayOf(workout.date));
+    }
+    const basePlan = generatePlan({
+      ...fullConfig,
+      raceDate: '2026-03-15',
+      anchor: null,
+      daysPerWeek: 4,
+      longRunDay: 6,
+      runDays: customDays,
+    });
+    for (const workout of basePlan.workouts) {
+      if (!isRunType(workout.type) || workout.date === '2026-03-15') continue;
+      expect(customDays).toContain(weekdayOf(workout.date));
+    }
+  });
+
+  it('rejects run days that do not match daysPerWeek', () => {
+    expect(() => generatePlan({ ...fullConfig, daysPerWeek: 4, runDays: [1, 3, 5] })).toThrow('daysPerWeek');
+  });
+
+  it('rejects run days without the long run day', () => {
+    expect(() => generatePlan({ ...fullConfig, daysPerWeek: 4, runDays: [0, 1, 3, 5] })).toThrow('longRunDay');
+  });
+
+  it('rejects duplicate run days', () => {
+    expect(() => generatePlan({ ...fullConfig, daysPerWeek: 4, runDays: [1, 3, 5, 5] })).toThrow('duplicates');
+  });
+
+  it('builds valid default days for every configuration', () => {
+    for (const daysPerWeek of [3, 4, 5, 6] as const) {
+      for (let longRunDay = 0; longRunDay < 7; longRunDay++) {
+        const runDays = defaultRunDays(daysPerWeek, longRunDay);
+        expect(runDays).toHaveLength(daysPerWeek);
+        expect(new Set(runDays).size).toBe(daysPerWeek);
+        expect(runDays).toContain(longRunDay);
+        const plan = generatePlan({ ...fullConfig, daysPerWeek, longRunDay, runDays });
+        for (const workout of plan.workouts) {
+          if (!isRunType(workout.type) || workout.date === fullConfig.raceDate) continue;
+          expect(runDays).toContain(weekdayOf(workout.date));
+        }
+      }
     }
   });
 });

@@ -25,6 +25,8 @@
     "schedule": {
       "title": "When do you run?",
       "daysLabel": "How many days per week",
+      "runDays": "Run days",
+      "runDaysHint": "Tap a day to include or exclude it. The long run is colour-coded.",
       "longRunNote": "The long run anchors your week: the other days are arranged around it.",
       "windowNote": "For mornings we check the forecast for 06–09 h, for evenings 17–21 h."
     },
@@ -117,6 +119,8 @@
     "recentTimeRequired": "Enter your recent race time",
     "recentTimeFormat": "Enter the race time as mm:ss (e.g. 25:30)",
     "recentDistanceRequired": "Pick your recent race distance",
+    "daysCount": "Pick exactly {{count}} training days.",
+    "longRunDayMissing": "The long run day must be one of the selected days.",
     "cityRequired": "Pick a city from the search results",
     "generateFailed": "Plan generation failed. Please try again"
   }

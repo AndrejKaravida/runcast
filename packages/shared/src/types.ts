@@ -61,6 +61,7 @@ export interface PlanConfig {
   distanceKm?: number;
   daysPerWeek: 3 | 4 | 5 | 6;
   longRunDay: number;
+  runDays?: number[];
   experience: Experience;
   volumeBand: VolumeBand;
   anchor: PlanAnchor | null;

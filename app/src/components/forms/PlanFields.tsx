@@ -1,3 +1,5 @@
+import { defaultRunDays } from '@runcast/shared';
+import { clsx } from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { AppInput } from '@/components/ui/AppInput';
 import { AppSelect } from '@/components/ui/AppSelect';
@@ -8,6 +10,25 @@ export type PlanFieldsGroup = 'race' | 'goal' | 'schedule' | 'experience';
 type PlanFieldsVariant = 'onboarding' | 'settings';
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+const REMOVE_ORDER = [6, 0, 1, 5, 3, 4, 2];
+
+function normalizeRunDays(runDays: number[], daysPerWeek: number, longRunDay: number): number[] {
+  const next = [...new Set(runDays)];
+  if (!next.includes(longRunDay)) next.push(longRunDay);
+  for (const day of REMOVE_ORDER) {
+    if (next.length <= daysPerWeek) break;
+    if (day === longRunDay) continue;
+    const index = next.indexOf(day);
+    if (index >= 0) next.splice(index, 1);
+  }
+  if (next.length < daysPerWeek) {
+    for (const day of defaultRunDays(daysPerWeek, longRunDay)) {
+      if (next.length >= daysPerWeek) break;
+      if (!next.includes(day)) next.push(day);
+    }
+  }
+  return next.sort((a, b) => a - b);
+}
 
 interface PlanFieldsLabels {
   raceDate: string;
@@ -17,6 +38,8 @@ interface PlanFieldsLabels {
   recentDistance: string;
   recentTime: string;
   daysPerWeek: string;
+  runDays: string;
+  runDaysHint: string;
   longRunDay: string;
   experience: string;
   experienceFirst: string;
@@ -36,6 +59,8 @@ const LABELS: Record<PlanFieldsVariant, PlanFieldsLabels> = {
     recentDistance: 'fields.recentRace',
     recentTime: 'fields.recentTime',
     daysPerWeek: 'steps.schedule.daysLabel',
+    runDays: 'steps.schedule.runDays',
+    runDaysHint: 'steps.schedule.runDaysHint',
     longRunDay: 'fields.longRunDay',
     experience: 'fields.experience',
     experienceFirst: 'experience.first',
@@ -53,6 +78,8 @@ const LABELS: Record<PlanFieldsVariant, PlanFieldsLabels> = {
     recentDistance: 'plan.recentDistance',
     recentTime: 'plan.recentTime',
     daysPerWeek: 'plan.daysPerWeek',
+    runDays: 'plan.runDays',
+    runDaysHint: 'plan.runDaysHint',
     longRunDay: 'plan.longRunDay',
     experience: 'plan.experience',
     experienceFirst: 'plan.experienceFirst',
@@ -73,7 +100,15 @@ interface PlanFieldsProps {
 
 export function PlanFields({ variant, groups, value, onChange }: PlanFieldsProps) {
   const { t } = useTranslation(variant);
+  const { t: tPlan } = useTranslation('plan');
   const labels = LABELS[variant];
+
+  function toggleDay(day: number) {
+    const runDays = value.runDays.includes(day)
+      ? value.runDays.filter((item) => item !== day)
+      : [...value.runDays, day].sort((a, b) => a - b);
+    onChange({ runDays });
+  }
   const raceDistances = [
     { value: '42.195', label: labels.distanceMarathon },
     { value: '21.0975', label: labels.distanceHalf },
@@ -155,7 +190,9 @@ export function PlanFields({ variant, groups, value, onChange }: PlanFieldsProps
             <p className="section-label mb-1.5">{t(labels.daysPerWeek)}</p>
             <SegmentedControl
               value={value.daysPerWeek}
-              onChange={(daysPerWeek) => onChange({ daysPerWeek })}
+              onChange={(daysPerWeek) =>
+                onChange({ daysPerWeek, runDays: normalizeRunDays(value.runDays, daysPerWeek, value.longRunDay) })
+              }
               options={[
                 { value: 3, label: '3' },
                 { value: 4, label: '4' },
@@ -164,10 +201,51 @@ export function PlanFields({ variant, groups, value, onChange }: PlanFieldsProps
               ]}
             />
           </div>
+          <div>
+            <p className="section-label mb-1.5">{t(labels.runDays)}</p>
+            <div className="grid grid-cols-7 gap-1.5">
+              {DAY_KEYS.map((key, index) => {
+                const selected = value.runDays.includes(index);
+                const isLong = selected && index === value.longRunDay;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    data-testid={`plan-day-${index}`}
+                    aria-pressed={selected}
+                    onClick={() => toggleDay(index)}
+                    className={clsx(
+                      'flex flex-col items-center gap-1.5 rounded-lg px-1 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-[0.97]',
+                      isLong ? 'bg-rain-soft' : selected ? 'bg-primary-soft' : 'bg-surface-elevated',
+                    )}
+                  >
+                    <span
+                      className={clsx(
+                        'section-label',
+                        isLong ? 'text-rain-ink' : selected ? 'text-primary-ink' : 'text-text-muted',
+                      )}
+                    >
+                      {variant === 'onboarding' ? t(`days.short.${key}`) : tPlan(`days.${key}`)}
+                    </span>
+                    <span
+                      className={clsx(
+                        'h-1.5 w-1.5 rounded-full',
+                        isLong ? 'bg-rain-ink' : selected ? 'bg-primary-ink' : 'bg-text-muted',
+                      )}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1.5 text-caption text-text-muted">{t(labels.runDaysHint)}</p>
+          </div>
           <AppSelect
             label={t(labels.longRunDay)}
             value={String(value.longRunDay)}
-            onChange={(event) => onChange({ longRunDay: Number(event.target.value) })}
+            onChange={(event) => {
+              const longRunDay = Number(event.target.value);
+              onChange({ longRunDay, runDays: normalizeRunDays(value.runDays, value.daysPerWeek, longRunDay) });
+            }}
           >
             {DAY_KEYS.map((key, index) => (
               <option key={key} value={index}>

@@ -11,6 +11,7 @@ export interface LogWorkoutInput {
   rpe: number;
   notes?: string;
   shoeId?: string | null;
+  source?: 'gps' | 'manual';
 }
 
 export function invalidateWorkoutData(queryClient: ReturnType<typeof useQueryClient>) {
@@ -30,6 +31,7 @@ export function useLogWorkout() {
         p_rpe: input.rpe,
         p_notes: input.notes ?? '',
         p_shoe_id: input.shoeId ?? undefined,
+        p_source: input.source ?? 'manual',
       });
       if (error) throw error;
     },

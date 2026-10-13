@@ -1,0 +1,48 @@
+{
+  "title": "Prijatelji",
+  "description": "Poveži se sa drugim trkačima po imenu profila.",
+  "anonymous": "Trkač",
+  "visibilityNote": "Prijatelji vide tvoje treninge.",
+  "requests": {
+    "title": "Zahtevi",
+    "empty": "Nema novih zahteva.",
+    "accept": "Prihvati",
+    "decline": "Odbij"
+  },
+  "add": {
+    "title": "Dodaj prijatelja",
+    "label": "Ime profila",
+    "hint": "Pretraga ide po tačnom imenu profila, bez razlike velikih i malih slova.",
+    "action": "Pošalji zahtev",
+    "sent": "Zahtev je poslat.",
+    "errors": {
+      "notFound": "Nema trkača sa tim imenom profila.",
+      "self": "To je tvoje ime profila.",
+      "already": "Zahtev već postoji ili ste prijatelji.",
+      "blocked": "Zahtev nije moguć.",
+      "pendingLimit": "Imaš previše zahteva na čekanju. Sačekaj da ih drugi prihvate.",
+      "dailyLimit": "Dnevni limit zahteva je dostignut. Pokušaj ponovo sutra.",
+      "failed": "Nije uspelo. Pokušaj ponovo."
+    }
+  },
+  "friends": {
+    "title": "Prijatelji",
+    "emptyTitle": "Još nemaš prijatelje",
+    "emptyDescription": "Pošalji zahtev po imenu profila i treninzi prijatelja pojaviće se u feed-u.",
+    "emptyAction": "Dodaj prijatelja",
+    "weeklyKm": "{{km}} km ove nedelje",
+    "remove": "Ukloni",
+    "removeTitle": "Ukloniti prijatelja?",
+    "removeDescription": "{{name}} više neće videti tvoje treninge.",
+    "block": "Blokiraj",
+    "blockTitle": "Blokirati korisnika?",
+    "blockDescription": "{{name}} neće videti tvoje treninge i neće moći da ti pošalje zahtev. Osoba neće biti obaveštena."
+  },
+  "feed": {
+    "title": "Feed",
+    "emptyTitle": "Feed je još prazan",
+    "emptyDescription": "Trening prijatelja pojaviće se ovde čim ga zabeleži.",
+    "anonymous": "Trkač",
+    "kudos": "Kudos"
+  }
+}

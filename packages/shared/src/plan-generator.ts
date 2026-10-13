@@ -108,6 +108,7 @@ interface WeekBuildParams {
   raceDistanceKm: number;
   isRaceWeek: boolean;
   daysPerWeek: 3 | 4 | 5 | 6;
+  runDays?: number[];
   experience: Experience;
   longKm: number;
   longFinish: boolean;
@@ -117,7 +118,27 @@ function round1(value: number): number {
   return Math.round(value * 10) / 10;
 }
 
-function buildLayout(daysPerWeek: number, longRunDay: number, qualityCount: number): Layout {
+function validateRunDays(runDays: number[], daysPerWeek: number, longRunDay: number): void {
+  if (runDays.length !== daysPerWeek) throw new Error('runDays must have daysPerWeek entries');
+  if (new Set(runDays).size !== runDays.length) throw new Error('runDays must not contain duplicates');
+  if (!runDays.includes(longRunDay)) throw new Error('runDays must include longRunDay');
+  if (runDays.some((day) => !Number.isInteger(day) || day < 0 || day > 6))
+    throw new Error('runDays must contain weekday indices');
+}
+
+function buildLayout(daysPerWeek: number, longRunDay: number, qualityCount: number, runDays?: number[]): Layout {
+  if (runDays) {
+    validateRunDays(runDays, daysPerWeek, longRunDay);
+    const selected = new Set(runDays);
+    const qualityDays: number[] = [];
+    for (const offset of [2, 4, 5, 3]) {
+      if (qualityDays.length >= qualityCount) break;
+      const day = (longRunDay + offset) % 7;
+      if (day !== longRunDay && selected.has(day) && !qualityDays.includes(day)) qualityDays.push(day);
+    }
+    const easyDays = runDays.filter((day) => day !== longRunDay && !qualityDays.includes(day)).sort((a, b) => a - b);
+    return { longRunDay, qualityDays: [...qualityDays].sort((a, b) => a - b), easyDays };
+  }
   const forbidden = new Set([(longRunDay + 6) % 7, longRunDay, (longRunDay + 1) % 7]);
   const qualityDays: number[] = [];
   for (const offset of [2, 4, 5, 3]) {
@@ -133,8 +154,17 @@ function buildLayout(daysPerWeek: number, longRunDay: number, qualityCount: numb
   return { longRunDay, qualityDays: [...qualityDays].sort((a, b) => a - b), easyDays };
 }
 
-function raceWeekLayout(raceDate: string, daysPerWeek: number): Layout {
+export function defaultRunDays(daysPerWeek: number, longRunDay: number): number[] {
+  const layout = buildLayout(daysPerWeek, longRunDay, daysPerWeek >= 5 ? 2 : 1);
+  return [...layout.qualityDays, ...layout.easyDays, layout.longRunDay].sort((a, b) => a - b);
+}
+
+function raceWeekLayout(raceDate: string, daysPerWeek: number, runDays?: number[]): Layout {
   const raceDay = weekdayOf(raceDate);
+  if (runDays) {
+    const easyDays = runDays.filter((day) => day !== raceDay).sort((a, b) => a - b);
+    return { longRunDay: -1, qualityDays: [], easyDays };
+  }
   const easyDays = [2, 4, 3, 5, 1, 0, 6]
     .filter((day) => day !== raceDay)
     .slice(0, Math.max(daysPerWeek - 1, 1))
@@ -354,7 +384,9 @@ function raceWorkout(date: string, distanceKm: number, paces: PlanPaces | null, 
 }
 
 function buildWeek(params: WeekBuildParams): WorkoutDraft[] {
-  const layout = params.isRaceWeek ? raceWeekLayout(params.raceDate, params.daysPerWeek) : params.layout;
+  const layout = params.isRaceWeek
+    ? raceWeekLayout(params.raceDate, params.daysPerWeek, params.runDays)
+    : params.layout;
   const strengthByDate = new Map<string, WorkoutDraft>();
   if (!params.isRaceWeek && layout.longRunDay >= 0) {
     const drafts = strengthWorkoutsForWeek({
@@ -460,7 +492,7 @@ export function generatePlan(config: PlanConfig): PlanDraft {
   const paces = anchor ? pacesFromVdot(vdotFromPerformance(anchor.distanceKm, anchor.timeSec)) : null;
 
   if (baseMode) {
-    const layout = buildLayout(config.daysPerWeek, config.longRunDay, 0);
+    const layout = buildLayout(config.daysPerWeek, config.longRunDay, 0, config.runDays);
     const workouts: WorkoutDraft[] = [];
     let phaseWeek = 0;
     let previousPhase: PlanPhase | null = null;
@@ -484,6 +516,7 @@ export function generatePlan(config: PlanConfig): PlanDraft {
           raceDistanceKm,
           isRaceWeek,
           daysPerWeek: config.daysPerWeek,
+          runDays: config.runDays,
           experience: config.experience,
           longKm: series.longKm[i],
           longFinish: false,
@@ -507,7 +540,7 @@ export function generatePlan(config: PlanConfig): PlanDraft {
     previousPhase = phase;
     const buildWeekNumber = templateIndex - template.base;
     const qualities = qualityForWeek(phase, buildWeekNumber, config.daysPerWeek);
-    const layout = buildLayout(config.daysPerWeek, config.longRunDay, qualities.length);
+    const layout = buildLayout(config.daysPerWeek, config.longRunDay, qualities.length, config.runDays);
     const isRaceWeek = i === weeks - 1;
     const longFinish = (phase === 'BUILD' || phase === 'PEAK') && buildWeekNumber >= template.build - 3;
     workouts.push(
@@ -525,6 +558,7 @@ export function generatePlan(config: PlanConfig): PlanDraft {
         raceDistanceKm,
         isRaceWeek,
         daysPerWeek: config.daysPerWeek,
+        runDays: config.runDays,
         experience: config.experience,
         longKm: series.longKm[i],
         longFinish,

@@ -106,6 +106,9 @@
     "emptyDescription": "Uključi javni profil i budi prvi na listi.",
     "emptyAction": "Otvori podešavanja",
     "sessionsOne": "{{count}} trening",
-    "sessionsMany": "{{count}} treninga"
+    "sessionsMany": "{{count}} treninga",
+    "tabGlobal": "Globalno",
+    "tabFriends": "Prijatelji",
+    "tabFeed": "Feed"
   }
 }

@@ -15,7 +15,8 @@ export type GuidedCueKind =
   | 'RESUME'
   | 'SKIP'
   | 'FINISH'
-  | 'DISTANCE';
+  | 'DISTANCE'
+  | 'SPLIT';
 
 export interface GuidedWorkoutInput {
   type: string;
@@ -58,6 +59,7 @@ export interface GuidedCueContext {
   paceLabel?: string | null;
   elapsedSec?: number;
   distanceKm?: number;
+  km?: number;
 }
 
 const ZONE_FIELD: Record<PaceZone, keyof PlanPaces> = {
@@ -212,5 +214,7 @@ export function cueTextFor(kind: GuidedCueKind, context: GuidedCueContext = {}):
       return { key: 'content:guided.cue.finish', params: { elapsed: formatDuration(context.elapsedSec ?? 0) } };
     case 'DISTANCE':
       return { key: 'content:guided.cue.distance', params: { km: context.distanceKm ?? 0 } };
+    case 'SPLIT':
+      return { key: 'content:guided.cue.split', params: { km: context.km ?? 1, pace: context.paceLabel ?? '' } };
   }
 }

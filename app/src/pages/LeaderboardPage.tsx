@@ -1,14 +1,20 @@
 import { ArrowLeft } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
+import { FriendsFeed } from '@/components/social/FriendsFeed';
+import { FriendsLeaderboardCard } from '@/components/social/FriendsLeaderboardCard';
 import { LeaderboardCard } from '@/components/social/LeaderboardCard';
 import { AppButton } from '@/components/ui/AppButton';
 import { QueryError } from '@/components/ui/QueryError';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/auth/AuthProvider';
-import { useLeaderboard } from '@/features/social/queries';
+import { useFriendsFeed, useFriendsLeaderboard, useLeaderboard } from '@/features/social/queries';
 import { startOfWeekIso, todayIso } from '@/lib/dates';
+
+type LeaderboardTab = 'global' | 'friends' | 'feed';
 
 function LeaderboardSkeleton() {
   return (
@@ -32,9 +38,14 @@ function LeaderboardSkeleton() {
 
 export function LeaderboardPage() {
   const { t } = useTranslation('stats');
+  const { t: tSocial } = useTranslation('social');
   const navigate = useNavigate();
   const { session } = useAuth();
-  const { data = [], isLoading, isError, refetch } = useLeaderboard(startOfWeekIso(todayIso()));
+  const [tab, setTab] = useState<LeaderboardTab>('global');
+  const weekStart = startOfWeekIso(todayIso());
+  const global = useLeaderboard(weekStart);
+  const friends = useFriendsLeaderboard(weekStart);
+  const feed = useFriendsFeed();
 
   return (
     <div className="mx-auto w-full max-w-[560px] space-y-5 px-4 py-6">
@@ -43,17 +54,50 @@ export function LeaderboardPage() {
       </AppButton>
 
       <div className="space-y-1">
-        <SectionHeader label={t('leaderboard.title')} />
+        <SectionHeader
+          label={t('leaderboard.title')}
+          action={
+            <Link to="/friends" className="text-caption font-semibold text-primary-ink">
+              {tSocial('title')}
+            </Link>
+          }
+        />
         <p className="text-sm text-text-secondary">{t('leaderboard.description')}</p>
       </div>
 
-      {isLoading ? (
+      <SegmentedControl
+        value={tab}
+        onChange={setTab}
+        options={[
+          { value: 'global', label: t('leaderboard.tabGlobal') },
+          { value: 'friends', label: t('leaderboard.tabFriends') },
+          { value: 'feed', label: t('leaderboard.tabFeed') },
+        ]}
+      />
+
+      {tab === 'global' ? (
+        global.isLoading ? (
+          <LeaderboardSkeleton />
+        ) : global.isError ? (
+          <QueryError onRetry={() => void global.refetch()} />
+        ) : session ? (
+          <LeaderboardCard entries={global.data ?? []} currentUserId={session.user.id} />
+        ) : null
+      ) : tab === 'friends' ? (
+        friends.isLoading ? (
+          <LeaderboardSkeleton />
+        ) : friends.isError ? (
+          <QueryError onRetry={() => void friends.refetch()} />
+        ) : session ? (
+          <FriendsLeaderboardCard entries={friends.data ?? []} currentUserId={session.user.id} />
+        ) : null
+      ) : feed.isLoading ? (
         <LeaderboardSkeleton />
-      ) : isError ? (
-        <QueryError onRetry={() => void refetch()} />
-      ) : session ? (
-        <LeaderboardCard entries={data} currentUserId={session.user.id} />
-      ) : null}
+      ) : feed.isError ? (
+        <QueryError onRetry={() => void feed.refetch()} />
+      ) : (
+        <FriendsFeed items={feed.data ?? []} />
+      )}
     </div>
   );
 }

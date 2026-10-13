@@ -105,7 +105,7 @@ export function GuidedRunPage() {
         elapsedSec={clock.elapsedSec}
         loggedDistanceKm={runner.loggedDistanceKm}
         loggedDuration={runner.loggedDuration}
-        gpsEnabled={runner.gpsEnabled}
+        logSource={runner.logSource}
         gpsWithoutFix={runner.gpsWithoutFix}
         bannerText={runner.bannerText}
         existingLog={runner.existingLog}
@@ -132,7 +132,13 @@ export function GuidedRunPage() {
         gpsEnabled={runner.gpsEnabled}
         gpsStatus={geo.status}
         gpsDistanceKm={geo.distanceKm}
-        onTogglePause={() => (clock.phase === 'paused' ? clock.resume() : clock.pause())}
+        plannedDistanceKm={workout.distance_km > 0 ? workout.distance_km : timeline.totalDistanceKm}
+        paceEmaSecPerKm={geo.paceEmaSecPerKm}
+        avgPaceSecPerKm={runner.avgPaceSecPerKm}
+        splits={geo.splits}
+        gpsLost={geo.gpsLost}
+        gpsFallback={runner.gpsFallback}
+        onTogglePause={runner.handleTogglePause}
         onNext={runner.handleNext}
         onBack={runner.handleBack}
         onFinish={() => setFinishOpen(true)}

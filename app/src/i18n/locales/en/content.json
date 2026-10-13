@@ -196,7 +196,8 @@
       "skip": "Moving on to: {{label}}.",
       "skipFallback": "Moving on to: the next step.",
       "finish": "Done! {{elapsed}} in the legs.",
-      "distance": "GPS distance: {{km, number(maximumFractionDigits: 2)}} kilometres."
+      "distance": "GPS distance: {{km, number(maximumFractionDigits: 2)}} kilometres.",
+      "split": "Kilometre {{km}} in {{pace}}."
     }
   },
   "achievements": {

@@ -187,7 +187,8 @@
       "skip": "Prelazimo na: {{label}}.",
       "skipFallback": "Prelazimo na: sledeći korak.",
       "finish": "Gotovo! {{elapsed}} u nogama.",
-      "distance": "GPS distanca: {{km, number(maximumFractionDigits: 2)}} kilometara."
+      "distance": "GPS distanca: {{km, number(maximumFractionDigits: 2)}} kilometara.",
+      "split": "Kilometar {{km}} za {{pace}}."
     }
   },
   "achievements": {

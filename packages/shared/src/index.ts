@@ -7,6 +7,7 @@ export * from './srpe';
 export * from './achievements';
 export * from './predict';
 export * from './guided';
+export * from './live-track';
 export * from './schemas';
 export * from './explain';
 export * from './plan-generator';

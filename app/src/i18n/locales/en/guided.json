@@ -31,7 +31,14 @@
     "end": "End",
     "gpsTracking": "GPS tracking",
     "gpsDenied": "GPS blocked",
-    "gpsStart": "GPS start"
+    "gpsStart": "GPS start",
+    "gpsFallback": "GPS is unavailable. You will enter the distance manually after the run.",
+    "gpsLost": "Distance paused: no GPS signal.",
+    "livePace": "Live pace",
+    "avgPace": "Average pace",
+    "of": "of {{km}} km",
+    "split": "km {{km}}",
+    "progress": "Progress to goal"
   },
   "stats": {
     "duration": "Duration",

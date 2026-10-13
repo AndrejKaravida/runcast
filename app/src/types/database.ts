@@ -3,6 +3,80 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      blocks: {
+        Row: {
+          blocked_id: string;
+          blocker_id: string;
+          created_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          blocked_id: string;
+          blocker_id: string;
+          created_at?: string;
+        };
+        Update: {
+          blocked_id?: string;
+          blocker_id?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      friendships: {
+        Row: {
+          addressee_id: string;
+          created_at: string;
+          id: string;
+          requester_id: string;
+          responded_at: string | null;
+          status: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          addressee_id: string;
+          created_at?: string;
+          id?: string;
+          requester_id: string;
+          responded_at?: string | null;
+          status?: string;
+        };
+        Update: {
+          addressee_id?: string;
+          created_at?: string;
+          id?: string;
+          requester_id?: string;
+          responded_at?: string | null;
+          status?: string;
+        };
+        Relationships: [];
+      };
+      kudos: {
+        Row: {
+          created_at: string;
+          run_log_id: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          run_log_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          run_log_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'kudos_run_log_id_fkey';
+            columns: ['run_log_id'];
+            isOneToOne: false;
+            referencedRelation: 'run_logs';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       plans: {
         Row: {
           anchor: Json | null;
@@ -253,6 +327,7 @@ export type Database = {
           notes: string | null;
           rpe: number | null;
           shoe_id: string | null;
+          source: string;
           user_id: string;
           workout_id: string | null;
         };
@@ -268,6 +343,7 @@ export type Database = {
           notes?: string | null;
           rpe?: number | null;
           shoe_id?: string | null;
+          source?: string;
           user_id: string;
           workout_id?: string | null;
         };
@@ -282,6 +358,7 @@ export type Database = {
           notes?: string | null;
           rpe?: number | null;
           shoe_id?: string | null;
+          source?: string;
           user_id?: string;
           workout_id?: string | null;
         };
@@ -403,6 +480,8 @@ export type Database = {
     };
     Functions: {
       apply_week_plan: { Args: { p_assignments: Json }; Returns: number };
+      can_view_profile: { Args: { p_profile_id: string }; Returns: boolean };
+      can_view_run_log: { Args: { p_run_log_id: string }; Returns: boolean };
       create_plan_with_workouts: {
         Args: {
           p_anchor: Json;
@@ -420,7 +499,29 @@ export type Database = {
         Returns: string;
       };
       delete_my_account: { Args: Record<PropertyKey, never>; Returns: undefined };
+      find_profile_by_name: {
+        Args: { p_name: string };
+        Returns: {
+          avatar_url: string;
+          display_name: string;
+          id: string;
+        }[];
+      };
+      friends_weekly_leaderboard: {
+        Args: { p_week_start: string };
+        Returns: {
+          avatar_url: string;
+          display_name: string;
+          distance_km: number;
+          is_public: boolean;
+          rank: number;
+          sessions: number;
+          user_id: string;
+        }[];
+      };
       get_push_public_key: { Args: Record<PropertyKey, never>; Returns: string };
+      is_blocked_with: { Args: { p_other_id: string }; Returns: boolean };
+      is_friend_or_self: { Args: { p_user_id: string }; Returns: boolean };
       log_workout: {
         Args: {
           p_distance_km: number;
@@ -428,6 +529,7 @@ export type Database = {
           p_notes: string;
           p_rpe: number;
           p_shoe_id?: string;
+          p_source?: string;
           p_workout_id: string;
         };
         Returns: undefined;

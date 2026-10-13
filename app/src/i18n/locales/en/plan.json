@@ -49,5 +49,9 @@
     "confirm": "You have {{count}} missed workouts this week. Reshuffle what's left?",
     "success": "The week has been adjusted.",
     "error": "Adaptation failed. Try again"
+  },
+  "errors": {
+    "daysCount": "Pick exactly {{count}} training days.",
+    "longRunDayMissing": "The long run day must be one of the selected days."
   }
 }

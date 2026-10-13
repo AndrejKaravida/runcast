@@ -14,7 +14,7 @@ interface GuidedFinishProps {
   elapsedSec: number;
   loggedDistanceKm: number | null;
   loggedDuration: number;
-  gpsEnabled: boolean;
+  logSource: 'gps' | 'manual';
   gpsWithoutFix: boolean;
   bannerText: string;
   existingLog: RunLogsRow | null;
@@ -26,7 +26,7 @@ export function GuidedFinish({
   elapsedSec,
   loggedDistanceKm,
   loggedDuration,
-  gpsEnabled,
+  logSource,
   gpsWithoutFix,
   bannerText,
   existingLog,
@@ -49,7 +49,7 @@ export function GuidedFinish({
             },
             {
               label: t('guided:finish.source'),
-              value: gpsEnabled ? t('guided:finish.sourceGps') : t('guided:finish.sourcePlan'),
+              value: logSource === 'gps' ? t('guided:finish.sourceGps') : t('guided:finish.sourcePlan'),
             },
           ]}
           className="w-full max-w-sm rounded-xl bg-surface-elevated py-1"
@@ -71,7 +71,7 @@ export function GuidedFinish({
         workout={workout}
         open={logOpen}
         onClose={() => setLogOpen(false)}
-        prefill={{ distanceKm: loggedDistanceKm ?? undefined, durationSec: loggedDuration }}
+        prefill={{ distanceKm: loggedDistanceKm ?? undefined, durationSec: loggedDuration, source: logSource }}
       />
     </div>
   );

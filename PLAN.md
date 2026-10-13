@@ -124,6 +124,25 @@ je zatvoren.
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
 
+## v1.7 — konkurentska analiza, live tracker, custom dani, edit trke, prijatelji
+
+- **Konkurentska analiza** (`docs/features/13-competitive/report.md`): matrica 15 aplikacija,
+  rangirane praznine (in-run iskustvo, workout na sat, adaptivni plan, S&C, audio, social) i
+  naši diferencijatori (weather loop, adherence rang lista, benchmark auto-rekalibracija).
+- **Live GPS tracker** (F14): živa distanca + progres do planirane, live/avg pace, km splitovi,
+  auto-pause sa histerezom, GPS-lost baner, haptic/beep/govorni cue-ovi, wake lock, ručni
+  fallback; `run_logs.source` (gps/manual); native lokacijske permisije.
+- **Custom dani plana** (F15): interaktivni izbor tačno kojih dana u nedelji se trči (dugi trk
+  posebno); generator `runDays` uz potpuno backward-compatible default; validacija u onboardingu
+  i settings regeneraciji.
+- **Edit trke** (F16): izmena naziva/datuma/distance/ciljnog vremena iz Settings → Plan, uz
+  eksplicitnu ponudu regeneracije plana; `races_update_own` politika.
+- **Scroll-to-top**: svaka navigacija (uključujući podstranice van tabova) počinje od vrha.
+- **Prijatelji / social MVP** (F17): mutual friendship (zahtev/prihvatanje), feed prijateljskih
+  treninga, kudos, friends-only rang lista, blokiranje, pretraga samo po tačnom imenu profila
+  (bez email pretrage); RLS: prijatelji vide logove, javni profil ostaje opt-in; sekcija u
+  politici privatnosti + export/brisanje pokrivaju social tabele.
+
 ## v1.6 — native shell, Health integracije, splash, floating dock, shoes
 
 - **Capacitor native shell**: ista codebase kao prava Android/iOS app (bez browsera); Android APK

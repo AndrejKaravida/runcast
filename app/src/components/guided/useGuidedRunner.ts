@@ -4,6 +4,7 @@ import {
   buildStepTimeline,
   cueTextFor,
   elapsedAfterSkip,
+  formatPace,
   segmentAt,
   type GuidedCueContext,
   type GuidedCueKind,
@@ -12,8 +13,9 @@ import {
   type TimelineSegment,
 } from '@runcast/shared';
 import { useTranslation } from 'react-i18next';
-import { useGeoDistance } from '@/components/guided/useGeoDistance';
+import { vibrate } from '@/components/guided/haptics';
 import { useGuidedClock, type GuidedPhase } from '@/components/guided/useGuidedClock';
+import { useLiveTrack } from '@/components/guided/useLiveTrack';
 import { useSpeechCues } from '@/components/guided/useSpeechCues';
 import { useWakeLock } from '@/components/guided/useWakeLock';
 import { workoutSteps } from '@/features/workouts/utils';
@@ -50,8 +52,15 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
 
   const clock = useGuidedClock(timeline?.totalDurationSec ?? 0, timeScale);
   const speech = useSpeechCues();
-  const [gpsEnabled, setGpsEnabled] = useState(false);
-  const geo = useGeoDistance(gpsEnabled && clock.phase === 'running');
+  const [gpsEnabled, setGpsEnabled] = useState(true);
+  const gpsActive =
+    gpsEnabled && (clock.phase === 'countdown' || clock.phase === 'running' || clock.phase === 'paused');
+  const geo = useLiveTrack({
+    enabled: gpsActive,
+    running: clock.phase === 'running',
+    onAutoPause: clock.pause,
+    onAutoResume: clock.resume,
+  });
   const wakeLockSupported = useWakeLock(
     clock.phase === 'countdown' || clock.phase === 'running' || clock.phase === 'paused',
   );
@@ -69,10 +78,14 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
 
   const existingLog = workout ? (logs.find((entry) => entry.workout_id === workout.id) ?? null) : null;
   const position = timeline ? segmentAt(timeline, clock.elapsedSec) : null;
-  const trackedDistanceKm = gpsEnabled && geo.distanceKm > 0.01 ? geo.distanceKm : null;
-  const loggedDistanceKm = trackedDistanceKm ?? (gpsEnabled ? null : (workout?.distance_km ?? 0));
-  const gpsWithoutFix = gpsEnabled && trackedDistanceKm === null;
+  const gpsFallback = gpsEnabled && (geo.status === 'denied' || geo.status === 'unsupported');
+  const trackedDistanceKm = gpsEnabled && !gpsFallback && geo.distanceKm > 0.01 ? geo.distanceKm : null;
+  const loggedDistanceKm = trackedDistanceKm ?? (gpsFallback || !gpsEnabled ? (workout?.distance_km ?? 0) : null);
+  const gpsWithoutFix = gpsEnabled && !gpsFallback && trackedDistanceKm === null;
   const loggedDuration = Math.max(1, Math.round(clock.elapsedSec));
+  const logSource: 'gps' | 'manual' = trackedDistanceKm !== null ? 'gps' : 'manual';
+  const avgPaceSecPerKm =
+    trackedDistanceKm !== null && trackedDistanceKm > 0.2 ? Math.round(clock.elapsedSec / trackedDistanceKm) : null;
 
   useEffect(() => {
     const phase = clock.phase;
@@ -96,11 +109,11 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
       finishedCueRef.current = true;
       const base = cueText('FINISH', { elapsedSec: clock.elapsedSec });
       const text =
-        gpsEnabled && geo.distanceKm > 0.01 ? `${base} ${cueText('DISTANCE', { distanceKm: geo.distanceKm })}` : base;
+        trackedDistanceKm !== null ? `${base} ${cueText('DISTANCE', { distanceKm: trackedDistanceKm })}` : base;
       speech.speak(text);
       speech.beep(880, 250);
     }
-  }, [clock.phase, clock.elapsedSec, gpsEnabled, geo.distanceKm, speech, cueText]);
+  }, [clock.phase, clock.elapsedSec, trackedDistanceKm, speech, cueText]);
 
   useEffect(() => {
     if (clock.phase !== 'countdown') return;
@@ -141,9 +154,28 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
     speech.beep(660, 120);
   }, [clock.phase, clock.elapsedSec, fuelingCues, speech, localize]);
 
+  const splitsSeenRef = useRef(0);
+  useEffect(() => {
+    if (clock.phase !== 'running' || geo.splits.length <= splitsSeenRef.current) return;
+    splitsSeenRef.current = geo.splits.length;
+    const split = geo.splits[geo.splits.length - 1];
+    vibrate(80);
+    speech.beep(880, 120);
+    speech.speak(cueText('SPLIT', { km: split.km, paceLabel: formatPace(split.paceSecPerKm) }));
+  }, [clock.phase, geo.splits, speech, cueText]);
+
   const handleStart = () => {
     speech.unlock();
     clock.start();
+  };
+
+  const handleTogglePause = () => {
+    geo.resetAutoPause();
+    if (clock.phase === 'paused') {
+      clock.resume();
+      return;
+    }
+    clock.pause();
   };
 
   const handleNext = () => {
@@ -175,8 +207,8 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
     Boolean(timeline && timeline.totalDurationSec > 0) && clock.elapsedSec >= (timeline?.totalDurationSec ?? 0) / 2;
   const finishedCue = cueText('FINISH', { elapsedSec: clock.elapsedSec });
   const finishedCueWithDistance =
-    gpsEnabled && geo.distanceKm > 0.01
-      ? `${finishedCue} ${cueText('DISTANCE', { distanceKm: geo.distanceKm })}`
+    trackedDistanceKm !== null
+      ? `${finishedCue} ${cueText('DISTANCE', { distanceKm: trackedDistanceKm })}`
       : finishedCue;
   const bannerText =
     clock.phase === 'idle'
@@ -217,12 +249,16 @@ export function useGuidedRunner({ workout, paces, logs, timeScale }: GuidedRunne
     position,
     activeSegment,
     loggedDistanceKm,
+    logSource,
     gpsWithoutFix,
+    gpsFallback,
+    avgPaceSecPerKm,
     loggedDuration,
     bannerText,
     fuelingHint,
     handleStart,
     handleNext,
     handleBack,
+    handleTogglePause,
   };
 }

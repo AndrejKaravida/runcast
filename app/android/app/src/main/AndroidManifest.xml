@@ -39,6 +39,9 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <!-- Health Connect (merged with the @capgo/capacitor-health manifest) -->
 
     <uses-permission android:name="android.permission.health.READ_EXERCISE" />

@@ -13,6 +13,7 @@ import type { WorkoutsRow } from '@/types';
 interface LogWorkoutPrefill {
   distanceKm?: number;
   durationSec?: number;
+  source?: 'gps' | 'manual';
 }
 
 interface LogWorkoutModalProps {
@@ -72,7 +73,12 @@ function LogForm({
       return;
     }
     try {
-      await logWorkout.mutateAsync({ workout, ...parsed.data, shoeId: shoeId || null });
+      await logWorkout.mutateAsync({
+        workout,
+        ...parsed.data,
+        shoeId: shoeId || null,
+        source: prefill?.source ?? 'manual',
+      });
       onClose();
     } catch {
       setError(t('log.errorSave'));

@@ -31,7 +31,14 @@
     "end": "Kraj",
     "gpsTracking": "GPS aktivan",
     "gpsDenied": "GPS blokiran",
-    "gpsStart": "GPS start"
+    "gpsStart": "GPS start",
+    "gpsFallback": "GPS nije dostupan. Distancu ćeš upisati ručno posle treninga.",
+    "gpsLost": "Distanca pauzirana: nema GPS signala.",
+    "livePace": "Tekući tempo",
+    "avgPace": "Prosečan tempo",
+    "of": "od {{km}} km",
+    "split": "{{km}}. km",
+    "progress": "Napredak do cilja"
   },
   "stats": {
     "duration": "Trajanje",

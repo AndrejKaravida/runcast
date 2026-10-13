@@ -40,6 +40,14 @@
         ]
       },
       {
+        "heading": "Prijatelji i feed",
+        "paragraphs": [
+          "Prijateljstvo u RunCast-u je obostrano: tuđe treninge vidiš, a drugi vide tvoje, samo kada zahtev prihvatite. Prijatelji vide ime i avatar, zabeležene treninge u feed-u i nedeljne kilometre na zajedničkoj rang listi. Pretraga ide isključivo po tačnom imenu profila, nikada po email adresi ili telefonu.",
+          "Prijatelja možeš ukloniti ili blokirati u aplikaciji: Rang lista → Prijatelji. Blokada skriva obe strane jednu od druge bez obaveštenja i onemogućava nove zahteve u oba smera.",
+          "Brisanjem naloga brišu se prijateljstva, blokade i kudos-i koje si poslao. Ako prijatelj obriše nalog, njegovi podaci nestaju i iz tvog feed-a i rang liste."
+        ]
+      },
+      {
         "heading": "Pružaoci usluga sa kojima delimo podatke",
         "paragraphs": [
           "Supabase: autentifikacija, baza podataka, čuvanje fajlova i transakcioni email.",

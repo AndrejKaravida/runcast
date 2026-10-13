@@ -10,12 +10,19 @@ export interface GeneratePlanInput {
   recentRace: { distanceKm: number; timeSec: number } | null;
   daysPerWeek: 3 | 4 | 5 | 6;
   longRunDay: number;
+  runDays?: number[];
   experience: 'first' | 'experienced';
   volumeBand: VolumeBand;
 }
 
 export type ActivePlan = PlansRow & {
-  races: { name: string | null; race_date: string; distance_km: number; goal_time_sec: number | null } | null;
+  races: {
+    id: string;
+    name: string | null;
+    race_date: string;
+    distance_km: number;
+    goal_time_sec: number | null;
+  } | null;
 };
 
 export function useActivePlan() {
@@ -27,7 +34,7 @@ export function useActivePlan() {
     queryFn: async (): Promise<ActivePlan | null> => {
       const { data, error } = await supabase
         .from('plans')
-        .select('*, races(name, race_date, distance_km, goal_time_sec)')
+        .select('*, races(id, name, race_date, distance_km, goal_time_sec)')
         .eq('user_id', userId as string)
         .eq('status', 'ACTIVE')
         .order('created_at', { ascending: false })
@@ -96,6 +103,7 @@ export function useGeneratePlan() {
         distanceKm: input.race?.distanceKm ?? 42.195,
         daysPerWeek: input.daysPerWeek,
         longRunDay: input.longRunDay,
+        runDays: input.runDays,
         experience: input.experience,
         volumeBand: input.volumeBand,
         anchor,
@@ -128,6 +136,37 @@ export function useGeneratePlan() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['plan'] });
       queryClient.invalidateQueries({ queryKey: ['workouts'] });
+      queryClient.invalidateQueries({ queryKey: ['races'] });
+    },
+  });
+}
+
+export interface UpdateRaceInput {
+  id: string;
+  name: string | null;
+  raceDate: string;
+  distanceKm: number;
+  goalTimeSec: number | null;
+}
+
+export function useUpdateRace() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: UpdateRaceInput) => {
+      const { error } = await supabase
+        .from('races')
+        .update({
+          name: input.name,
+          race_date: input.raceDate,
+          distance_km: input.distanceKm,
+          goal_time_sec: input.goalTimeSec,
+        })
+        .eq('id', input.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plans'] });
+      queryClient.invalidateQueries({ queryKey: ['plan'] });
       queryClient.invalidateQueries({ queryKey: ['races'] });
     },
   });

@@ -25,6 +25,8 @@
     "schedule": {
       "title": "Kada trčiš?",
       "daysLabel": "Koliko dana nedeljno",
+      "runDays": "Dani za trčanje",
+      "runDaysHint": "Klikni dan da ga uključiš ili isključiš. Dugo trčanje je označeno bojom.",
       "longRunNote": "Dugi trk nosi nedelju: ostale dane raspoređujemo oko njega.",
       "windowNote": "Za jutro gledamo prognozu 06–09 h, za veče 17–21 h."
     },
@@ -117,6 +119,8 @@
     "recentTimeRequired": "Unesi vreme poslednje trke",
     "recentTimeFormat": "Vreme trke unesi kao mm:ss (npr. 25:30)",
     "recentDistanceRequired": "Izaberi distancu poslednje trke",
+    "daysCount": "Izaberi tačno {{count}} dana za trening.",
+    "longRunDayMissing": "Dan dugog trčanja mora biti među izabranim danima.",
     "cityRequired": "Izaberi grad iz rezultata pretrage",
     "generateFailed": "Generisanje plana nije uspelo. Pokušaj ponovo"
   }

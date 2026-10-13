@@ -168,5 +168,9 @@ describe('guided timeline', () => {
       key: 'content:guided.cue.distance',
       params: { km: 5.25 },
     });
+    expect(cueTextFor('SPLIT', { km: 2, paceLabel: '5:00' })).toEqual({
+      key: 'content:guided.cue.split',
+      params: { km: 2, pace: '5:00' },
+    });
   });
 });

@@ -2,6 +2,7 @@ import { parseTimeToSeconds, type Experience, type VolumeBand } from '@runcast/s
 import type { GeneratePlanInput } from '@/features/plans/queries';
 
 export interface PlanDraft {
+  raceName: string;
   raceDate: string;
   distanceKm: string;
   goalTime: string;
@@ -9,10 +10,11 @@ export interface PlanDraft {
   recentTime: string;
   daysPerWeek: 3 | 4 | 5 | 6;
   longRunDay: number;
+  runDays: number[];
   experience: Experience;
 }
 
-export type PlanDraftSection = 'raceDate' | 'goalTime' | 'recentRace';
+export type PlanDraftSection = 'raceDate' | 'goalTime' | 'recentRace' | 'schedule';
 
 export type PlanDraftError =
   | 'raceDateRequired'
@@ -20,7 +22,9 @@ export type PlanDraftError =
   | 'goalTimeFormat'
   | 'recentTimeRequired'
   | 'recentTimeFormat'
-  | 'recentDistanceRequired';
+  | 'recentDistanceRequired'
+  | 'daysCount'
+  | 'longRunDayMissing';
 
 const MAX_GOAL_TIME_SEC = 24 * 60 * 60;
 
@@ -59,6 +63,11 @@ export function validatePlanDraft(
     if (hasRecentTime && tryParseTime(draft.recentTime) === null) return 'recentTimeFormat';
     if (hasRecentTime && !hasRecentDistance) return 'recentDistanceRequired';
   }
+  if (sections.includes('schedule')) {
+    if (new Set(draft.runDays).size !== draft.runDays.length) return 'daysCount';
+    if (draft.runDays.length !== draft.daysPerWeek) return 'daysCount';
+    if (!draft.runDays.includes(draft.longRunDay)) return 'longRunDayMissing';
+  }
   return null;
 }
 
@@ -84,6 +93,7 @@ export function buildPlanInput(
     recentRace,
     daysPerWeek: draft.daysPerWeek,
     longRunDay: draft.longRunDay,
+    runDays: draft.runDays,
     experience: draft.experience,
     volumeBand: options.volumeBand,
   };

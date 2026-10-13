@@ -11,6 +11,7 @@ import onboardingEn from './locales/en/onboarding.json';
 import planEn from './locales/en/plan.json';
 import raceEn from './locales/en/race.json';
 import settingsEn from './locales/en/settings.json';
+import socialEn from './locales/en/social.json';
 import statsEn from './locales/en/stats.json';
 import todayEn from './locales/en/today.json';
 import workoutEn from './locales/en/workout.json';
@@ -25,6 +26,7 @@ import onboardingSr from './locales/sr/onboarding.json';
 import planSr from './locales/sr/plan.json';
 import raceSr from './locales/sr/race.json';
 import settingsSr from './locales/sr/settings.json';
+import socialSr from './locales/sr/social.json';
 import statsSr from './locales/sr/stats.json';
 import todaySr from './locales/sr/today.json';
 import workoutSr from './locales/sr/workout.json';
@@ -49,6 +51,7 @@ export const NAMESPACES = [
   'content',
   'licenses',
   'legal',
+  'social',
 ] as const;
 
 const LOCALE_BY_LANGUAGE: Record<AppLanguage, string> = {
@@ -88,6 +91,7 @@ const resources = {
     plan: planEn,
     race: raceEn,
     settings: settingsEn,
+    social: socialEn,
     stats: statsEn,
     today: todayEn,
     workout: workoutEn,
@@ -104,6 +108,7 @@ const resources = {
     plan: planSr,
     race: raceSr,
     settings: settingsSr,
+    social: socialSr,
     stats: statsSr,
     today: todaySr,
     workout: workoutSr,

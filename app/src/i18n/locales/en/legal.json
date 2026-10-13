@@ -40,6 +40,14 @@
         ]
       },
       {
+        "heading": "Friends and feed",
+        "paragraphs": [
+          "Friendships in RunCast are mutual: you see someone's workouts, and they see yours, only after you accept a request. Friends can see your display name and avatar, logged workouts in the feed and weekly kilometres on the friends leaderboard. Search works only by exact profile name, never by email address or phone number.",
+          "You can remove or block a friend in the app: Leaderboard → Friends. A block hides both sides from each other without notice and prevents new requests in both directions.",
+          "Deleting your account removes friendships, blocks and kudos you sent. If a friend deletes their account, their data disappears from your feed and leaderboard as well."
+        ]
+      },
+      {
         "heading": "Processors we share data with",
         "paragraphs": [
           "Supabase: authentication, database, file storage and transactional email.",

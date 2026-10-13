@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
+  defaultRunDays,
   formatDuration,
   formatPace,
   pacesFromVdot,
@@ -22,7 +23,14 @@ import { PlanFields } from '@/components/forms/PlanFields';
 import { useGeneratePlan } from '@/features/plans/queries';
 import { useUpdateProfile } from '@/features/profile/queries';
 import { dayDiff, todayIso } from '@/lib/dates';
-import { buildPlanInput, parseOptionalTime, tryParseTime, validatePlanDraft, type PlanDraft } from '@/lib/plan-form';
+import {
+  buildPlanInput,
+  parseOptionalTime,
+  tryParseTime,
+  validatePlanDraft,
+  type PlanDraft,
+  type PlanDraftError,
+} from '@/lib/plan-form';
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
@@ -53,6 +61,7 @@ interface WizardState {
   volumeBand: VolumeBand;
   daysPerWeek: 3 | 4 | 5 | 6;
   longRunDay: number;
+  runDays: number[];
   runWindow: RunWindow;
   weatherRefreshMinutes: number | null;
   city: string;
@@ -76,6 +85,7 @@ const initialState: WizardState = {
   volumeBand: '20-40',
   daysPerWeek: 4,
   longRunDay: 6,
+  runDays: defaultRunDays(4, 6),
   runWindow: 'morning',
   weatherRefreshMinutes: 60,
   city: '',
@@ -135,18 +145,30 @@ export function OnboardingPage() {
     return { vdot: Math.round(vdot * 10) / 10, paces, feasibility };
   }, [goalTimeSec, recentTimeSec, state.recentDistanceKm, state.distanceKm]);
 
+  function planErrorText(draftError: PlanDraftError): string {
+    if (draftError === 'daysCount') return t('errors.daysCount', { count: state.daysPerWeek });
+    return t(`errors.${draftError}`);
+  }
+
   function validateStep(): boolean {
     if (step === 0 && state.hasRace) {
       const draftError = validatePlanDraft(state, ['raceDate'], todayIso());
       if (draftError) {
-        setError(t(`errors.${draftError}`));
+        setError(planErrorText(draftError));
         return false;
       }
     }
     if (step === 1) {
       const draftError = validatePlanDraft(state, ['goalTime', 'recentRace'], todayIso());
       if (draftError) {
-        setError(t(`errors.${draftError}`));
+        setError(planErrorText(draftError));
+        return false;
+      }
+    }
+    if (step === 3) {
+      const draftError = validatePlanDraft(state, ['schedule'], todayIso());
+      if (draftError) {
+        setError(planErrorText(draftError));
         return false;
       }
     }
@@ -307,26 +329,7 @@ export function OnboardingPage() {
           <div className="space-y-4">
             <h1 className="text-2xl font-semibold tracking-display">{t('steps.schedule.title')}</h1>
             <PlanFields variant="onboarding" groups={['schedule']} value={state} onChange={updatePlan} />
-            <div className="space-y-2">
-              <div className="grid grid-cols-7 gap-1.5">
-                {DAY_KEYS.map((key, index) => {
-                  const isLong = index === state.longRunDay;
-                  return (
-                    <div
-                      key={key}
-                      className={clsx(
-                        'flex flex-col items-center gap-1.5 rounded-lg px-1 py-2',
-                        isLong ? 'bg-rain-soft' : 'bg-surface-elevated',
-                      )}
-                    >
-                      <span className={clsx('section-label', isLong && 'text-rain-ink')}>{t(`days.short.${key}`)}</span>
-                      <span className={clsx('h-1.5 w-1.5 rounded-full', isLong ? 'bg-rain-ink' : 'bg-text-muted')} />
-                    </div>
-                  );
-                })}
-              </div>
-              <p className="text-caption text-text-muted">{t('steps.schedule.longRunNote')}</p>
-            </div>
+            <p className="text-caption text-text-muted">{t('steps.schedule.longRunNote')}</p>
             <div>
               <p className="section-label mb-1.5">{t('fields.runWindow')}</p>
               <SegmentedControl

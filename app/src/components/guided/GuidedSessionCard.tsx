@@ -1,11 +1,11 @@
 import { clsx } from 'clsx';
-import { formatDuration, type GuidedTimeline, type TimelineSegment } from '@runcast/shared';
+import { formatDuration, formatPace, type GuidedTimeline, type LiveSplit, type TimelineSegment } from '@runcast/shared';
 import { Droplets, Square, Volume2, VolumeX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CueBanner } from '@/components/guided/CueBanner';
 import { formatKm } from '@/components/guided/format';
 import { GuidedControls } from '@/components/guided/GuidedControls';
-import type { GeoStatus } from '@/components/guided/useGeoDistance';
+import type { GeoStatus } from '@/components/guided/useLiveTrack';
 import type { GuidedPhase } from '@/components/guided/useGuidedClock';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { IconButton } from '@/components/ui/IconButton';
@@ -27,6 +27,12 @@ interface GuidedSessionCardProps {
   gpsEnabled: boolean;
   gpsStatus: GeoStatus;
   gpsDistanceKm: number;
+  plannedDistanceKm: number;
+  paceEmaSecPerKm: number | null;
+  avgPaceSecPerKm: number | null;
+  splits: LiveSplit[];
+  gpsLost: boolean;
+  gpsFallback: boolean;
   onTogglePause: () => void;
   onNext: () => void;
   onBack: () => void;
@@ -48,6 +54,12 @@ export function GuidedSessionCard({
   gpsEnabled,
   gpsStatus,
   gpsDistanceKm,
+  plannedDistanceKm,
+  paceEmaSecPerKm,
+  avgPaceSecPerKm,
+  splits,
+  gpsLost,
+  gpsFallback,
   onTogglePause,
   onNext,
   onBack,
@@ -64,6 +76,9 @@ export function GuidedSessionCard({
       : gpsStatus === 'denied'
         ? t('session.gpsDenied')
         : t('session.gpsStart');
+  const progressPercent = plannedDistanceKm > 0 ? Math.min(gpsDistanceKm / plannedDistanceKm, 1) * 100 : 0;
+  const livePaceText = paceEmaSecPerKm !== null ? `${formatPace(paceEmaSecPerKm)} /km` : '—';
+  const avgPaceText = avgPaceSecPerKm !== null ? `${formatPace(avgPaceSecPerKm)} /km` : '—';
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[560px] flex-col px-4 py-6">
@@ -91,6 +106,74 @@ export function GuidedSessionCard({
         </div>
       </div>
       <p className="mt-1 truncate text-caption text-text-muted">{workoutTitle}</p>
+
+      {gpsEnabled && gpsFallback ? (
+        <p
+          data-testid="guided-gps-fallback"
+          className="mt-4 rounded-xl border border-warning/40 bg-warning-soft px-3 py-2 text-center text-caption text-warning-ink"
+        >
+          {t('session.gpsFallback')}
+        </p>
+      ) : null}
+
+      {gpsEnabled && !gpsFallback ? (
+        <section className="mt-5 space-y-2">
+          <div className="flex items-end justify-between gap-3">
+            <p data-testid="guided-distance" className="num text-hero font-bold tracking-display">
+              {formatKm(gpsDistanceKm)}
+              <span className="text-lg font-semibold text-text-secondary"> km</span>
+            </p>
+            {plannedDistanceKm > 0 ? (
+              <p className="num pb-1 text-caption text-text-muted">
+                {t('session.of', { km: formatKm(plannedDistanceKm) })}
+              </p>
+            ) : null}
+          </div>
+          {plannedDistanceKm > 0 ? (
+            <div
+              data-testid="guided-progress"
+              role="progressbar"
+              aria-label={t('session.progress')}
+              aria-valuemin={0}
+              aria-valuemax={plannedDistanceKm}
+              aria-valuenow={gpsDistanceKm}
+              className="h-2 w-full overflow-hidden rounded-full bg-surface-elevated"
+            >
+              <div
+                className="h-full rounded-full bg-primary transition-all duration-500"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          ) : null}
+          {gpsLost ? (
+            <p
+              data-testid="guided-gps-lost"
+              role="status"
+              className="rounded-full border border-warning/40 bg-warning-soft px-3 py-2 text-center text-caption font-medium text-warning-ink"
+            >
+              {t('session.gpsLost')}
+            </p>
+          ) : null}
+          <div className="grid grid-cols-2 gap-2">
+            <StatTile label={t('session.livePace')} value={livePaceText} />
+            <StatTile label={t('session.avgPace')} value={avgPaceText} />
+          </div>
+          {splits.length > 0 ? (
+            <ol data-testid="guided-splits" className="divide-y divide-border">
+              {splits.map((split) => (
+                <li
+                  key={split.km}
+                  data-testid={`guided-split-${split.km}`}
+                  className="flex items-center justify-between py-2 text-sm"
+                >
+                  <span className="num text-text-secondary">{t('session.split', { km: split.km })}</span>
+                  <span className="num font-medium">{`${formatPace(split.paceSecPerKm)} /km`}</span>
+                </li>
+              ))}
+            </ol>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className="mt-6 flex flex-col items-center gap-2 text-center">
         <p className="text-lg font-semibold">{segment.label}</p>

@@ -8,9 +8,9 @@ export function uniqueEmail(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 10_000)}@example.com`;
 }
 
-export async function register(page: Page, email: string) {
+export async function register(page: Page, email: string, name = 'E2E Trkač') {
   await page.goto('/register');
-  await page.getByLabel('Ime', { exact: true }).fill('E2E Trkač');
+  await page.getByLabel('Ime', { exact: true }).fill(name);
   await page.getByLabel('Email', { exact: true }).fill(email);
   await page.getByLabel('Lozinka', { exact: true }).fill('testtest123');
   await page.getByLabel('Potvrdi lozinku', { exact: true }).fill('testtest123');

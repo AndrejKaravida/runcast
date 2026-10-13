@@ -49,5 +49,9 @@
     "confirm": "Imaš {{count}} propuštenih treninga ove nedelje. Prerasporedi ostatak?",
     "success": "Nedelja je prilagođena.",
     "error": "Adaptacija nije uspela. Pokušaj ponovo"
+  },
+  "errors": {
+    "daysCount": "Izaberi tačno {{count}} dana za trening.",
+    "longRunDayMissing": "Dan dugog trčanja mora biti među izabranim danima."
   }
 }
