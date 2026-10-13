@@ -62,7 +62,7 @@ export function WeatherBanner({
       ) : null}
 
       {applied ? (
-        <p data-testid="reschedule-applied" className="mt-2 text-sm font-medium">
+        <p data-testid="reschedule-applied" role="status" className="mt-2 text-sm font-medium">
           {tContent('reschedule.applied')}
         </p>
       ) : showPrompt ? (
@@ -116,7 +116,11 @@ export function WeatherBanner({
           </AppButton>
         </div>
       ) : null}
-      {swapError ? <p className="mt-2 text-caption text-danger-ink">{swapError}</p> : null}
+      {swapError ? (
+        <p role="alert" className="mt-2 text-caption text-danger-ink">
+          {swapError}
+        </p>
+      ) : null}
     </div>
   );
 }

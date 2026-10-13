@@ -1,8 +1,7 @@
 import { clsx } from 'clsx';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
-import { AppButton } from '@/components/ui/AppButton';
+import { AppLinkButton } from '@/components/ui/AppLinkButton';
 import { Avatar } from '@/components/ui/Avatar';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { AdherenceLeaderboardEntry, FriendsLeaderboardEntry } from '@/features/social/queries';
@@ -30,20 +29,20 @@ export function FriendsLeaderboardCard({ entries, currentUserId, metric = 'km' }
         title={tSocial('friends.emptyTitle')}
         description={tSocial('friends.emptyDescription')}
         action={
-          <Link to="/friends">
-            <AppButton size="sm">{tSocial('friends.emptyAction')}</AppButton>
-          </Link>
+          <AppLinkButton to="/friends" size="sm">
+            {tSocial('friends.emptyAction')}
+          </AppLinkButton>
         }
       />
     );
   }
 
   return (
-    <div className="space-y-2">
+    <ul className="space-y-2">
       {entries.map((entry) => {
         const isMe = entry.user_id === currentUserId;
         return (
-          <div
+          <li
             key={entry.user_id}
             data-testid="friends-leaderboard-row"
             className={clsx(
@@ -73,9 +72,9 @@ export function FriendsLeaderboardCard({ entries, currentUserId, metric = 'km' }
               <AppBadge tone="primary">{t('leaderboard.adherenceBadge', { percent: entry.adherence })}</AppBadge>
             ) : null}
             {isMe ? <AppBadge tone="primary">{t('leaderboard.you')}</AppBadge> : null}
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ul>
   );
 }

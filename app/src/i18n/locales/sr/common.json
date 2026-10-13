@@ -34,6 +34,9 @@
     "skipped": "Preskočeno"
   },
   "appName": "RunCast",
+  "a11y": {
+    "skipToContent": "Preskoči na sadržaj"
+  },
   "loading": "Učitavanje",
   "queryError": {
     "title": "Ne mogu da učitam podatke",

@@ -1,6 +1,6 @@
 import { clsx } from 'clsx';
 import { ChevronDown } from 'lucide-react';
-import type { ComponentProps, ReactNode } from 'react';
+import { useId, type ComponentProps, type ReactNode } from 'react';
 import { fieldId } from '@/lib/field-id';
 
 interface AppSelectProps extends ComponentProps<'select'> {
@@ -11,6 +11,7 @@ interface AppSelectProps extends ComponentProps<'select'> {
 
 export function AppSelect({ label, error, id, className, children, ...rest }: AppSelectProps) {
   const selectId = fieldId(label, id ?? rest.name);
+  const errorId = useId();
   return (
     <div>
       {label ? (
@@ -21,6 +22,8 @@ export function AppSelect({ label, error, id, className, children, ...rest }: Ap
       <div className="relative">
         <select
           id={selectId}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
           className={clsx(
             'h-11 w-full appearance-none rounded-xl border bg-surface-elevated px-3 pr-9 text-sm text-text transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60',
             error ? 'border-danger' : 'border-border',
@@ -35,7 +38,11 @@ export function AppSelect({ label, error, id, className, children, ...rest }: Ap
           aria-hidden
         />
       </div>
-      {error ? <p className="mt-1 text-xs text-danger-ink">{error}</p> : null}
+      {error ? (
+        <p id={errorId} role="alert" className="mt-1 text-xs text-danger-ink">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

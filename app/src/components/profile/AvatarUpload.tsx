@@ -55,7 +55,11 @@ export function AvatarUpload({ avatarUrl, displayName }: AvatarUploadProps) {
           }}
         />
       </div>
-      {error ? <p className="text-caption text-danger-ink">{error}</p> : null}
+      {error ? (
+        <p role="alert" className="text-caption text-danger-ink">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

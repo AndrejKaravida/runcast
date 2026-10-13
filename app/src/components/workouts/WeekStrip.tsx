@@ -22,10 +22,18 @@ export function WeekStrip({ workouts, today = todayIso() }: { workouts: Workouts
         const date = addDaysIso(weekStart, index);
         const workout = workouts.find((item) => item.workout_date === date);
         const isToday = date === today;
+        const statusKey =
+          workout?.status === 'DONE'
+            ? 'common:status.done'
+            : workout?.status === 'SKIPPED'
+              ? 'common:status.skipped'
+              : null;
+        const dayLabel = `${t(dayKey)} ${Number(date.slice(8, 10))}${statusKey ? ` ${t(statusKey)}` : ''}`;
         return (
           <MotionLink
             key={date}
             to={workout ? `/workout/${workout.id}` : '/plan'}
+            aria-label={dayLabel}
             className={clsx(
               'flex select-none flex-col items-center gap-1.5 rounded-lg px-1 py-2 transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-[0.96]',
               isToday ? 'bg-primary-soft' : 'hover:bg-surface-elevated',

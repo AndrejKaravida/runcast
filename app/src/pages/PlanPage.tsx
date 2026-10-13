@@ -377,7 +377,14 @@ export function PlanPage() {
             {t('header.daysPerWeek', { days: plan.days_per_week })}
           </p>
         </div>
-        <div className="h-1.5 overflow-hidden rounded-full bg-surface-elevated">
+        <div
+          role="progressbar"
+          aria-label={t('header.label')}
+          aria-valuemin={1}
+          aria-valuemax={plan.weeks}
+          aria-valuenow={planWeek}
+          className="h-1.5 overflow-hidden rounded-full bg-surface-elevated"
+        >
           <div className="h-full rounded-full bg-primary" style={{ width: `${progressPct}%` }} />
         </div>
         <div className="flex flex-wrap items-center gap-1.5 text-caption">
@@ -391,20 +398,21 @@ export function PlanPage() {
           ))}
         </div>
         {adaptDone ? (
-          <p data-testid="adapt-success" className="text-caption text-success-ink">
+          <p data-testid="adapt-success" role="status" className="text-caption text-success-ink">
             {t('adapt.success')}
           </p>
         ) : null}
         {realignNotice ? (
           <p
             data-testid="realign-notice"
+            role={realignNotice === 'error' ? 'alert' : 'status'}
             className={clsx('text-caption', realignNotice === 'error' ? 'text-danger-ink' : 'text-success-ink')}
           >
             {t(`realign.${realignNotice}`)}
           </p>
         ) : null}
         {recoveryDone ? (
-          <p data-testid="recovery-notice" className="text-caption text-success-ink">
+          <p data-testid="recovery-notice" role="status" className="text-caption text-success-ink">
             {t('recovery.success')}
           </p>
         ) : null}
@@ -462,7 +470,11 @@ export function PlanPage() {
               {t('recovery.action')}
             </AppButton>
           </div>
-          {recoveryError ? <p className="text-caption text-danger-ink">{t('recovery.error')}</p> : null}
+          {recoveryError ? (
+            <p role="alert" className="text-caption text-danger-ink">
+              {t('recovery.error')}
+            </p>
+          ) : null}
         </AppCard>
       ) : null}
 

@@ -447,7 +447,11 @@ export function WorkoutPage() {
               <CheckCircle2 className="h-5 w-5" aria-hidden /> {t('workout:actions.done')}
             </AppButton>
           )}
-          {completeError ? <p className="text-caption text-danger-ink">{completeError}</p> : null}
+          {completeError ? (
+            <p role="alert" className="text-caption text-danger-ink">
+              {completeError}
+            </p>
+          ) : null}
           {!isStrength && isGuidedRunType(workout.type) && steps.length > 0 ? (
             <AppLinkButton
               to={`/run/${workout.id}`}
@@ -480,7 +484,11 @@ export function WorkoutPage() {
             value={moveDate}
             onChange={(event) => setMoveDate(event.target.value)}
           />
-          {moveError ? <p className="text-sm text-danger-ink">{moveError}</p> : null}
+          {moveError ? (
+            <p role="alert" className="text-sm text-danger-ink">
+              {moveError}
+            </p>
+          ) : null}
           <div className="flex gap-3">
             <AppButton variant="secondary" className="flex-1" onClick={closeMove}>
               {t('common:actions.cancel')}

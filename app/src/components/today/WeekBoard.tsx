@@ -33,7 +33,12 @@ export function WeekBoard({ week, challenge, workouts, today }: WeekBoardProps) 
         }
       />
       <div className="flex items-center gap-4">
-        <ProgressRing value={week.plannedSessions > 0 ? week.doneSessions / week.plannedSessions : 0}>
+        <ProgressRing
+          value={week.plannedSessions > 0 ? week.doneSessions / week.plannedSessions : 0}
+          label={t('week.title')}
+          valueNow={week.doneSessions}
+          valueMax={week.plannedSessions}
+        >
           <span className="num text-caption font-semibold">
             {week.doneSessions}/{week.plannedSessions}
           </span>

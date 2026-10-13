@@ -142,7 +142,9 @@ function LogForm({
         </AppSelect>
       ) : null}
       {error ? (
-        <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">{error}</p>
+        <p role="alert" className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">
+          {error}
+        </p>
       ) : null}
       <div className="flex gap-3">
         <AppButton type="button" variant="secondary" className="flex-1" onClick={onClose}>

@@ -7,16 +7,41 @@ interface ProgressRingProps {
   size?: number;
   stroke?: number;
   tone?: RingTone;
+  label?: string;
+  valueNow?: number;
+  valueMax?: number;
   children?: ReactNode;
 }
 
-export function ProgressRing({ value, size = 72, stroke = 7, tone = 'primary', children }: ProgressRingProps) {
+export function ProgressRing({
+  value,
+  size = 72,
+  stroke = 7,
+  tone = 'primary',
+  label,
+  valueNow,
+  valueMax,
+  children,
+}: ProgressRingProps) {
   const clamped = Math.min(Math.max(value, 0), 1);
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const dashOffset = circumference * (1 - clamped);
+  const progressProps = label
+    ? {
+        role: 'progressbar' as const,
+        'aria-label': label,
+        'aria-valuemin': 0,
+        'aria-valuemax': valueMax ?? 100,
+        'aria-valuenow': valueNow ?? Math.round(clamped * 100),
+      }
+    : {};
   return (
-    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+    <div
+      className="relative inline-flex items-center justify-center"
+      style={{ width: size, height: size }}
+      {...progressProps}
+    >
       <svg width={size} height={size} className="-rotate-90" aria-hidden>
         <circle
           cx={size / 2}

@@ -147,12 +147,16 @@ export function FriendsPage() {
             {t('add.action')}
           </AppButton>
           {sent ? (
-            <p className="rounded-xl border border-success/40 bg-success-soft px-3 py-2 text-sm text-success-ink">
+            <p
+              role="status"
+              className="rounded-xl border border-success/40 bg-success-soft px-3 py-2 text-sm text-success-ink"
+            >
               {t('add.sent')}
             </p>
           ) : null}
           {error ? (
             <p
+              role="alert"
               data-testid="friend-add-error"
               className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink"
             >

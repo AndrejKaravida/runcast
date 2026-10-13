@@ -3,10 +3,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { TFunction } from 'i18next';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
 import { z } from 'zod';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
+import { AppLinkButton } from '@/components/ui/AppLinkButton';
 import { authErrorMessage } from '@/lib/auth-errors';
 import { supabase } from '@/lib/supabase';
 
@@ -61,7 +61,10 @@ export function ForgotPasswordPage() {
               {...register('email')}
             />
             {serverError ? (
-              <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">
+              <p
+                role="alert"
+                className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink"
+              >
                 {serverError}
               </p>
             ) : null}
@@ -71,11 +74,9 @@ export function ForgotPasswordPage() {
           </form>
         </div>
       )}
-      <Link to="/login" className="mt-4">
-        <AppButton variant="ghost" size="sm" className="w-full">
-          {t('backToLogin')}
-        </AppButton>
-      </Link>
+      <AppLinkButton to="/login" variant="ghost" size="sm" className="mt-4 w-full">
+        {t('backToLogin')}
+      </AppLinkButton>
     </div>
   );
 }

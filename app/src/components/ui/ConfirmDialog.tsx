@@ -55,7 +55,11 @@ export function ConfirmDialog({
           />
         </div>
       ) : null}
-      {error ? <p className="mt-2 text-sm text-danger-ink">{error}</p> : null}
+      {error ? (
+        <p role="alert" className="mt-2 text-sm text-danger-ink">
+          {error}
+        </p>
+      ) : null}
       <div className="mt-4 flex gap-3">
         <AppButton variant="secondary" className="flex-1" onClick={close}>
           {t('actions.cancel')}

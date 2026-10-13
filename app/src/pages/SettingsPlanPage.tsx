@@ -524,7 +524,10 @@ export function SettingsPlanPage() {
       )}
 
       {notice ? (
-        <p className="rounded-xl border border-success/40 bg-success-soft px-3 py-2 text-sm text-success-ink">
+        <p
+          role="status"
+          className="rounded-xl border border-success/40 bg-success-soft px-3 py-2 text-sm text-success-ink"
+        >
           {notice}
         </p>
       ) : null}
@@ -549,7 +552,9 @@ export function SettingsPlanPage() {
         </AppButton>
       ) : null}
       {error ? (
-        <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">{error}</p>
+        <p role="alert" className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">
+          {error}
+        </p>
       ) : null}
 
       <AppModal open={raceForm !== null} onClose={() => setRaceForm(null)} title={t('plan.raceEditTitle')}>

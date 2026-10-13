@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router';
 import { z } from 'zod';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
+import { AppLinkButton } from '@/components/ui/AppLinkButton';
 import { TERMS_VERSION } from '@/features/legal/legal';
 import { authErrorMessage } from '@/lib/auth-errors';
 import { supabase } from '@/lib/supabase';
@@ -69,11 +70,9 @@ export function RegisterPage() {
           <p className="text-2xl font-semibold tracking-display">{t('register.confirmationTitle')}</p>
           <p className="text-sm text-text-secondary">{t('register.confirmationText')}</p>
         </div>
-        <Link to="/login" className="mt-6">
-          <AppButton variant="secondary" size="lg" className="w-full">
-            {t('backToLogin')}
-          </AppButton>
-        </Link>
+        <AppLinkButton to="/login" variant="secondary" size="lg" className="mt-6 w-full">
+          {t('backToLogin')}
+        </AppLinkButton>
       </div>
     );
   }
@@ -123,6 +122,8 @@ export function RegisterPage() {
             <input
               type="checkbox"
               data-testid="accept-terms"
+              aria-invalid={formState.errors.accepted ? true : undefined}
+              aria-describedby={formState.errors.accepted ? 'accept-terms-error' : undefined}
               className="mt-0.5 h-4 w-4 shrink-0 accent-primary"
               {...register('accepted')}
             />
@@ -138,11 +139,16 @@ export function RegisterPage() {
             </span>
           </label>
           {formState.errors.accepted ? (
-            <p className="mt-1 text-xs text-danger-ink">{formState.errors.accepted.message}</p>
+            <p id="accept-terms-error" role="alert" className="mt-1 text-xs text-danger-ink">
+              {formState.errors.accepted.message}
+            </p>
           ) : null}
         </div>
         {serverError ? (
-          <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">
+          <p
+            role="alert"
+            className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink"
+          >
             {serverError}
           </p>
         ) : null}

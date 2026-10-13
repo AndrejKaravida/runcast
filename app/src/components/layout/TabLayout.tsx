@@ -33,6 +33,12 @@ export function TabLayout() {
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[720px] flex-col bg-bg">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-xl focus:border focus:border-border focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+      >
+        {t('a11y.skipToContent')}
+      </a>
       <header className="sticky top-0 z-40 bg-bg/85 backdrop-blur-xl backdrop-saturate-150">
         <div className="mx-auto flex w-full max-w-[720px] items-center justify-between px-4 py-3">
           <span className="text-base font-bold tracking-tight">
@@ -46,7 +52,11 @@ export function TabLayout() {
           )}
         />
       </header>
-      <main className="flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] pt-4">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] pt-4 outline-none"
+      >
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}

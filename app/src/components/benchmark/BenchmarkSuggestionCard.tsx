@@ -108,7 +108,11 @@ export function BenchmarkSuggestionCard({ distanceKm, timeSec, paces, daysToRace
           {t('suggestion.raceWarning', { days: daysToRace })}
         </p>
       ) : null}
-      {status === 'error' ? <p className="text-sm text-danger-ink">{t('suggestion.error')}</p> : null}
+      {status === 'error' ? (
+        <p role="alert" className="text-sm text-danger-ink">
+          {t('suggestion.error')}
+        </p>
+      ) : null}
       <div className="flex gap-3">
         <AppButton
           variant="secondary"

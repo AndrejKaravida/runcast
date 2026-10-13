@@ -183,7 +183,11 @@ export function TodayHeroCard({
               </AppButton>
             </div>
           ) : null}
-          {swapError ? <p className="mt-2 text-caption text-danger-ink">{swapError}</p> : null}
+          {swapError ? (
+            <p role="alert" className="mt-2 text-caption text-danger-ink">
+              {swapError}
+            </p>
+          ) : null}
         </div>
       ) : weatherLoading ? (
         <WeatherBannerSkeleton />
@@ -222,7 +226,11 @@ export function TodayHeroCard({
             </AppLinkButton>
           ) : null}
         </div>
-        {completeError ? <p className="text-caption text-danger-ink">{completeError}</p> : null}
+        {completeError ? (
+          <p role="alert" className="text-caption text-danger-ink">
+            {completeError}
+          </p>
+        ) : null}
         <Link
           to={`/workout/${workout.id}`}
           className="block text-center text-sm font-medium text-primary-ink hover:text-primary-ink-hover"

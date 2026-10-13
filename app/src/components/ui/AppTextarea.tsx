@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import type { ComponentProps } from 'react';
+import { useId, type ComponentProps } from 'react';
 import { fieldId } from '@/lib/field-id';
 
 interface AppTextareaProps extends ComponentProps<'textarea'> {
@@ -9,6 +9,7 @@ interface AppTextareaProps extends ComponentProps<'textarea'> {
 
 export function AppTextarea({ label, error, id, className, ...rest }: AppTextareaProps) {
   const textareaId = fieldId(label, id ?? rest.name);
+  const errorId = useId();
   return (
     <div>
       {label ? (
@@ -18,6 +19,8 @@ export function AppTextarea({ label, error, id, className, ...rest }: AppTextare
       ) : null}
       <textarea
         id={textareaId}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? errorId : undefined}
         className={clsx(
           'min-h-24 w-full rounded-xl border bg-surface-elevated px-3 py-2 text-sm text-text transition-colors placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60',
           error ? 'border-danger' : 'border-border',
@@ -25,7 +28,11 @@ export function AppTextarea({ label, error, id, className, ...rest }: AppTextare
         )}
         {...rest}
       />
-      {error ? <p className="mt-1 text-xs text-danger-ink">{error}</p> : null}
+      {error ? (
+        <p id={errorId} role="alert" className="mt-1 text-xs text-danger-ink">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }

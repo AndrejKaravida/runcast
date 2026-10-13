@@ -31,7 +31,8 @@
     "untitled": "Trka bez naziva",
     "daysTo": "dana do trke",
     "passed": "Trka je prošla. Napravi novi plan",
-    "day": "Dan trke"
+    "day": "Dan trke",
+    "progress": "Napredak plana"
   },
   "plan": {
     "label": "Plan",

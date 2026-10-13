@@ -180,7 +180,14 @@ export function StatsPage() {
           <span className="text-base font-medium text-text-secondary">km</span>
         </p>
         <p className="num text-caption text-text-muted">{t('summary.planned', { km: stats.plannedToDate })}</p>
-        <div className="h-1.5 overflow-hidden rounded-full bg-surface-elevated">
+        <div
+          role="progressbar"
+          aria-label={t('summary.label')}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progressPct}
+          className="h-1.5 overflow-hidden rounded-full bg-surface-elevated"
+        >
           <div className="h-full rounded-full bg-primary" style={{ width: `${progressPct}%` }} />
         </div>
       </div>

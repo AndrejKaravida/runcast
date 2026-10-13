@@ -135,7 +135,7 @@ export function GearSection() {
       <p className="text-caption text-text-muted">{t('gear.hint')}</p>
 
       {error ? (
-        <p data-testid="gear-error" className="text-sm text-danger-ink">
+        <p data-testid="gear-error" role="alert" className="text-sm text-danger-ink">
           {error}
         </p>
       ) : null}

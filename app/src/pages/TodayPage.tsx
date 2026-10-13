@@ -353,7 +353,10 @@ export function TodayPage() {
       <RaceChip plan={plan} daysToRace={daysToRace} planWeek={planWeek} />
 
       {planRangeError ? (
-        <div className="flex items-center justify-between gap-2 rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-caption text-danger-ink">
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-2 rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-caption text-danger-ink"
+        >
           <span>{t('rangeError')}</span>
           <AppButton size="sm" variant="ghost" onClick={() => void refetchPlanRange()}>
             {t('common:actions.retry')}

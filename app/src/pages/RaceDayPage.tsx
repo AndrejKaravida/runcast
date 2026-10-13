@@ -380,7 +380,11 @@ export function RaceDayPage() {
               {tPlan('recovery.action')}
             </AppButton>
           </div>
-          {recoveryError ? <p className="text-caption text-danger-ink">{tPlan('recovery.error')}</p> : null}
+          {recoveryError ? (
+            <p role="alert" className="text-caption text-danger-ink">
+              {tPlan('recovery.error')}
+            </p>
+          ) : null}
         </AppCard>
       ) : null}
 

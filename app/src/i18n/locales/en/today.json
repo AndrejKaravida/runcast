@@ -31,7 +31,8 @@
     "untitled": "Untitled race",
     "daysTo": "days to race",
     "passed": "The race is over. Create a new plan",
-    "day": "Race day"
+    "day": "Race day",
+    "progress": "Plan progress"
   },
   "plan": {
     "label": "Plan",

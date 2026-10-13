@@ -77,12 +77,18 @@ export function SettingsAccountPage() {
           <p className="text-caption text-text-muted">{t('account.exportHint')}</p>
         </AppCard>
         {exportNotice ? (
-          <p className="rounded-xl border border-success/40 bg-success-soft px-3 py-2 text-sm text-success-ink">
+          <p
+            role="status"
+            className="rounded-xl border border-success/40 bg-success-soft px-3 py-2 text-sm text-success-ink"
+          >
             {exportNotice}
           </p>
         ) : null}
         {exportError ? (
-          <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">
+          <p
+            role="alert"
+            className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink"
+          >
             {exportError}
           </p>
         ) : null}

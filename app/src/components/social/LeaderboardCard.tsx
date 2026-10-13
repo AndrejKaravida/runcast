@@ -2,7 +2,7 @@ import { clsx } from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
-import { AppButton } from '@/components/ui/AppButton';
+import { AppLinkButton } from '@/components/ui/AppLinkButton';
 import { Avatar } from '@/components/ui/Avatar';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { AdherenceLeaderboardEntry, LeaderboardEntry } from '@/features/social/queries';
@@ -18,7 +18,7 @@ interface LeaderboardCardProps {
 function Row({ entry, isMe }: { entry: LeaderboardCardEntry; isMe: boolean }) {
   const { t } = useTranslation('stats');
   return (
-    <div
+    <li
       data-testid="leaderboard-row"
       className={clsx(
         'flex items-center gap-3 rounded-xl border border-border bg-surface px-3.5 py-2.5',
@@ -47,7 +47,7 @@ function Row({ entry, isMe }: { entry: LeaderboardCardEntry; isMe: boolean }) {
         <AppBadge tone="primary">{t('leaderboard.adherenceBadge', { percent: entry.adherence })}</AppBadge>
       ) : null}
       {isMe ? <AppBadge tone="primary">{t('leaderboard.you')}</AppBadge> : null}
-    </div>
+    </li>
   );
 }
 
@@ -68,9 +68,9 @@ export function LeaderboardCard({ entries, currentUserId, metric = 'km' }: Leade
         title={t('leaderboard.emptyTitle')}
         description={t('leaderboard.emptyDescription')}
         action={
-          <Link to="/settings">
-            <AppButton size="sm">{t('leaderboard.emptyAction')}</AppButton>
-          </Link>
+          <AppLinkButton to="/settings" size="sm">
+            {t('leaderboard.emptyAction')}
+          </AppLinkButton>
         }
       />
     );
@@ -86,17 +86,17 @@ export function LeaderboardCard({ entries, currentUserId, metric = 'km' }: Leade
 
   return (
     <div className="space-y-3">
-      <div className="space-y-2">
+      <ul className="space-y-2">
         {sorted.map((entry) => (
           <Row key={entry.user_id} entry={entry} isMe={entry.user_id === currentUserId} />
         ))}
         {meOutsideTop && me ? (
           <>
-            <div className="border-t border-dashed border-border" />
+            <li aria-hidden="true" className="border-t border-dashed border-border" />
             <Row entry={me} isMe />
           </>
         ) : null}
-      </div>
+      </ul>
       <p className="text-caption text-text-muted">
         {me && !me.is_public ? (
           <>

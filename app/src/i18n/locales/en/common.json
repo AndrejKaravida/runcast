@@ -34,6 +34,9 @@
     "skipped": "Skipped"
   },
   "appName": "RunCast",
+  "a11y": {
+    "skipToContent": "Skip to content"
+  },
   "loading": "Loading",
   "queryError": {
     "title": "Couldn't load data",

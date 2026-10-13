@@ -8,6 +8,7 @@ import { Link, useNavigate } from 'react-router';
 import { z } from 'zod';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
+import { AppLinkButton } from '@/components/ui/AppLinkButton';
 import { authErrorMessage } from '@/lib/auth-errors';
 import { supabase } from '@/lib/supabase';
 
@@ -78,7 +79,10 @@ export function LoginPage() {
           {...register('password')}
         />
         {serverError ? (
-          <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">
+          <p
+            role="alert"
+            className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink"
+          >
             {serverError}
           </p>
         ) : null}
@@ -86,11 +90,9 @@ export function LoginPage() {
           {t('login.submit')}
         </AppButton>
       </form>
-      <Link to="/register" className="mt-3">
-        <AppButton variant="secondary" size="lg" className="w-full">
-          {t('login.register')}
-        </AppButton>
-      </Link>
+      <AppLinkButton to="/register" variant="secondary" size="lg" className="mt-3 w-full">
+        {t('login.register')}
+      </AppLinkButton>
       <Link className="mt-4 text-center text-sm text-text-secondary hover:text-text" to="/forgot-password">
         {t('login.forgot')}
       </Link>

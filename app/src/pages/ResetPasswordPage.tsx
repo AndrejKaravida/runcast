@@ -3,12 +3,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { TFunction } from 'i18next';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { z } from 'zod';
 import { useAuth } from '@/auth/AuthProvider';
 import { FullScreenLoader } from '@/components/layout/FullScreenLoader';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
+import { AppLinkButton } from '@/components/ui/AppLinkButton';
 import { authErrorMessage } from '@/lib/auth-errors';
 import { supabase } from '@/lib/supabase';
 
@@ -54,11 +55,9 @@ export function ResetPasswordPage() {
           <p className="text-2xl font-semibold tracking-display">{t('reset.invalidTitle')}</p>
           <p className="text-sm text-text-secondary">{t('reset.invalidText')}</p>
         </div>
-        <Link to="/forgot-password" className="mt-6">
-          <AppButton variant="secondary" size="lg" className="w-full">
-            {t('reset.requestNew')}
-          </AppButton>
-        </Link>
+        <AppLinkButton to="/forgot-password" variant="secondary" size="lg" className="mt-6 w-full">
+          {t('reset.requestNew')}
+        </AppLinkButton>
       </div>
     );
   }
@@ -82,7 +81,10 @@ export function ResetPasswordPage() {
           {...register('confirm')}
         />
         {serverError ? (
-          <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">
+          <p
+            role="alert"
+            className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink"
+          >
             {serverError}
           </p>
         ) : null}

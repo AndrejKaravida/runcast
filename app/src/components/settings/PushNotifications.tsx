@@ -252,12 +252,12 @@ export function PushNotifications() {
       )}
 
       {notice ? (
-        <p data-testid="push-notice" className="text-sm text-success-ink">
+        <p data-testid="push-notice" role="status" className="text-sm text-success-ink">
           {notice}
         </p>
       ) : null}
       {error ? (
-        <p data-testid="push-error" className="text-sm text-danger-ink">
+        <p data-testid="push-error" role="alert" className="text-sm text-danger-ink">
           {error}
         </p>
       ) : null}

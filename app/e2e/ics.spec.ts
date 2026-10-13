@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
-import { escapeIcsText, generatePlan } from '@runcast/shared';
+import { defaultRunDays, escapeIcsText, generatePlan } from '@runcast/shared';
 import {
   assertNoHorizontalOverflow,
   completeOnboarding,
@@ -11,6 +11,25 @@ import {
 } from './helpers';
 
 const encoder = new TextEncoder();
+const REMOVE_ORDER = [6, 0, 1, 5, 3, 4, 2];
+
+function onboardingRunDays(daysPerWeek: number, longRunDay: number): number[] {
+  const next = [...new Set(defaultRunDays(4, 6))];
+  if (!next.includes(longRunDay)) next.push(longRunDay);
+  for (const day of REMOVE_ORDER) {
+    if (next.length <= daysPerWeek) break;
+    if (day === longRunDay) continue;
+    const index = next.indexOf(day);
+    if (index >= 0) next.splice(index, 1);
+  }
+  if (next.length < daysPerWeek) {
+    for (const day of defaultRunDays(daysPerWeek, longRunDay)) {
+      if (next.length >= daysPerWeek) break;
+      if (!next.includes(day)) next.push(day);
+    }
+  }
+  return next.sort((a, b) => a - b);
+}
 
 async function mockWeather(page: Page) {
   await page.route('**/v1/forecast**', (route) => route.fulfill({ json: rainFixture() }));
@@ -45,12 +64,14 @@ test('ICS izvoz — ceo plan u fajlu sa non-REST treninzima', async ({ page }) =
   }
 
   const unfolded = content.replace(/\r\n /g, '');
+  const longRunDay = (new Date().getDay() + 6) % 7;
   const draft = generatePlan({
     raceDate: isoFromNow(126),
     startDate: isoFromNow(0),
     distanceKm: 42.195,
     daysPerWeek: 4,
-    longRunDay: 0,
+    longRunDay,
+    runDays: onboardingRunDays(4, longRunDay),
     experience: 'first',
     volumeBand: '20-40',
     anchor: { kind: 'goal', distanceKm: 42.195, timeSec: 3 * 3600 + 45 * 60 },

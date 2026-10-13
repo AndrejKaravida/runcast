@@ -167,7 +167,10 @@ export function BenchmarkPage() {
             onChange={(event) => setDistanceInput(event.target.value)}
           />
           {error ? (
-            <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">
+            <p
+              role="alert"
+              className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink"
+            >
               {error}
             </p>
           ) : null}

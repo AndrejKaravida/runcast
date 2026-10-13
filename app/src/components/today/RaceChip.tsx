@@ -34,7 +34,14 @@ export function RaceChip({ plan, daysToRace, planWeek }: RaceChipProps) {
         {formatDateShort(raceInfo.race_date)} · {raceInfo.distance_km} km
       </p>
       <div className="space-y-1 pt-1">
-        <div className="h-1.5 overflow-hidden rounded-full bg-surface-elevated">
+        <div
+          role="progressbar"
+          aria-label={t('race.progress')}
+          aria-valuemin={1}
+          aria-valuemax={plan.weeks}
+          aria-valuenow={planWeek}
+          className="h-1.5 overflow-hidden rounded-full bg-surface-elevated"
+        >
           <div
             className="h-full rounded-full bg-primary"
             style={{ width: `${Math.min(100, (planWeek / plan.weeks) * 100)}%` }}

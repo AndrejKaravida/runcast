@@ -1,5 +1,5 @@
 import { clsx } from 'clsx';
-import type { ComponentProps, ReactNode } from 'react';
+import { useId, type ComponentProps, type ReactNode } from 'react';
 import { fieldId } from '@/lib/field-id';
 
 interface AppInputProps extends ComponentProps<'input'> {
@@ -10,6 +10,9 @@ interface AppInputProps extends ComponentProps<'input'> {
 
 export function AppInput({ label, error, hint, id, className, ...rest }: AppInputProps) {
   const inputId = fieldId(label, id ?? rest.name);
+  const hintId = useId();
+  const errorId = useId();
+  const describedBy = error ? errorId : hint ? hintId : undefined;
   return (
     <div>
       {label ? (
@@ -19,6 +22,8 @@ export function AppInput({ label, error, hint, id, className, ...rest }: AppInpu
       ) : null}
       <input
         id={inputId}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={describedBy}
         className={clsx(
           'h-11 w-full rounded-xl border bg-surface-elevated px-3 text-sm text-text transition-colors placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60',
           error ? 'border-danger' : 'border-border',
@@ -26,8 +31,16 @@ export function AppInput({ label, error, hint, id, className, ...rest }: AppInpu
         )}
         {...rest}
       />
-      {error ? <p className="mt-1 text-xs text-danger-ink">{error}</p> : null}
-      {!error && hint ? <p className="mt-1 text-xs text-text-muted">{hint}</p> : null}
+      {error ? (
+        <p id={errorId} role="alert" className="mt-1 text-xs text-danger-ink">
+          {error}
+        </p>
+      ) : null}
+      {!error && hint ? (
+        <p id={hintId} className="mt-1 text-xs text-text-muted">
+          {hint}
+        </p>
+      ) : null}
     </div>
   );
 }

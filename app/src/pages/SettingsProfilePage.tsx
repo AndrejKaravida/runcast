@@ -264,12 +264,17 @@ export function SettingsProfilePage() {
       ) : null}
 
       {notice ? (
-        <p className="rounded-xl border border-success/40 bg-success-soft px-3 py-2 text-sm text-success-ink">
+        <p
+          role="status"
+          className="rounded-xl border border-success/40 bg-success-soft px-3 py-2 text-sm text-success-ink"
+        >
           {notice}
         </p>
       ) : null}
       {error ? (
-        <p className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">{error}</p>
+        <p role="alert" className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink">
+          {error}
+        </p>
       ) : null}
     </SettingsSubpage>
   );

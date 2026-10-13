@@ -191,12 +191,12 @@ export function HealthIntegrations() {
       <p className="text-caption text-text-muted">{t('integrations.privacy')}</p>
 
       {notice ? (
-        <p data-testid="health-notice" className="text-sm text-success-ink">
+        <p data-testid="health-notice" role="status" className="text-sm text-success-ink">
           {notice}
         </p>
       ) : null}
       {error ? (
-        <p data-testid="health-error" className="text-sm text-danger-ink">
+        <p data-testid="health-error" role="alert" className="text-sm text-danger-ink">
           {error}
         </p>
       ) : null}
