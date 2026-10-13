@@ -73,6 +73,10 @@ describe('buildCoachInsights', () => {
     expect(insights).toHaveLength(1);
     expect(insights[0].id).toBe('missed-runs');
     expect(insights[0].tone).toBe('warning');
+    expect(insights[0].titleKey).toBe('content:coach.missedRuns.title');
+    expect(insights[0].titleParams).toEqual({ missed: 2 });
+    expect(insights[0].descriptionKey).toBe('content:coach.missedRuns.description');
+    expect(insights[0].actionLabelKey).toBe('stats:coach.actions.missedRuns');
     expect(insights[0].action).toEqual({ kind: 'scale-week', weekStart: TARGET_WEEK_START, factor: 0.8 });
   });
 
@@ -92,6 +96,9 @@ describe('buildCoachInsights', () => {
     expect(insights).toHaveLength(1);
     expect(insights[0].id).toBe('high-rpe');
     expect(insights[0].tone).toBe('warning');
+    expect(insights[0].titleKey).toBe('content:coach.highRpe.title');
+    expect(insights[0].titleParams).toEqual({ rpe: 9 });
+    expect(insights[0].actionLabelKey).toBe('stats:coach.actions.highRpe');
     expect(insights[0].action?.factor).toBe(0.9);
   });
 
@@ -136,6 +143,9 @@ describe('buildCoachInsights', () => {
     expect(insights).toHaveLength(1);
     expect(insights[0].id).toBe('ready-to-build');
     expect(insights[0].tone).toBe('positive');
+    expect(insights[0].descriptionKey).toBe('content:coach.readyToBuild.description');
+    expect(insights[0].descriptionParams).toEqual({ adherence: 100, rpe: 5 });
+    expect(insights[0].actionLabelKey).toBe('stats:coach.actions.readyToBuild');
     expect(insights[0].action).toEqual({ kind: 'scale-week', weekStart: TARGET_WEEK_START, factor: 1.1 });
   });
 

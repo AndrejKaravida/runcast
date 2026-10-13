@@ -1,0 +1,61 @@
+{
+  "nav": {
+    "today": "Today",
+    "plan": "Plan",
+    "stats": "Stats",
+    "settings": "Settings"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "retry": "Try again",
+    "back": "Back",
+    "next": "Next",
+    "save": "Save"
+  },
+  "type": {
+    "easy": "Easy",
+    "long": "Long run",
+    "tempo": "Tempo",
+    "intervals": "Intervals",
+    "repetitions": "Repetitions",
+    "rest": "Rest",
+    "race": "Race",
+    "strength": "Strength"
+  },
+  "stats": {
+    "distance": "Distance",
+    "duration": "Duration",
+    "pace": "Pace",
+    "steps": "Steps"
+  },
+  "status": {
+    "done": "Done",
+    "skipped": "Skipped"
+  },
+  "loading": "Loading",
+  "queryError": {
+    "title": "Couldn't load data",
+    "message": "The connection is weak right now. Check your internet and try again."
+  },
+  "theme": {
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "toLight": "Switch to light theme",
+    "toDark": "Switch to dark theme"
+  },
+  "city": {
+    "label": "City",
+    "placeholder": "Novi Sad",
+    "search": "Search",
+    "tooShort": "Type at least 2 characters of the city name",
+    "noResults": "No results — try another name",
+    "searchFailed": "Search isn't working right now — try later"
+  },
+  "notFound": {
+    "text": "This page doesn't exist.",
+    "back": "Back to Today"
+  },
+  "avatar": "Avatar"
+}

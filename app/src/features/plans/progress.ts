@@ -30,14 +30,24 @@ export function weekProgress(workouts: WorkoutsRow[]): WeekProgress {
 }
 
 export function runStreak(workouts: WorkoutsRow[], today: string): number {
-  const byDate = new Map(workouts.map((workout) => [workout.workout_date, workout]));
+  const statusesByDate = new Map<string, string[]>();
+  for (const workout of workouts) {
+    if (!isRunWorkout(workout)) continue;
+    const statuses = statusesByDate.get(workout.workout_date) ?? [];
+    statuses.push(workout.status);
+    statusesByDate.set(workout.workout_date, statuses);
+  }
   let streak = 0;
   for (let offset = 0; offset < 120; offset++) {
     const date = addDaysIso(today, -offset);
-    const workout = byDate.get(date);
-    if (!workout || !isRunWorkout(workout)) continue;
-    if (workout.status === 'DONE') streak += 1;
-    else break;
+    const statuses = statusesByDate.get(date);
+    if (!statuses) continue;
+    if (statuses.includes('DONE')) {
+      streak += 1;
+      continue;
+    }
+    if (offset === 0) continue;
+    break;
   }
   return streak;
 }

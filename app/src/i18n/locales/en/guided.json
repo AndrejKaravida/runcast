@@ -1,0 +1,68 @@
+{
+  "overview": {
+    "estimate": "pace estimate",
+    "title": "Guided run",
+    "steps": "{{count}} steps",
+    "noSpeechSuffix": " · no voice guidance",
+    "stepsHeader": "Steps",
+    "speechUnavailable": "Voice guidance isn't available on this device — sound and visuals are used instead.",
+    "wakeLock": "Keep the screen on — locking it stops the sound.",
+    "start": "Start guided run",
+    "gpsOn": "GPS on",
+    "gpsOff": "GPS off"
+  },
+  "session": {
+    "step": "Step {{index}}/{{total}}",
+    "repeatSuffix": " · {{index}}/{{total}}",
+    "paused": "Paused",
+    "running": "In progress",
+    "finish": "Finish workout",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "goalPace": "goal pace",
+    "estimateSuffix": " · estimate",
+    "toEnd": "to go",
+    "total": "Total",
+    "distance": "Distance",
+    "pace": "Pace",
+    "remaining": "Remaining",
+    "stepLabel": "Step",
+    "next": "Next",
+    "end": "End",
+    "gpsTracking": "GPS tracking",
+    "gpsDenied": "GPS blocked",
+    "gpsStart": "GPS start"
+  },
+  "stats": {
+    "duration": "Duration",
+    "distance": "Distance",
+    "pace": "Pace"
+  },
+  "controls": {
+    "resume": "Resume",
+    "pause": "Pause"
+  },
+  "empty": {
+    "title": "No guided run for this workout",
+    "description": "Guidance works for runs with steps.",
+    "action": "View workout"
+  },
+  "ready": "Ready?",
+  "countdown": {
+    "banner": "Get ready…",
+    "label": "Get ready"
+  },
+  "finish": {
+    "title": "Workout complete",
+    "time": "Time",
+    "source": "Source",
+    "sourceGps": "GPS",
+    "sourcePlan": "Plan",
+    "logged": "This workout is already logged.",
+    "view": "View workout",
+    "noFixHint": "GPS didn't get a fix — enter the distance manually.",
+    "confirmTitle": "Finish early?",
+    "confirmDescription": "We'll log the time you've run so far — nothing is lost.",
+    "confirm": "Finish"
+  }
+}

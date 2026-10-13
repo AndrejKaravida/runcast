@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { searchPlaces, type Place } from '@runcast/shared';
 import { CheckCircle2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
 
@@ -11,6 +12,7 @@ interface CityPickerProps {
 }
 
 export function CityPicker({ city, onSelect, onManualInput }: CityPickerProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [places, setPlaces] = useState<Place[]>([]);
   const [searching, setSearching] = useState(false);
@@ -19,7 +21,7 @@ export function CityPicker({ city, onSelect, onManualInput }: CityPickerProps) {
   async function handleSearch() {
     const trimmed = query.trim();
     if (trimmed.length < 2) {
-      setError('Ukucaj bar 2 znaka naziva grada');
+      setError(t('city.tooShort'));
       return;
     }
     setSearching(true);
@@ -27,9 +29,9 @@ export function CityPicker({ city, onSelect, onManualInput }: CityPickerProps) {
     try {
       const results = await searchPlaces(trimmed);
       setPlaces(results);
-      if (results.length === 0) setError('Nema rezultata — probaj drugi naziv');
+      if (results.length === 0) setError(t('city.noResults'));
     } catch {
-      setError('Pretraga trenutno ne radi — probaj kasnije');
+      setError(t('city.searchFailed'));
     } finally {
       setSearching(false);
     }
@@ -40,8 +42,8 @@ export function CityPicker({ city, onSelect, onManualInput }: CityPickerProps) {
       <div className="flex items-end gap-2">
         <div className="flex-1">
           <AppInput
-            label="Grad"
-            placeholder="Novi Sad"
+            label={t('city.label')}
+            placeholder={t('city.placeholder')}
             value={query}
             onChange={(event) => {
               setQuery(event.target.value);
@@ -56,25 +58,32 @@ export function CityPicker({ city, onSelect, onManualInput }: CityPickerProps) {
           />
         </div>
         <AppButton type="button" variant="secondary" onClick={() => void handleSearch()} loading={searching}>
-          Traži
+          {t('city.search')}
         </AppButton>
       </div>
       {places.length > 0 ? (
         <ul className="space-y-1">
           {places.map((place) => (
             <li key={`${place.lat}-${place.lon}`}>
-              <button
+              <AppButton
                 type="button"
-                className="w-full rounded-xl border border-border bg-surface-elevated px-3 py-2 text-left text-sm hover:border-primary/50"
+                size="sm"
+                variant="secondary"
+                className="w-full justify-start text-left"
                 onClick={() => {
                   onSelect(place);
                   setPlaces([]);
                   setQuery('');
                 }}
               >
-                {place.name}
-                <span className="text-text-muted"> · {[place.admin1, place.country].filter(Boolean).join(', ')}</span>
-              </button>
+                <span className="min-w-0 truncate">
+                  {place.name}
+                  <span className="font-normal text-text-muted">
+                    {' '}
+                    · {[place.admin1, place.country].filter(Boolean).join(', ')}
+                  </span>
+                </span>
+              </AppButton>
             </li>
           ))}
         </ul>

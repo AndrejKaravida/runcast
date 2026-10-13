@@ -1,4 +1,5 @@
 import { formatPace } from '@runcast/shared';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { ListRow } from '@/components/ui/ListRow';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -6,14 +7,15 @@ import { formatDateShort } from '@/lib/dates';
 import type { RunLogsRow } from '@/types';
 
 export function RecentActivityCard({ logs }: { logs: RunLogsRow[] }) {
+  const { t } = useTranslation('workout');
   if (logs.length === 0) return null;
   return (
     <div data-testid="recent-activity" className="space-y-2">
       <SectionHeader
-        label="Poslednje aktivnosti"
+        label={t('recent.title')}
         action={
           <Link to="/stats" className="text-sm font-medium text-primary-ink hover:text-primary-ink-hover">
-            Sve
+            {t('recent.all')}
           </Link>
         }
       />
@@ -22,7 +24,7 @@ export function RecentActivityCard({ logs }: { logs: RunLogsRow[] }) {
           <ListRow
             key={log.id}
             eyebrow={formatDateShort(log.log_date)}
-            title={log.distance_km ? `${log.distance_km} km` : 'Trening'}
+            title={log.distance_km ? `${log.distance_km} km` : t('recent.workout')}
             value={
               <>
                 {log.avg_pace_sec_per_km ? <span>{formatPace(log.avg_pace_sec_per_km)} /km</span> : null}

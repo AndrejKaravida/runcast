@@ -1,0 +1,123 @@
+{
+  "header": {
+    "step": "Korak {{step}} / 6",
+    "tagline": "Podešavamo plan za tebe"
+  },
+  "steps": {
+    "race": {
+      "title": "Za koju trku se spremaš?",
+      "hasRace": "Imam trku",
+      "noRace": "Još nemam",
+      "noRaceText": "Bez trke dobijaš bazni plan za narednih 8 nedelja — lagano trčanje bez ciljnih tempa. Trku možeš dodati kasnije u podešavanjima."
+    },
+    "goal": {
+      "title": "Čemu težiš?",
+      "goalTimeHint": "Npr. cilj za maraton u 3 sata i 45 minuta",
+      "or": "ili",
+      "ambitious": "Cilj je ambiciozan za trenutnu formu (predviđeno {{time}}).",
+      "realistic": "Cilj je realan za trenutnu formu (predviđeno {{time}}).",
+      "noResult": "Bez rezultata dobijaš bazni plan: lagano trčanje dok ne uhvatimo formu."
+    },
+    "experience": {
+      "title": "Iskustvo i trenutna kilometraža",
+      "volume": "Koliko kilometara prelaziš nedeljno?"
+    },
+    "schedule": {
+      "title": "Kada trčiš?",
+      "daysLabel": "Koliko dana nedeljno",
+      "longRunNote": "Dugi trk nosi nedelju — ostale dane raspoređujemo oko njega.",
+      "windowNote": "Za jutro gledamo prognozu 06–09 h, za veče 17–21 h."
+    },
+    "location": {
+      "title": "Gde trčiš?"
+    },
+    "details": {
+      "title": "Još samo par detalja",
+      "race": "Trka",
+      "plan": "Plan",
+      "basePlan": "Bazni plan · 8 nedelja",
+      "summaryWeeks": "{{weeks}} nedelja",
+      "summaryDays": "{{days}} dana nedeljno · dugi trk {{day}}",
+      "baseWarning": "Bez cilja ili rezultata (ili manje od 12 nedelja do trke) dobijaš bazni plan — samo lagani treninzi."
+    }
+  },
+  "fields": {
+    "raceName": "Naziv trke (opciono)",
+    "raceNamePlaceholder": "Beogradski maraton",
+    "raceDate": "Datum trke",
+    "distance": "Distanca",
+    "goalTime": "Ciljno vreme (h:mm:ss, opciono)",
+    "recentRace": "Poslednja trka",
+    "recentTime": "Vreme (mm:ss)",
+    "experience": "Iskustvo",
+    "longRunDay": "Dan dugog trčanja",
+    "runWindow": "Deo dana za trening",
+    "weatherRefresh": "Osvežavanje prognoze",
+    "height": "Visina (cm)",
+    "weight": "Težina (kg)",
+    "birthYear": "Godina rođenja",
+    "sex": "Pol"
+  },
+  "distance": {
+    "marathon": "Maraton",
+    "half": "Polumaraton",
+    "ten": "10 km",
+    "five": "5 km"
+  },
+  "volume": {
+    "lt20": "do 20 km",
+    "from20to40": "20–40 km",
+    "from40to60": "40–60 km",
+    "over60": "preko 60 km"
+  },
+  "experience": {
+    "first": "Prvi put",
+    "experienced": "Iskusan"
+  },
+  "window": {
+    "morning": "Jutro",
+    "evening": "Veče",
+    "flexible": "Fleksibilno"
+  },
+  "sex": {
+    "male": "Muški",
+    "female": "Ženski",
+    "other": "Drugo"
+  },
+  "onOpen": "Samo na otvaranje",
+  "raceFallback": "Trka bez naziva",
+  "daysToRace": "dana do trke",
+  "days": {
+    "mon": "Ponedeljak",
+    "tue": "Utorak",
+    "wed": "Sreda",
+    "thu": "Četvrtak",
+    "fri": "Petak",
+    "sat": "Subota",
+    "sun": "Nedelja",
+    "short": {
+      "mon": "pon",
+      "tue": "uto",
+      "wed": "sre",
+      "thu": "čet",
+      "fri": "pet",
+      "sat": "sub",
+      "sun": "ned"
+    }
+  },
+  "actions": {
+    "back": "Nazad",
+    "next": "Dalje",
+    "generate": "Generiši plan"
+  },
+  "errors": {
+    "raceDateRequired": "Izaberi datum trke",
+    "raceDateFuture": "Datum trke mora biti u budućnosti",
+    "goalTimeFormat": "Ciljno vreme unesi kao h:mm:ss (npr. 3:45:00)",
+    "recentTimeRequired": "Unesi vreme poslednje trke",
+    "recentTimeFormat": "Vreme trke unesi kao mm:ss (npr. 25:30)",
+    "recentDistanceRequired": "Izaberi distancu poslednje trke",
+    "cityRequired": "Izaberi grad iz rezultata pretrage",
+    "generateFailed": "Generisanje plana nije uspelo — pokušaj ponovo"
+  }
+}

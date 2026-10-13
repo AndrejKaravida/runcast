@@ -1,0 +1,88 @@
+{
+  "summary": {
+    "label": "Ukupno pređeno",
+    "planned": "od {{km}} km planiranih do danas"
+  },
+  "empty": {
+    "title": "Statistika još čeka prvi trening",
+    "description": "Napravimo plan — brojevi se pune sami dok trčiš.",
+    "action": "Otvori podešavanja"
+  },
+  "row": {
+    "completion": "Realizacija",
+    "streak": "Dani u nizu",
+    "race": "Do trke"
+  },
+  "weekly": {
+    "title": "Nedeljni kilometri",
+    "tooltip": "{{done}} od {{planned}} km",
+    "planned": "planirano",
+    "done": "urađeno",
+    "noDone": "Još nema urađenih treninga — kolone se pune kako beležiš treninge.",
+    "description": "Koliko si istrčao od planiranog — nedelja po nedelju."
+  },
+  "recent": {
+    "title": "Poslednje zabeleženo",
+    "emptyTitle": "Prvi trening još čeka",
+    "emptyDescription": "Kad budeš spreman, zabeleži trening i brojevi se pune sami.",
+    "fallback": "Trening"
+  },
+  "coach": {
+    "title": "Prošla nedelja",
+    "planned": "Planirano",
+    "done": "Urađeno",
+    "longest": "Najduži trk",
+    "adherence": "Ispunjeno",
+    "sessionsOne": "{{count}} trening",
+    "sessionsMany": "{{count}} treninga",
+    "underControl": "Sve držiš pod kontrolom — samo nastavi.",
+    "weekAdjusted": "Nedelja od {{day}}.{{month}}. je prilagođena.",
+    "applyFailed": "Nije uspelo — pokušaj ponovo.",
+    "actions": {
+      "missedRuns": "Olakšaj sledeću nedelju 20%",
+      "highRpe": "Olakšaj 10%",
+      "rpeDrift": "Bez promene",
+      "longRunMissed": "Bez promene",
+      "readyToBuild": "Dodaj 10%"
+    },
+    "tones": {
+      "positive": "Napredak",
+      "warning": "Pažnja",
+      "neutral": "Info"
+    }
+  },
+  "predictor": {
+    "title": "Predikcija trke",
+    "empty": "Ubaci poslednju trku ili cilj — pokazaću ti predikciju.",
+    "outOfRange": "Rezultat je ispod opsega VDOT modela — predikcija nije pouzdana.",
+    "yourRace": "Tvoja trka",
+    "goalNote": "Bazirano na ciljnom tempu — odražava cilj, ne garantuje trenutnu formu.",
+    "anchorNote": "Bazirano na rezultatu: {{distance}} {{time}}.",
+    "method": "Procena po Daniels VDOT modelu — greška raste sa razlikom distanci (±2–4%).",
+    "benchmarkCta": "Uradi test trku"
+  },
+  "distance": {
+    "half": "Polumaraton",
+    "marathon": "Maraton"
+  },
+  "pb": {
+    "title": "Lični rekordi",
+    "emptyTitle": "Rekorda još nema",
+    "emptyDescription": "Zabeleži trku na 5, 10 ili 21 km — prvi rekord je uvek najslađi.",
+    "footer": "Automatski iz zabeleženih treninga (±0,4% tolerancije)."
+  },
+  "leaderboard": {
+    "title": "Rang lista",
+    "description": "Nedelja po nedelju — ko je istrčao najviše.",
+    "you": "Ti",
+    "rank": "Ti si #{{rank}} ove nedelje.",
+    "noKm": "Ove nedelje još nemaš kilometara — istrči prvi.",
+    "notPublic": "Uključi javni profil u podešavanjima da vidiš svoj rang.",
+    "anonymous": "Trkač",
+    "emptyTitle": "Rang lista je još prazna",
+    "emptyDescription": "Uključi javni profil i budi prvi na listi.",
+    "emptyAction": "Otvori podešavanja",
+    "sessionsOne": "{{count}} trening",
+    "sessionsMany": "{{count}} treninga"
+  }
+}

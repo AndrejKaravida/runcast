@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { formatDuration } from '@runcast/shared';
 import { clsx } from 'clsx';
 import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppButton } from '@/components/ui/AppButton';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -9,7 +10,7 @@ import { QueryError } from '@/components/ui/QueryError';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useActivePlan, useWorkoutsRange } from '@/features/plans/queries';
-import { phaseLabel, TONE_DOT_CLASSES, typeTone, workoutDurationSec } from '@/features/workouts/utils';
+import { TONE_DOT_CLASSES, typeTone, workoutDurationSec } from '@/features/workouts/utils';
 import {
   addDaysIso,
   addMonthsIso,
@@ -21,9 +22,10 @@ import {
   startOfWeekIso,
   todayIso,
 } from '@/lib/dates';
+import { workoutTitle } from '@/lib/workout-title';
 import type { WorkoutsRow } from '@/types';
 
-const DAY_LABELS = ['pon', 'uto', 'sre', 'čet', 'pet', 'sub', 'ned'];
+const DAY_KEYS = ['days.mon', 'days.tue', 'days.wed', 'days.thu', 'days.fri', 'days.sat', 'days.sun'];
 const PHASES = ['BASE', 'BUILD', 'PEAK', 'TAPER', 'RACE'];
 
 function dotClass(workout: WorkoutsRow): string {
@@ -43,15 +45,16 @@ function WeekRow({
   dayLabel: string;
   isToday: boolean;
 }) {
+  const { t } = useTranslation('plan');
   const isDone = workout?.status === 'DONE';
   const isSkipped = workout?.status === 'SKIPPED';
   const isRest = !workout || workout.type === 'REST';
   const barClass = workout && !isRest ? TONE_DOT_CLASSES[typeTone(workout.type)] : 'bg-transparent';
   const duration = workout ? workoutDurationSec(workout) : null;
   const meta = !workout
-    ? 'Slobodan dan'
+    ? t('week.free')
     : workout.type === 'REST'
-      ? 'Dan za oporavak'
+      ? t('week.recovery')
       : [workout.distance_km > 0 ? `${workout.distance_km} km` : null, duration ? formatDuration(duration) : null]
           .filter(Boolean)
           .join(' · ');
@@ -83,7 +86,7 @@ function WeekRow({
             isRest && 'text-text-muted',
           )}
         >
-          {workout ? workout.title : 'Bez treninga'}
+          {workout ? workoutTitle(t, workout) : t('week.none')}
         </span>
         <span className="num block truncate text-caption text-text-muted">{meta}</span>
       </span>
@@ -97,6 +100,7 @@ function WeekRow({
 }
 
 export function PlanPage() {
+  const { t } = useTranslation('plan');
   const today = todayIso();
   const [monthAnchor, setMonthAnchor] = useState(() => firstDayOfMonth(today));
   const gridStart = startOfWeekIso(monthAnchor);
@@ -130,12 +134,12 @@ export function PlanPage() {
   if (!plan) {
     return (
       <EmptyState
-        title="Još nemamo plan"
-        description="Hajde da napravimo tvoj plan — trka, tempo i dani koje imaš."
+        title={t('empty.title')}
+        description={t('empty.description')}
         icon={<CalendarDays className="h-6 w-6" />}
         action={
           <Link to="/settings">
-            <AppButton size="sm">Otvori podešavanja</AppButton>
+            <AppButton size="sm">{t('empty.action')}</AppButton>
           </Link>
         }
       />
@@ -151,15 +155,13 @@ export function PlanPage() {
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="section-label">Tvoj plan</p>
-            <p className="num text-xl font-semibold">
-              Nedelja {planWeek} / {plan.weeks}
-            </p>
+            <p className="section-label">{t('header.label')}</p>
+            <p className="num text-xl font-semibold">{t('header.week', { week: planWeek, weeks: plan.weeks })}</p>
           </div>
           <p className="num shrink-0 text-right text-caption text-text-muted">
-            {daysToRace >= 0 ? `${daysToRace} dana do trke` : 'Trka je prošla'}
+            {daysToRace >= 0 ? t('header.daysToRace', { days: daysToRace }) : t('header.racePassed')}
             <br />
-            {plan.days_per_week} dana nedeljno
+            {t('header.daysPerWeek', { days: plan.days_per_week })}
           </p>
         </div>
         <div className="h-1.5 overflow-hidden rounded-full bg-surface-elevated">
@@ -170,7 +172,7 @@ export function PlanPage() {
             <span key={phase} className="flex items-center gap-1.5">
               {index > 0 ? <span className="text-text-muted">→</span> : null}
               <span className={phase === currentPhase ? 'font-semibold text-primary-ink' : 'text-text-muted'}>
-                {phaseLabel(phase)}
+                {t(`phase.${phase.toLowerCase()}`)}
               </span>
             </span>
           ))}
@@ -179,13 +181,13 @@ export function PlanPage() {
 
       <div className="space-y-3">
         <SectionHeader
-          label="Mesec"
+          label={t('month.title')}
           action={
             <div className="flex items-center gap-1">
               <AppButton
                 size="sm"
                 variant="ghost"
-                aria-label="Prethodni mesec"
+                aria-label={t('month.previous')}
                 onClick={() => setMonthAnchor((current) => addMonthsIso(current, -1))}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -194,7 +196,7 @@ export function PlanPage() {
               <AppButton
                 size="sm"
                 variant="ghost"
-                aria-label="Sledeći mesec"
+                aria-label={t('month.next')}
                 onClick={() => setMonthAnchor((current) => addMonthsIso(current, 1))}
               >
                 <ChevronRight className="h-4 w-4" />
@@ -208,13 +210,13 @@ export function PlanPage() {
             onClick={() => setMonthAnchor(firstDayOfMonth(today))}
             className="rounded-lg bg-surface-elevated px-2.5 py-1.5 text-caption font-medium text-text-secondary transition-colors hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
           >
-            Vrati na danas
+            {t('month.today')}
           </button>
         ) : null}
         <div className="grid grid-cols-7 gap-1 text-center">
-          {DAY_LABELS.map((label) => (
-            <span key={label} className="section-label">
-              {label}
+          {DAY_KEYS.map((key) => (
+            <span key={key} className="section-label">
+              {t(key)}
             </span>
           ))}
         </div>
@@ -251,7 +253,7 @@ export function PlanPage() {
                   </div>
                 );
                 return workout ? (
-                  <Link key={date} to={`/workout/${workout.id}`} aria-label={`${date}: ${workout.title}`}>
+                  <Link key={date} to={`/workout/${workout.id}`} aria-label={`${date}: ${workoutTitle(t, workout)}`}>
                     {cell}
                   </Link>
                 ) : (
@@ -265,7 +267,7 @@ export function PlanPage() {
 
       <div className="space-y-2">
         <SectionHeader
-          label={isCurrentMonth ? 'Ova nedelja' : 'Prva nedelja meseca'}
+          label={t(isCurrentMonth ? 'week.current' : 'week.first')}
           action={
             <span className="num text-caption text-text-muted">
               {doneKm} / {plannedKm} km
@@ -284,7 +286,7 @@ export function PlanPage() {
               key={date}
               workout={weekWorkouts.find((workout) => workout.workout_date === date) ?? null}
               date={date}
-              dayLabel={DAY_LABELS[index]}
+              dayLabel={t(DAY_KEYS[index])}
               isToday={date === today}
             />
           ))}

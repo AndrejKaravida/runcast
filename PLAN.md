@@ -17,8 +17,11 @@ i predlaže zamenu treninga unutar iste nedelje kada uslovi nisu dobri.
 | 17   | v1.2/T1: dizajn refresh po referencama (Runna/Strava/NRC/Garmin) + light/dark tema sa toggle-om → `docs/design/01-03` | ✅     |
 | 18   | v1.2/T2: plan generator recalibracija (long-run-first, realni volumeni) → `docs/design/04`                            | ✅     |
 | 19   | v1.2/T3: 3 nove feature (race-day strategija, fueling, ICS export) → `docs/features/06-08`                            | ✅     |
+| 20   | v1.3/L: potpuna lokalizacija (i18next, sr/en, ~500 ključeva, shared sadržaj kroz ključeve)                            | ✅     |
+| 21   | v1.3/R: arhitekturalni review (6 agenata → `docs/review/*`) + sve P0/P1 popravke                                      | ✅     |
+| 22   | v1.3/F: gamifikacija + profil/avatar/rang lista + benchmark recalibracija tempa                                       | ✅     |
 
-Testovi: **166 unit** (shared) + **25 E2E** (Playwright kroz pravi UI) + typecheck/lint/build.
+Testovi: **193 unit** (shared) + **33 E2E** (Playwright kroz pravi UI) + typecheck/lint/build.
 
 ## Struktura
 
@@ -29,13 +32,13 @@ runcast/
     src/components/    # ui (Button/Card/Input/Badge/Modal(sheet)/ConfirmDialog/QueryError/ProgressRing/…)
     src/features/      # profile / plans (+ progress utils) / logs / weather
     src/pages/         # Login, Register, Reset, Onboarding, Today, Plan, Workout, Stats, Settings
-    e2e/               # 7 Playwright scenarija
+    e2e/               # 29 Playwright scenarija
     public/_redirects  # SPA fallback (Cloudflare Pages)
     public/_headers    # sigurnosni headeri (CF Pages)
-  packages/shared/     # pure TS: vdot, plan-generator, weather, weather-rules, schemas (+ 64 testa)
+  packages/shared/     # pure TS: vdot, plan-generator, weather, weather-rules, schemas (+ 170 testa)
   supabase/            # config + migracije 0001 (šema/RLS) i 0002 (RPC-ovi, integrity)
   docs/plans/          # auditi 01–05 + design-apple.md
-  .github/workflows/   # ci.yml, backup.yml, keepalive.yml
+  .github/workflows/   # ci.yml (checks + migrations), backup.yml, keepalive.yml
 ```
 
 ## Ključne odluke i ispravke posle audita
@@ -69,9 +72,9 @@ npx supabase start          # lokalna baza + auth (Docker)
 npm install
 npm run dev                 # http://localhost:5173
 
-npm run test                # 64 unit testa
+npm run test                # 170 unit testa
 npm run typecheck && npm run lint
-npm run test:e2e -w app     # 7 E2E (traži supabase start + dev server)
+npm run test:e2e -w app     # 29 E2E (traži supabase start + dev server)
 npm run db:types            # regeneriši TS tipove iz lokalne baze
 npm run build               # produkcijski build (route-level code splitting)
 ```
@@ -92,6 +95,8 @@ isključene (`supabase/config.toml`).
   Bitno: ime fajla migracije mora da odgovara verziji u istoriji (`YYYYMMDDHHMMSS_naziv.sql`) — kada
   migraciju praviš lokalno preko `supabase migration new`, to je automatski tačno; migracije
   primenjene ručno (MCP/SQL) moraju da se imenuju po stvarnoj verziji.
+- **CI validacija migracija:** `ci.yml` job `migrations` (`supabase start` + `supabase db reset`) prolazi
+  sve migracije na PR-u pre merge-a.
 - **Responsive:** automatski E2E audit (320/375/768/1440, sve strane + log sheet + ceo onboarding
   na 320) — bez horizontalnog overflow-a; ispravljeni kontrast, dugmad koja se prelamaju,
   truncate za duge nazive, 44px touch targeti.
@@ -118,6 +123,33 @@ je zatvoren.
 2. **Napomene:** Supabase free projekat se pauzira posle 7 dana bez aktivnosti (keepalive ping je već
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
+
+## v1.3 — lokalizacija, arhitekturalni review, nove feature
+
+**L — Lokalizacija:** i18next + react-i18next; **sr (default) + en**; 11+1 namespaces, ~500 ključeva;
+jezik se bira u Settings („Jezik") ili prati sistem; datumi/vreme kroz Intl po jeziku; `workoutTitle`
+renderuje naslove treninga iz strukture (lokalizovano, i za postojeće planove); shared generisani
+sadržaj (explain/coach/fueling/raceday/guided cue-ovi) vraća `LocalizedText` ključeve; TTS govor
+prati izabrani jezik. Ograničenje v1: imena vežbi snage ostaju u jeziku generisanja plana.
+
+**R — Arhitekturalni review (6 agenata, `docs/review/01-06` + `SUMMARY.md`):** popravljeni svi
+P0/P1 — lokalni `todayIso` (UTC bug), transakcioni `log_workout` i `scale_week_volume` RPC-ovi,
+Settings single-save tok, weather invalidacija pri promeni grada, `predict` guard + stroža PB
+tolerancija (±0,4%), konsolidovani date helperi, `PlanFields` dedupe (~200 linija), onboarding
+atomičnost (RPC postavlja `onboarding_completed`), AppModal refokus, GPS bez fixa ne upisuje
+lažnu distancu, error handling na mutacijama, `_headers` (geolocation + avatari), šifrovan backup,
+CI job za validaciju migracija, E2E mock geocoding (nema živih API poziva u testovima).
+
+**F — 3 nove feature:**
+
+- **Gamifikacija**: 9 familija / 20 nivoa bedževa + nedeljni izazov + diskretna proslava (toast);
+  sve izračunato iz postojećih podataka (bez šeme).
+- **Profil & social**: avatar upload (Supabase Storage, canvas resize), opcioni javni profil,
+  **nedeljna rang lista** (`/leaderboard`, security definer RPC, opt-in).
+- **Benchmark + recalibracija**: test trka (5K/10K) sa tajmerom → predlog novih tempa (staro vs
+  novo po zoni) → prihvatanje menja `plans.paces`/`anchor` i buduće korake treninga (`recalibrate_plan` RPC).
+
+Bundle: **252 kB / 80 kB gzip** (sa početnih 742 kB / 212 kB).
 
 ## v1.2 — dizajn refresh, plan recalibracija, 3 nove feature
 

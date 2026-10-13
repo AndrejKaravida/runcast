@@ -6,6 +6,7 @@ import {
   type PlanAnchor,
   type PlanPaces,
 } from '@runcast/shared';
+import { useTranslation } from 'react-i18next';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppCard } from '@/components/ui/AppCard';
 
@@ -15,38 +16,34 @@ interface PredictorCardProps {
   raceDistanceKm: number | null;
 }
 
-const DISTANCE_LABELS = new Map<number, string>([
-  [5, '5 km'],
-  [10, '10 km'],
-  [21.0975, 'Polumaraton'],
-  [42.195, 'Maraton'],
-]);
-
-function labelFor(distanceKm: number): string {
-  return DISTANCE_LABELS.get(distanceKm) ?? `${distanceKm} km`;
-}
-
 function isSameDistance(first: number, second: number): boolean {
   return Math.abs(first - second) < 0.01;
 }
 
 export function PredictorCard({ paces, anchor, raceDistanceKm }: PredictorCardProps) {
+  const { t } = useTranslation('stats');
   const vdot = vdotFromPlan({ paces, anchor });
 
-  if (vdot === null) {
+  function labelFor(distanceKm: number): string {
+    if (isSameDistance(distanceKm, 21.0975)) return t('distance.half');
+    if (isSameDistance(distanceKm, 42.195)) return t('distance.marathon');
+    return `${distanceKm} km`;
+  }
+
+  const predictions = vdot === null ? null : predictRaceTimes(vdot);
+
+  if (vdot === null || predictions === null) {
     return (
       <AppCard data-testid="predictor-card" className="space-y-2">
-        <p className="text-sm font-semibold">Predikcija trke</p>
-        <p className="text-sm text-text-muted">Ubaci poslednju trku ili cilj — pokazaću ti predikciju.</p>
+        <p className="text-sm font-semibold">{t('predictor.title')}</p>
+        <p className="text-sm text-text-muted">{t(vdot === null ? 'predictor.empty' : 'predictor.outOfRange')}</p>
       </AppCard>
     );
   }
 
-  const predictions = predictRaceTimes(vdot);
-
   return (
     <AppCard data-testid="predictor-card" className="space-y-2">
-      <p className="text-sm font-semibold">Predikcija trke</p>
+      <p className="text-sm font-semibold">{t('predictor.title')}</p>
       <ul className="divide-y divide-border">
         {predictions.map((prediction) => {
           const isTarget = raceDistanceKm !== null && isSameDistance(raceDistanceKm, prediction.distanceKm);
@@ -55,7 +52,7 @@ export function PredictorCard({ paces, anchor, raceDistanceKm }: PredictorCardPr
               <span className="min-w-0">
                 <span className="block text-sm text-text-secondary">{labelFor(prediction.distanceKm)}</span>
                 <AppBadge tone="primary" className="mt-1">
-                  Tvoja trka
+                  {t('predictor.yourRace')}
                 </AppBadge>
               </span>
               <span className="shrink-0 text-right">
@@ -79,13 +76,14 @@ export function PredictorCard({ paces, anchor, raceDistanceKm }: PredictorCardPr
       {anchor ? (
         <p className="text-caption text-text-muted">
           {anchor.kind === 'goal'
-            ? 'Bazirano na ciljnom tempu — odražava cilj, ne garantuje trenutnu formu.'
-            : `Bazirano na rezultatu: ${labelFor(anchor.distanceKm)} ${formatDuration(anchor.timeSec)}.`}
+            ? t('predictor.goalNote')
+            : t('predictor.anchorNote', {
+                distance: labelFor(anchor.distanceKm),
+                time: formatDuration(anchor.timeSec),
+              })}
         </p>
       ) : null}
-      <p className="text-caption text-text-muted">
-        Procena po Daniels VDOT modelu — greška raste sa razlikom distanci (±2–4%).
-      </p>
+      <p className="text-caption text-text-muted">{t('predictor.method')}</p>
     </AppCard>
   );
 }

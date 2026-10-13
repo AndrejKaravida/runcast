@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { AppButton } from '@/components/ui/AppButton';
 import { EmptyState } from '@/components/ui/EmptyState';
 
@@ -6,18 +7,16 @@ interface QueryErrorProps {
   onRetry?: () => void;
 }
 
-export function QueryError({
-  message = 'Veza je trenutno slaba. Proveri internet i pokušaj ponovo.',
-  onRetry,
-}: QueryErrorProps) {
+export function QueryError({ message, onRetry }: QueryErrorProps) {
+  const { t } = useTranslation();
   return (
     <EmptyState
-      title="Ne mogu da učitam podatke"
-      description={message}
+      title={t('queryError.title')}
+      description={message ?? t('queryError.message')}
       action={
         onRetry ? (
           <AppButton size="sm" variant="secondary" onClick={onRetry}>
-            Pokušaj ponovo
+            {t('actions.retry')}
           </AppButton>
         ) : undefined
       }

@@ -1,0 +1,68 @@
+{
+  "overview": {
+    "estimate": "procena tempa",
+    "title": "Vođeno trčanje",
+    "steps": "{{count}} koraka",
+    "noSpeechSuffix": " · bez glasovnog navođenja",
+    "stepsHeader": "Koraci",
+    "speechUnavailable": "Glasovno navođenje nije dostupno na ovom uređaju — koriste se zvuk i vizuelni prikaz.",
+    "wakeLock": "Drži ekran uključenim — zaključavanje prekida zvuk.",
+    "start": "Počni vođeno trčanje",
+    "gpsOn": "GPS uključen",
+    "gpsOff": "GPS isključen"
+  },
+  "session": {
+    "step": "Korak {{index}}/{{total}}",
+    "repeatSuffix": " · {{index}}/{{total}}",
+    "paused": "Pauza",
+    "running": "U toku",
+    "finish": "Završi trening",
+    "mute": "Isključi zvuk",
+    "unmute": "Uključi zvuk",
+    "goalPace": "ciljni tempo",
+    "estimateSuffix": " · procena",
+    "toEnd": "do kraja",
+    "total": "Ukupno",
+    "distance": "Distanca",
+    "pace": "Tempo",
+    "remaining": "Preostalo",
+    "stepLabel": "Korak",
+    "next": "Sledeće",
+    "end": "Kraj",
+    "gpsTracking": "GPS aktivan",
+    "gpsDenied": "GPS blokiran",
+    "gpsStart": "GPS start"
+  },
+  "stats": {
+    "duration": "Trajanje",
+    "distance": "Distanca",
+    "pace": "Tempo"
+  },
+  "controls": {
+    "resume": "Nastavi",
+    "pause": "Pauza"
+  },
+  "empty": {
+    "title": "Za ovaj trening nema vođenja",
+    "description": "Vođenje radi za trčanje sa koracima.",
+    "action": "Pogledaj trening"
+  },
+  "ready": "Spremni?",
+  "countdown": {
+    "banner": "Pripremi se…",
+    "label": "Pripremi se"
+  },
+  "finish": {
+    "title": "Trening završen",
+    "time": "Vreme",
+    "source": "Izvor",
+    "sourceGps": "GPS",
+    "sourcePlan": "Plan",
+    "logged": "Trening je već zabeležen.",
+    "view": "Pogledaj trening",
+    "noFixHint": "GPS nije uhvatio signal — upiši distancu ručno.",
+    "confirmTitle": "Završiti pre kraja?",
+    "confirmDescription": "Zabeležićemo vreme koje si do sada istrčao — ništa se ne gubi.",
+    "confirm": "Završi"
+  }
+}

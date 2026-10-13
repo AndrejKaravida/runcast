@@ -14,7 +14,7 @@ describe('buildPacePlan', () => {
         for (const split of splits) {
           expect(split.segmentSec).toBeGreaterThan(0);
           expect(split.paceSecPerKm).toBeGreaterThan(0);
-          expect(split.label.length).toBeGreaterThan(0);
+          expect(split.label.key.length).toBeGreaterThan(0);
         }
       }
     }
@@ -27,6 +27,14 @@ describe('buildPacePlan', () => {
     const marathon = buildPacePlan(GOAL_TIME_SEC, 42.195, 'even');
     expect(marathon).toHaveLength(9);
     expect(marathon.at(-1)?.distanceKm).toBeCloseTo(2.195, 2);
+  });
+
+  it('oznake deonica su ključevi sa parametrima', () => {
+    const short = buildPacePlan(GOAL_TIME_SEC, 5, 'even');
+    expect(short[0].label).toEqual({ key: 'content:raceday.split.single', params: { index: 1 } });
+    const long = buildPacePlan(GOAL_TIME_SEC, 42.195, 'even');
+    expect(long[0].label).toEqual({ key: 'content:raceday.split.range', params: { from: 0, to: 5 } });
+    expect(long[1].label).toEqual({ key: 'content:raceday.split.range', params: { from: 5, to: 10 } });
   });
 
   it('negativni split: prva deonica sporija, zadnja brža od ravnomernog', () => {
@@ -51,6 +59,12 @@ describe('raceChecklist', () => {
     expect(raceChecklist(42.195)).toEqual(items);
   });
 
+  it('svaka stavka nosi ključ sa prefiksom', () => {
+    for (const item of raceChecklist(42.195)) {
+      expect(item.label.key.startsWith('content:raceday.checklist.')).toBe(true);
+    }
+  });
+
   it('duga trka je nadskup kratke po grupama', () => {
     const short = raceChecklist(5);
     const long = raceChecklist(21.0975);
@@ -66,10 +80,10 @@ describe('raceChecklist', () => {
 });
 
 describe('raceWeatherNote', () => {
-  it('vraća savet za svaki vremenski kod', () => {
+  it('vraća ključ saveta za svaki vremenski kod', () => {
     for (const code of ['STORM', 'RAIN', 'HEAT', 'COLD', 'WIND', 'AIR'] as const) {
       const assessment = { code, severity: 'warn', suggestion: 'keep', details: {} } as WeatherAssessment;
-      expect(raceWeatherNote(assessment)).toBeTruthy();
+      expect(raceWeatherNote(assessment)?.key).toBe(`content:raceday.weather.${code.toLowerCase()}`);
     }
   });
 

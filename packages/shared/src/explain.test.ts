@@ -22,47 +22,61 @@ function explain(type: WorkoutType, phase: PlanPhase, paceZone: PaceZone | null 
 }
 
 describe('describeWorkout', () => {
-  it('vraća kompletan sadržaj za svaki tip i fazu', () => {
+  it('vraća kompletan set ključeva za svaki tip i fazu', () => {
     for (const type of WORKOUT_TYPES) {
       for (const phase of PHASES) {
         const result = explain(type, phase);
-        expect(result.why.length).toBeGreaterThan(0);
-        expect(result.mistake.length).toBeGreaterThan(0);
-        expect(result.effort).toContain('RPE');
-        expect(result.how.length).toBeGreaterThanOrEqual(2);
-        for (const item of result.how) expect(item.length).toBeGreaterThan(0);
+        expect(result.why.key).toBe(`content:explain.types.${type}.${type === 'LONG' ? 'whyWithDistance' : 'why'}`);
+        expect(result.mistake.key).toBe(`content:explain.types.${type}.mistake`);
+        expect(result.effortLabel.key).toBe(`content:explain.types.${type}.effortLabel`);
+        expect(result.how).toHaveLength(2);
+        expect(result.how[0].key).toBe(`content:explain.types.${type}.how.0`);
+        expect(result.how[1].key).toBe(`content:explain.types.${type}.how.1`);
+        expect(result.why.suffix?.key).toBe(`content:explain.phase.${phase}`);
       }
     }
   });
 
-  it('tekst se razlikuje po fazi', () => {
-    expect(explain('EASY', 'BASE').why).not.toBe(explain('EASY', 'TAPER').why);
-    expect(explain('LONG', 'BUILD').why).not.toBe(explain('LONG', 'PEAK').why);
-    expect(explain('REST', 'BASE').why).not.toBe(explain('REST', 'RACE').why);
+  it('faza menja sufiks, a tip ostaje isti', () => {
+    expect(explain('EASY', 'BASE').why.suffix?.key).not.toBe(explain('EASY', 'TAPER').why.suffix?.key);
+    expect(explain('EASY', 'BASE').why.key).toBe(explain('EASY', 'TAPER').why.key);
+    expect(explain('LONG', 'BUILD').why.suffix?.key).not.toBe(explain('LONG', 'PEAK').why.suffix?.key);
+    expect(explain('REST', 'BASE').why.suffix?.key).not.toBe(explain('REST', 'RACE').why.suffix?.key);
   });
 
-  it('dodaje tempo iz plana u prvi korak', () => {
+  it('dodaje tempo iz plana kao sufiks prvog koraka', () => {
     const result = describeWorkout({ type: 'TEMPO', phase: 'BUILD', paceZone: 'T', distanceKm: 8 }, { paces });
-    expect(result.how[0]).toContain(formatPace(paces.thresholdSecPerKm));
-    expect(result.how[0]).toContain('/km');
+    expect(result.how[0].suffix?.key).toBe('content:explain.paceSuffix');
+    expect(result.how[0].suffix?.params).toEqual({ zone: 'T', pace: formatPace(paces.thresholdSecPerKm) });
+    expect(result.how[1].suffix).toBeUndefined();
   });
 
-  it('bez paces nema tempo brojeva', () => {
+  it('bez paces nema tempa u koracima', () => {
     for (const type of WORKOUT_TYPES) {
       for (const phase of PHASES) {
         const result = explain(type, phase);
-        expect(result.how.some((item) => item.includes('/km'))).toBe(false);
+        expect(result.how.every((item) => item.suffix === undefined)).toBe(true);
       }
     }
   });
 
   it('LONG nosi distancu, a REST i STRENGTH rade bez zone', () => {
-    expect(explain('LONG', 'BUILD').why).toContain('18');
+    const long = explain('LONG', 'BUILD');
+    expect(long.why.key).toBe('content:explain.types.LONG.whyWithDistance');
+    expect(long.why.params).toEqual({ km: 18 });
+
     const rest = explain('REST', 'BASE');
-    expect(rest.why.length).toBeGreaterThan(0);
-    expect(rest.how.some((item) => item.includes('/km'))).toBe(false);
+    expect(rest.why.suffix?.key).toBe('content:explain.phase.BASE');
+    expect(rest.how.every((item) => item.suffix === undefined)).toBe(true);
+
     const strength = describeWorkout({ type: 'STRENGTH', phase: 'BUILD', paceZone: null, distanceKm: 0 }, { paces });
     expect(strength.how).toHaveLength(2);
-    expect(strength.how.some((item) => item.includes('/km'))).toBe(false);
+    expect(strength.how.every((item) => item.suffix === undefined)).toBe(true);
+  });
+
+  it('sufiks napora ide samo u TAPER i RACE fazi', () => {
+    expect(explain('EASY', 'TAPER').effortCue.suffix?.key).toBe('content:explain.effortSuffix.TAPER');
+    expect(explain('EASY', 'RACE').effortCue.suffix?.key).toBe('content:explain.effortSuffix.RACE');
+    expect(explain('EASY', 'BUILD').effortCue.suffix).toBeUndefined();
   });
 });

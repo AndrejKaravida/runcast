@@ -1,5 +1,12 @@
 import { expect, test } from '@playwright/test';
-import { assertNoHorizontalOverflow, completeOnboarding, isoFromNow, register, uniqueEmail } from './helpers';
+import {
+  assertNoHorizontalOverflow,
+  completeOnboarding,
+  isoFromNow,
+  mockGeocoding,
+  register,
+  uniqueEmail,
+} from './helpers';
 
 const VIEWPORTS = [
   { name: 'small-320', width: 320, height: 568 },
@@ -14,10 +21,8 @@ test('nema horizontalnog overflow-a na svim stranama i veličinama', async ({ pa
   await completeOnboarding(page);
 
   await page.goto('/plan');
-  const workoutId = await page
-    .locator('[data-testid="week-row"]')
-    .first()
-    .evaluate((element) => element.getAttribute('href')?.split('/').pop() ?? '');
+  const workoutHref = await page.locator('[data-testid="week-row"][href^="/workout/"]').first().getAttribute('href');
+  const workoutId = workoutHref?.split('/').pop() ?? '';
   expect(workoutId).not.toBe('');
 
   for (const viewport of VIEWPORTS) {
@@ -50,6 +55,7 @@ test('nema horizontalnog overflow-a na svim stranama i veličinama', async ({ pa
 
 test('onboarding wizard nema overflow na 320px', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 });
+  await mockGeocoding(page);
   await register(page, uniqueEmail('wizard'));
 
   await page.getByLabel('Naziv trke (opciono)').fill('Beogradski maraton 2027');

@@ -1,0 +1,232 @@
+{
+  "explain": {
+    "paceSuffix": "({{zone}} tempo ~{{pace}} /km)",
+    "phase": {
+      "BASE": "Sada gradiš bazu i naviku — volumen raste, intenzitet ostaje nizak.",
+      "BUILD": "Faza gradnje: na bazu dodajemo kvalitet i držimo rast pod kontrolom.",
+      "PEAK": "Vrhunac pripreme: najzahtevniji rad, umor je očekivan i dozvoljen.",
+      "TAPER": "Taper: volumen opada da bi na start stigao svež.",
+      "RACE": "Sve je podređeno trci ove nedelje — dan koji je platio sav rad."
+    },
+    "effortSuffix": {
+      "TAPER": "Drži donji kraj raspona.",
+      "RACE": "Danas je dozvoljeno sve."
+    },
+    "types": {
+      "EASY": {
+        "why": "Lagano trčanje gradi aerobnu bazu i oporavlja te između teških treninga — zato je sporo namerno.",
+        "how": ["Drži razgovorni tempo cele deonice.", "Ako uletiš brže, uspori: plafon je brzina, ne cilj."],
+        "mistake": "„Laki\" dan na umerenom tempu (RPE 6) — tada nijedan dan nije ni lak ni težak.",
+        "effortLabel": "RPE 3–4",
+        "effortCue": "pričaš u punim rečenicama bez gubljenja daha."
+      },
+      "LONG": {
+        "why": "Gradi izdržljivost, ekonomičnost i mentalnu čvrstinu za završnicu trke.",
+        "whyWithDistance": "Dugi trk {{km, number(maximumFractionDigits: 1)}} km — Gradi izdržljivost, ekonomičnost i mentalnu čvrstinu za završnicu trke.",
+        "how": ["Kreni mirno, prvih 5 km najsporije.", "Hidriraj se i testiraj opremu kao na trci."],
+        "mistake": "Prebrz početak te iscedi pred kraj — trk treba da ti da samopouzdanje, ne da te slomi.",
+        "effortLabel": "RPE 4–5 (kraj do 6)",
+        "effortCue": "pričaš u rečenicama, dišeš kontrolisano."
+      },
+      "TEMPO": {
+        "why": "Tempo rad podiže laktatnu barijeru — tempo koji držiš ~1 h vremenom postaje lakši.",
+        "how": [
+          "Zagrevanje 2 km pa tempo blok ravnomerno, bez sursa.",
+          "Ako pređeš u govor u jednom slovu, preterao si."
+        ],
+        "mistake": "Tempo na 5 km brzini nije tempo — postaje VO2max sesija i traži previše oporavka.",
+        "effortLabel": "RPE 6–7",
+        "effortCue": "komotno teško, govoriš u kratkim frazama."
+      },
+      "INTERVALS": {
+        "why": "Intervali podižu VO2max — plafon aerobne snage i brzinu koju možeš da održiš.",
+        "how": [
+          "Prva 1–2 ponavljanja mirnije, poslednje jako kao prvo.",
+          "Oporavak: lagan trk ili hod, smiri disanje."
+        ],
+        "mistake": "Prejak start → besmislen umor umesto produktivnog; rezultati opadaju iz repa u rep.",
+        "effortLabel": "RPE 8–9",
+        "effortCue": "teško ali kontrolisano, tehnika se ne raspada."
+      },
+      "REPETITIONS": {
+        "why": "Repeticije ne grade izdržljivost — bruse mehaniku, korak i ekonomičnost trčanja.",
+        "how": ["Svako ponavljanje brzo i opušteno, bez grča.", "Pun oporavak pre sledećeg (hod ili lagan trk)."],
+        "mistake": "R tempo kao interval: bez punog oporavka mehanika se kvari i nema stimulusa za brzinu.",
+        "effortLabel": "RPE 9",
+        "effortCue": "kratko i čisto; kad tehnika padne, prekini seriju."
+      },
+      "REST": {
+        "why": "Odmor nije pauza od treninga — adaptacija se dešava dok se telo oporavlja.",
+        "how": ["Šetnja, mobilnost ili lagano istezanje 15–20 min.", "Prioritet: san 7–9 h i normalna ishrana."],
+        "mistake": "Popunjavanje dana junk kilometrima ili osećaj krivice — odmor je deo plana.",
+        "effortLabel": "RPE 0–2",
+        "effortCue": "danas ne treniraš, danas se gradiš."
+      },
+      "RACE": {
+        "why": "Dan za koji je ceo plan rađen — provera forme, taktike i glave.",
+        "how": ["Prvu polovinu kontrolisano, bez jurnjave za tuđim tempom.", "Drži se svog plana tempa do kraja."],
+        "mistake": "Prebrz start sagoreva energiju — najčešći razlog pada u drugoj polovini.",
+        "effortLabel": "RPE 8–10",
+        "effortCue": "jako, ali po planu; poslednja trećina sme da boli."
+      },
+      "STRENGTH": {
+        "why": "Snaga stabilizuje zglobove i ispravlja disbalanse — manje povreda i ekonomičniji trk (+8–12% za 1–2 sesije nedeljno).",
+        "how": [
+          "Kontrolisana forma iznad težine; zadnja 1–2 ponavljanja izazovna ali čista.",
+          "Težak rad nogu ne ostavljaj za dan pre ključne trčne sesije."
+        ],
+        "mistake": "Preteško i preblizu kvalitetnog trčanja — snaga tada krade oporavak umesto da ga podrži.",
+        "effortLabel": "RPE 6–8",
+        "effortCue": "osećaš rad mišića, forma ostaje čista."
+      }
+    }
+  },
+  "coach": {
+    "missedRuns": {
+      "title": "{{missed, number}} treninga su izostala — desi se",
+      "description": "Sledeća nedelja je lakša — vraćamo te u ritam bez pritiska."
+    },
+    "highRpe": {
+      "title": "Telo traži predah (prosek RPE {{rpe, number}})",
+      "description": "Pet treninga je bilo naporno. Uzimamo korak nazad — oporavak je trening."
+    },
+    "rpeDrift": {
+      "title": "Umor se polako skuplja (prosek {{rpe, number}})",
+      "description": "Volumen ostaje isti dok se ne vratiš u ritam."
+    },
+    "longRunMissed": {
+      "title": "Dugi trk je izostao",
+      "description": "Kilometri se ne nadoknađuju — sledeća nedelja ostaje tačno po planu."
+    },
+    "readyToBuild": {
+      "title": "Sve teče po planu — možemo malo jače",
+      "description": "Realizacija {{adherence, number}}% i nizak RPE (prosek {{rpe, number}}). Sledeća nedelja ide +10%."
+    }
+  },
+  "fueling": {
+    "nextGel": "Sledeći gel: ~{{minutes, number}} min",
+    "hydration": {
+      "default": "400–800 ml/h (po žeđi i uslovima)",
+      "cold": "400–500 ml/h",
+      "cool": "500–600 ml/h",
+      "warm": "600–700 ml/h",
+      "hot": "700–800 ml/h + elektroliti"
+    },
+    "pre": {
+      "meal": "Obrok 2–3 h pre trčanja: bogat UH (pasta, ovsena kaša), malo masti i proteina.",
+      "snackLong": "Užina 2–3 h pre: 75+ g UH + malo proteina.",
+      "snackMedium": "Užina 60–90 min pre: 50+ g UH + malo proteina.",
+      "snackShort": "Užina pred polazak: 25+ g UH (banana, tost sa medom).",
+      "water": "Popij ~500 ml vode 2 h pre starta.",
+      "race": "Gelove i tajming probaj na treningu — na dan trke ništa novo."
+    },
+    "during": {
+      "gel": "Gel {{index, number}} — popij ~200 ml vode."
+    },
+    "post": {
+      "recovery": "U roku od 1–2 h: protein + UH (čokoladno mleko, jogurt + voće, sendvič).",
+      "rehydrate": "Rehidratacija: ~1,5 L tečnosti po kg izgubljene mase, uz natrijum."
+    }
+  },
+  "raceday": {
+    "split": {
+      "range": "{{from, number(maximumFractionDigits: 1)}}–{{to, number(maximumFractionDigits: 1)}} km",
+      "single": "{{index, number}}. km"
+    },
+    "checklist": {
+      "kit": "Spakuj opremu: patike, čarape, šorc i majicu (probano u treningu)",
+      "bib": "Prikvači startni broj na majicu",
+      "watch": "Napuni sat i telefon",
+      "fuel": "Pripremi gelove, elektrolite i flašicu",
+      "logistics": "Proveri rutu do starta i preuzimanje broja",
+      "dropBag": "Spakuj drop-bag: suvu majicu, užinu i patike za posle",
+      "alarm": "Postavi dva alarma",
+      "breakfast": "Doručak 2–3 h pre starta (probano u treningu)",
+      "hydrate": "Popij 200–300 ml vode 60–90 min pre starta",
+      "antichafe": "Anti-chafe na butine, pazuh i stopala",
+      "toilet": "WC 30–45 min pre starta",
+      "warmupLong": "Kratko zagrevanje 10 min + par ubrzanja",
+      "warmupShort": "Zagrevanje 10–15 min + 2–4 ubrzanja",
+      "firstKmLong": "Prvi km disciplinovano — 5–10 s/km sporije od cilja",
+      "firstKmShort": "Kontrolisano jako od starta, bez sprinta",
+      "gelPlan": "Gel svakih 30–35 min + voda na svakoj stanici",
+      "effort": "Po vetru i uzbrdici trči po naporu, ne po satu",
+      "finishLong": "Zadnja 2 km pusti ako imaš",
+      "finishShort": "Zadnji km pusti sve"
+    },
+    "weather": {
+      "storm": "Grmljavina — proveri pravila trke i drži se plana ishrane.",
+      "rain": "Kiša — anti-chafe, kapica i suve čarape; tempo ostaje isti.",
+      "heat": "Vruće — kreni konzervativnije i pij na svakoj stanici.",
+      "cold": "Hladno — slojevi za čekanje na startu i duže zagrevanje.",
+      "wind": "Vetar — trči po naporu, ne juri tempo po satu.",
+      "air": "Loš vazduh — smanji intenzitet i prati kako se osećaš."
+    }
+  },
+  "guided": {
+    "cue": {
+      "start": "Krećemo!",
+      "segmentStart": "Sada: {{label}}.",
+      "segmentStartFallback": "Sada: korak.",
+      "repeat": "Ponavljanje {{index}} od {{total}}.",
+      "pace": "Tempo {{pace}} po kilometru.",
+      "segmentEnd": "Korak završen.",
+      "halfway": "Pola je — drži ritam.",
+      "pause": "Pauza — diši.",
+      "resume": "Idemo dalje.",
+      "skip": "Prelazimo na: {{label}}.",
+      "skipFallback": "Prelazimo na: sledeći korak.",
+      "finish": "Gotovo! {{elapsed}} u nogama.",
+      "distance": "GPS distanca: {{km, number(maximumFractionDigits: 2)}} kilometara."
+    }
+  },
+  "achievements": {
+    "title": "Dostignuća",
+    "emptyTitle": "Prvi bedž je najslađi",
+    "emptyDescription": "Samo zabeleži trening — dostignuća se otključavaju sama.",
+    "progress": "još {{remaining}} do {{title}}",
+    "toastTitle": "Novo dostignuće",
+    "first": {
+      "title": "Prvi trening",
+      "description": "Prvi završen trening — svaka priča počinje jednim korakom."
+    },
+    "sessions": {
+      "title": "{{count}} treninga",
+      "description": "Ukupno {{count}} završenih trčanja. Doslednost se isplati."
+    },
+    "streakWeeks": {
+      "title": "Nedelje u nizu {{weeks}}",
+      "description": "{{weeks}} uzastopne nedelje sa bar jednim trčanjem."
+    },
+    "long": {
+      "title": "Prvi long {{km}} km",
+      "description": "Dugi trk od {{km}} km — izdržljivost se gradi kilometrima."
+    },
+    "tempo": {
+      "title": "Prvi tempo",
+      "description": "Prvi tempo trening odrađen — laktatna barijera se pomera."
+    },
+    "km": {
+      "title": "{{km}} km ukupno",
+      "description": "Pređenih {{km}} km ukupno od početka."
+    },
+    "race": {
+      "title": "Trka odrađena",
+      "description": "Završena trka — dan za koji je ceo plan rađen."
+    },
+    "strength": {
+      "title": "Snaga 10×",
+      "description": "Deset odrađenih treninga snage — telo je stabilnije."
+    },
+    "pb": {
+      "title": "Novi lični rekord",
+      "description": "Prvi put da oboriš sopstveni rekord na standardnoj distanci."
+    },
+    "challenge": {
+      "label": "Nedeljni izazov",
+      "sessions": "{{done}}/{{target}} treninga",
+      "longDone": "dugi trk ✓",
+      "longPlanned": "dugi trk"
+    }
+  }
+}

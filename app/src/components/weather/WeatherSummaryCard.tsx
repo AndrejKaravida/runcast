@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { clsx } from 'clsx';
 import { ChevronDown, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { AppCard } from '@/components/ui/AppCard';
+import { IconButton } from '@/components/ui/IconButton';
 import type { WeatherData } from '@/features/weather/queries';
 import { weatherIcon } from '@/components/weather/weather-utils';
+import { localeForLanguage } from '@/i18n';
 
 interface WeatherSummaryCardProps {
   data: WeatherData | undefined;
@@ -50,25 +53,37 @@ export function WeatherSummaryCard({
   onRefresh,
   variant = 'card',
 }: WeatherSummaryCardProps) {
+  const { t, i18n } = useTranslation('workout');
   const [expanded, setExpanded] = useState(false);
   const hours = (data?.hours ?? []).filter((hour) => {
     const hourNumber = Number(hour.time.slice(11, 13));
     return hour.time.startsWith(date) && hourNumber >= windowStartHour && hourNumber < windowEndHour;
   });
-  const title = `Vreme za ${dayLabel ? `${dayLabel} ` : ''}termin ${String(windowStartHour).padStart(2, '0')}–${String(windowEndHour).padStart(2, '0')} h`;
+  const from = String(windowStartHour).padStart(2, '0');
+  const to = String(windowEndHour).padStart(2, '0');
+  const title = dayLabel ? t('weather.titleDay', { day: dayLabel, from, to }) : t('weather.title', { from, to });
   const updatedText = updatedAt
-    ? `Ažurirano: ${new Date(updatedAt).toLocaleTimeString('sr-Latn-RS', { hour: '2-digit', minute: '2-digit' })}`
+    ? t('weather.updated', {
+        time: new Date(updatedAt).toLocaleTimeString(localeForLanguage(i18n.language), {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      })
     : '';
 
   if (variant === 'row') {
     const first = hours[0];
     const summary = isError
-      ? 'Prognoza trenutno ćuti. Osveži je.'
+      ? t('weather.error')
       : first
-        ? `U terminu: ${Math.round(first.apparentC)}° · kiša ${Math.round(first.precipProbabilityPct)}% · od ${first.time.slice(11, 16)} h`
+        ? t('weather.inWindow', {
+            temp: Math.round(first.apparentC),
+            rain: Math.round(first.precipProbabilityPct),
+            time: first.time.slice(11, 16),
+          })
         : loading
-          ? 'Gledam prognozu…'
-          : 'Nema podataka za tvoj termin.';
+          ? t('weather.loading')
+          : t('weather.none');
     return (
       <div className="rounded-2xl border border-border bg-surface shadow-card">
         <div className="flex items-center gap-1 px-2 py-1.5">
@@ -92,27 +107,25 @@ export function WeatherSummaryCard({
               aria-hidden
             />
           </button>
-          <button
-            type="button"
+          <IconButton
+            label={t('weather.refresh')}
             onClick={onRefresh}
-            className="shrink-0 rounded-xl p-2 text-text-muted transition-colors hover:text-text active:scale-90"
-            aria-label="Osveži prognozu"
+            className="h-9 w-9 shrink-0 rounded-xl text-text-muted hover:text-text"
           >
             <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} aria-hidden />
-          </button>
+          </IconButton>
         </div>
         {expanded ? (
           <div className="border-t border-border px-4 pb-3 pt-3">
             {hours.length > 0 ? (
               <div className="grid grid-cols-3 gap-2">{hourTiles(hours)}</div>
             ) : (
-              <p className="text-sm text-text-muted">
-                {isError ? 'Prognoza trenutno ćuti. Osveži je.' : 'Nema podataka za tvoj termin.'}
-              </p>
+              <p className="text-sm text-text-muted">{isError ? t('weather.error') : t('weather.none')}</p>
             )}
             <p className="mt-2 text-caption text-text-muted">
               {updatedText}
-              {updatedText ? ' · ' : ''}Vreme: Open-Meteo
+              {updatedText ? ' · ' : ''}
+              {t('weather.source')}
             </p>
           </div>
         ) : null}
@@ -124,25 +137,25 @@ export function WeatherSummaryCard({
     <AppCard>
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold">{title}</p>
-        <button
-          type="button"
+        <IconButton
+          label={t('weather.refresh')}
           onClick={onRefresh}
-          className="-m-2 p-2 text-text-muted transition-transform hover:text-text active:scale-90"
-          aria-label="Osveži prognozu"
+          className="-m-2 h-8 w-8 text-text-muted hover:text-text"
         >
-          <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
-        </button>
+          <RefreshCw className={loading ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} aria-hidden />
+        </IconButton>
       </div>
       {isError ? (
-        <p className="mt-2 text-sm text-danger-ink">Prognoza trenutno ćuti. Osveži je.</p>
+        <p className="mt-2 text-sm text-danger-ink">{t('weather.error')}</p>
       ) : hours.length === 0 ? (
-        <p className="mt-2 text-sm text-text-muted">{loading ? 'Gledam prognozu…' : 'Nema podataka za tvoj termin.'}</p>
+        <p className="mt-2 text-sm text-text-muted">{loading ? t('weather.loading') : t('weather.none')}</p>
       ) : (
         <div className="mt-3 grid grid-cols-3 gap-2">{hourTiles(hours)}</div>
       )}
       <p className="num mt-2 text-caption text-text-muted">
         {updatedText}
-        {updatedText ? ' · ' : ''}Vreme: Open-Meteo
+        {updatedText ? ' · ' : ''}
+        {t('weather.source')}
       </p>
     </AppCard>
   );

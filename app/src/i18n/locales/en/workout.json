@@ -1,0 +1,122 @@
+{
+  "title": {
+    "easy": "Easy run {{km}} km",
+    "long": "Long run {{km}} km",
+    "tempo": "Tempo {{minutes}} min",
+    "intervals": "Intervals {{reps}}×1000 m",
+    "repetitions": "Repetitions {{reps}}×200 m",
+    "race": "Race {{km}} km"
+  },
+  "why": {
+    "title": "Why this workout",
+    "mistake": "Common mistake"
+  },
+  "fueling": {
+    "title": "Fueling",
+    "feelsLike": "feels {{temp}}°",
+    "pre": "Before",
+    "preMorning": "Before · meal by 07:00",
+    "preEvening": "Before · meal by {{time}}:00",
+    "during": "During",
+    "water": "Water:",
+    "short": "It's short — water is enough, a gel isn't necessary.",
+    "hot": "It's hot — a gel at ~30 min and more water.",
+    "after": "After"
+  },
+  "log": {
+    "title": "Log workout",
+    "distance": "Distance (km)",
+    "duration": "Duration (h:mm:ss)",
+    "rpe": "Effort (RPE)",
+    "rpeValue": "RPE {{rpe}} of 10",
+    "notes": "Note (optional)",
+    "notesPlaceholder": "How did it go?",
+    "errorDuration": "Enter the duration as mm:ss or h:mm:ss",
+    "errorInvalid": "Check the distance (km), duration and RPE",
+    "errorSave": "Saving failed — try again"
+  },
+  "missing": {
+    "title": "Can't find this workout",
+    "description": "The plan was probably refreshed — check the calendar.",
+    "action": "Back to plan"
+  },
+  "meta": {
+    "phase": "{{phase}} phase",
+    "week": "Week {{week}}/{{weeks}}"
+  },
+  "steps": {
+    "title": "Steps"
+  },
+  "logged": {
+    "title": "Logged"
+  },
+  "actions": {
+    "skip": "Skip",
+    "done": "Done",
+    "completeStrength": "Finish workout",
+    "guided": "Guided run",
+    "raceDay": "Race day strategy",
+    "googleCalendar": "Add to Google Calendar",
+    "error": "Action failed — try again"
+  },
+  "skip": {
+    "title": "Skip this workout?",
+    "description": "We'll mark it as skipped. It doesn't affect plan progress.",
+    "error": "Couldn't skip — try again"
+  },
+  "next": {
+    "eyebrow": "Next workout",
+    "tomorrow": "Tomorrow"
+  },
+  "recent": {
+    "title": "Recent activity",
+    "all": "All",
+    "workout": "Workout"
+  },
+  "days": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  },
+  "weather": {
+    "title": "Weather for your {{from}}–{{to}} h window",
+    "titleDay": "Weather for {{day}}, {{from}}–{{to}} h window",
+    "updated": "Updated: {{time}}",
+    "source": "Weather: Open-Meteo",
+    "refresh": "Refresh forecast",
+    "error": "The forecast is quiet right now. Refresh it.",
+    "inWindow": "In your window: {{temp}}° · rain {{rain}}% · from {{time}} h",
+    "loading": "Checking the forecast…",
+    "none": "No data for your workout window."
+  },
+  "assessment": {
+    "storm": {
+      "title": "Thunderstorm during your workout window",
+      "description": "Suggestion: move the workout or do the indoor version."
+    },
+    "rain": {
+      "title": "Rain — {{pct}}% chance",
+      "description": "Up to {{mm}} mm expected in your workout window."
+    },
+    "heat": {
+      "title": "Hot — feels {{temp}}°C",
+      "description": "Suggestion: move the workout earlier or to the evening."
+    },
+    "cold": {
+      "title": "Cold — feels {{temp}}°C",
+      "description": "Suggestion: indoor workout or an extra layer."
+    },
+    "wind": {
+      "title": "Strong wind — gusts up to {{gust}} km/h",
+      "description": "It'll be harder than usual outdoors."
+    },
+    "air": {
+      "title": "Poor air — PM2.5 {{pm25}}",
+      "description": "Suggestion: indoor or another time."
+    }
+  }
+}

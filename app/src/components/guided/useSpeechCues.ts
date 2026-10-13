@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface SpeechCues {
   muted: boolean;
@@ -9,10 +10,19 @@ export interface SpeechCues {
   beep: (frequency: number, durationMs?: number) => void;
 }
 
-function findSerbianVoice(): SpeechSynthesisVoice | null {
+function voicePrefix(language: string): string {
+  return language.toLowerCase().startsWith('en') ? 'en' : 'sr';
+}
+
+function speechLocale(language: string): string {
+  return language.toLowerCase().startsWith('en') ? 'en-US' : 'sr-Latn';
+}
+
+function findVoice(language: string): SpeechSynthesisVoice | null {
   if (!('speechSynthesis' in window)) return null;
   try {
-    return window.speechSynthesis.getVoices().find((item) => item.lang.toLowerCase().startsWith('sr')) ?? null;
+    const prefix = voicePrefix(language);
+    return window.speechSynthesis.getVoices().find((item) => item.lang.toLowerCase().startsWith(prefix)) ?? null;
   } catch {
     return null;
   }
@@ -29,13 +39,15 @@ function subscribeVoices(callback: () => void): () => void {
   };
 }
 
-function getSpeechAvailable(): boolean {
-  return findSerbianVoice() !== null;
-}
-
 export function useSpeechCues(): SpeechCues {
+  const { i18n } = useTranslation();
+  const language = i18n.language;
   const [muted, setMuted] = useState(false);
-  const speechAvailable = useSyncExternalStore(subscribeVoices, getSpeechAvailable, () => false);
+  const speechAvailable = useSyncExternalStore(
+    subscribeVoices,
+    () => findVoice(language) !== null,
+    () => false,
+  );
   const mutedRef = useRef(false);
   const audioContextRef = useRef<AudioContext | null>(null);
 
@@ -84,21 +96,24 @@ export function useSpeechCues(): SpeechCues {
     }
   }, []);
 
-  const speak = useCallback((text: string) => {
-    if (mutedRef.current) return;
-    const voice = findSerbianVoice();
-    if (!voice) return;
-    try {
-      const synthesis = window.speechSynthesis;
-      synthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = voice.lang;
-      utterance.voice = voice;
-      synthesis.speak(utterance);
-    } catch {
-      return;
-    }
-  }, []);
+  const speak = useCallback(
+    (text: string) => {
+      if (mutedRef.current) return;
+      const voice = findVoice(language);
+      if (!voice) return;
+      try {
+        const synthesis = window.speechSynthesis;
+        synthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = speechLocale(language);
+        utterance.voice = voice;
+        synthesis.speak(utterance);
+      } catch {
+        return;
+      }
+    },
+    [language],
+  );
 
   const beep = useCallback((frequency: number, durationMs = 150) => {
     if (mutedRef.current) return;

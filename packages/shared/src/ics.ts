@@ -1,4 +1,5 @@
 import type { PlanPaces, RunWindow, WorkoutStep, WorkoutType } from './types';
+import { parseIso, toIso } from './dates';
 import { formatDuration } from './vdot';
 
 export interface IcsEvent {
@@ -67,8 +68,8 @@ function localDateTime(iso: string, hour: number, minute: number): string {
 }
 
 function addMinutes(iso: string, hour: number, minutes: number): string {
-  const end = new Date(new Date(`${iso}T00:00:00.000Z`).getTime() + hour * 3_600_000 + minutes * 60_000);
-  return localDateTime(end.toISOString().slice(0, 10), end.getUTCHours(), end.getUTCMinutes());
+  const end = new Date(parseIso(iso).getTime() + hour * 3_600_000 + minutes * 60_000);
+  return localDateTime(toIso(end), end.getUTCHours(), end.getUTCMinutes());
 }
 
 function utcStamp(date: Date): string {

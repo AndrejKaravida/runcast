@@ -1,0 +1,53 @@
+{
+  "greeting": {
+    "morning": "Dobro jutro",
+    "afternoon": "Dobar dan",
+    "evening": "Dobro veče"
+  },
+  "streak": "dana u nizu",
+  "label": "Danas",
+  "status": {
+    "done": "Urađeno",
+    "skipped": "Preskočeno"
+  },
+  "actions": {
+    "completeStrength": "Završi trening",
+    "done": "Urađeno",
+    "guided": "Vođeno",
+    "view": "Pogledaj trening",
+    "completeError": "Čuvanje nije uspelo — pokušaj ponovo"
+  },
+  "empty": {
+    "title": "Još nemamo plan",
+    "description": "Hajde da napravimo tvoj plan — trka, tempo i dani koje imaš.",
+    "action": "Otvori podešavanja"
+  },
+  "rest": {
+    "title": "Danas je slobodan dan",
+    "description": "Baci pogled na kalendar — sledeći trening te čeka."
+  },
+  "race": {
+    "goal": "Ciljna trka",
+    "untitled": "Trka bez naziva",
+    "daysTo": "dana do trke",
+    "passed": "Trka je prošla — napravi novi plan",
+    "day": "Dan trke"
+  },
+  "plan": {
+    "label": "Plan",
+    "week": "Nedelja {{week}} / {{weeks}}"
+  },
+  "verdict": {
+    "nearest": "Najbliži slobodan termin: {{date}}.",
+    "swap": "Prebaci na {{date}}",
+    "stay": "Ostajem po planu",
+    "swapError": "Zamena nije uspela — pokušaj ponovo"
+  },
+  "week": {
+    "title": "Tvoja nedelja",
+    "all": "Ceo plan",
+    "summary": "{{done}} od {{planned}} treninga ove nedelje"
+  },
+  "tomorrow": "sutra",
+  "rangeError": "Deo plana nije učitan."
+}

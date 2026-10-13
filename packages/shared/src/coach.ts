@@ -1,3 +1,5 @@
+import { addDays, startOfWeek } from './dates';
+
 export type InsightTone = 'positive' | 'warning' | 'neutral';
 
 export interface InsightAction {
@@ -9,8 +11,11 @@ export interface InsightAction {
 export interface Insight {
   id: string;
   tone: InsightTone;
-  title: string;
-  description: string;
+  titleKey: string;
+  titleParams?: Record<string, number>;
+  descriptionKey: string;
+  descriptionParams?: Record<string, number>;
+  actionLabelKey?: string;
   action?: InsightAction;
 }
 
@@ -61,30 +66,9 @@ const ADHERENCE_MIN = 90;
 const MIN_RPE_LOGS = 3;
 const MIN_PLANNED = 3;
 const MAX_INSIGHTS = 3;
-const MS_PER_DAY = 86_400_000;
 
 export const SCALE_FACTOR_MIN = 0.6;
 export const SCALE_FACTOR_MAX = 1.15;
-
-function parseIso(iso: string): Date {
-  return new Date(`${iso}T00:00:00.000Z`);
-}
-
-function toIso(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
-function addDays(iso: string, days: number): string {
-  return toIso(new Date(parseIso(iso).getTime() + days * MS_PER_DAY));
-}
-
-function weekdayIndex(iso: string): number {
-  return (parseIso(iso).getUTCDay() + 6) % 7;
-}
-
-function startOfWeek(iso: string): string {
-  return addDays(iso, -weekdayIndex(iso));
-}
 
 function round1(value: number): number {
   return Math.round(value * 10) / 10;
@@ -92,10 +76,6 @@ function round1(value: number): number {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
-}
-
-function fmtNumber(value: number): string {
-  return String(value).replace('.', ',');
 }
 
 export function clampScaleFactor(factor: number): number {
@@ -183,24 +163,30 @@ export function buildCoachInsights(input: CoachInput): CoachResult {
     insights.push({
       id: 'missed-runs',
       tone: 'warning',
-      title: `${missed} treninga su izostala — desi se`,
-      description: 'Sledeća nedelja je lakša — vraćamo te u ritam bez pritiska.',
+      titleKey: 'content:coach.missedRuns.title',
+      titleParams: { missed },
+      descriptionKey: 'content:coach.missedRuns.description',
+      actionLabelKey: 'stats:coach.actions.missedRuns',
       action: action(0.8),
     });
   } else if (recent.avg >= RPE_HIGH) {
     insights.push({
       id: 'high-rpe',
       tone: 'warning',
-      title: `Telo traži predah (prosek RPE ${fmtNumber(recent.avg)})`,
-      description: 'Pet treninga je bilo naporno. Uzimamo korak nazad — oporavak je trening.',
+      titleKey: 'content:coach.highRpe.title',
+      titleParams: { rpe: recent.avg },
+      descriptionKey: 'content:coach.highRpe.description',
+      actionLabelKey: 'stats:coach.actions.highRpe',
       action: action(0.9),
     });
   } else if (recent.count >= MIN_RPE_LOGS && recent.avg >= RPE_DRIFT) {
     insights.push({
       id: 'rpe-drift',
       tone: 'neutral',
-      title: `Umor se polako skuplja (prosek ${fmtNumber(recent.avg)})`,
-      description: 'Volumen ostaje isti dok se ne vratiš u ritam.',
+      titleKey: 'content:coach.rpeDrift.title',
+      titleParams: { rpe: recent.avg },
+      descriptionKey: 'content:coach.rpeDrift.description',
+      actionLabelKey: 'stats:coach.actions.rpeDrift',
       action: action(1),
     });
   }
@@ -209,8 +195,9 @@ export function buildCoachInsights(input: CoachInput): CoachResult {
     insights.push({
       id: 'long-run-missed',
       tone: 'neutral',
-      title: 'Dugi trk je izostao',
-      description: 'Kilometri se ne nadoknađuju — sledeća nedelja ostaje tačno po planu.',
+      titleKey: 'content:coach.longRunMissed.title',
+      descriptionKey: 'content:coach.longRunMissed.description',
+      actionLabelKey: 'stats:coach.actions.longRunMissed',
       action: action(1),
     });
   }
@@ -235,8 +222,10 @@ export function buildCoachInsights(input: CoachInput): CoachResult {
     insights.push({
       id: 'ready-to-build',
       tone: 'positive',
-      title: 'Sve teče po planu — možemo malo jače',
-      description: `Realizacija ${adherence}% i nizak RPE (prosek ${fmtNumber(recent.avg)}). Sledeća nedelja ide +10%.`,
+      titleKey: 'content:coach.readyToBuild.title',
+      descriptionKey: 'content:coach.readyToBuild.description',
+      descriptionParams: { adherence, rpe: recent.avg },
+      actionLabelKey: 'stats:coach.actions.readyToBuild',
       action: action(1.1),
     });
   }

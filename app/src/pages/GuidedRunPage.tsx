@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   buildFuelingPlan,
   buildStepTimeline,
@@ -6,9 +6,13 @@ import {
   elapsedAfterSkip,
   formatDuration,
   segmentAt,
+  type GuidedCueContext,
+  type GuidedCueKind,
+  type LocalizedText,
   type PlanPaces,
 } from '@runcast/shared';
 import { CheckCircle2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { CueBanner } from '@/components/guided/CueBanner';
 import { formatKm } from '@/components/guided/format';
@@ -21,6 +25,7 @@ import { useWakeLock } from '@/components/guided/useWakeLock';
 import { AppButton } from '@/components/ui/AppButton';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { QueryError } from '@/components/ui/QueryError';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { StatRow } from '@/components/ui/StatRow';
 import { LogWorkoutModal } from '@/components/workouts/LogWorkoutModal';
@@ -38,13 +43,20 @@ function parseTimeScale(value: string | null): number {
 }
 
 export function GuidedRunPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const timeScale = parseTimeScale(searchParams.get('timeScale'));
-  const { data: workout, isLoading } = useWorkout(id);
+  const { data: workout, isLoading, isError, refetch } = useWorkout(id);
   const { data: plan } = useActivePlan();
   const { data: logs = [] } = useRunLogs();
+
+  const localize = useCallback((text: LocalizedText) => t(text.key, text.params), [t]);
+  const cueText = useCallback(
+    (kind: GuidedCueKind, context?: GuidedCueContext) => localize(cueTextFor(kind, context)),
+    [localize],
+  );
 
   const paces = (plan?.paces as unknown as PlanPaces | null) ?? null;
   const timeline = useMemo(() => {
@@ -83,7 +95,9 @@ export function GuidedRunPage() {
 
   const existingLog = workout ? (logs.find((entry) => entry.workout_id === workout.id) ?? null) : null;
   const position = timeline ? segmentAt(timeline, clock.elapsedSec) : null;
-  const loggedDistance = gpsEnabled && geo.distanceKm > 0.01 ? geo.distanceKm : (workout?.distance_km ?? 0);
+  const trackedDistanceKm = gpsEnabled && geo.distanceKm > 0.01 ? geo.distanceKm : null;
+  const loggedDistanceKm = trackedDistanceKm ?? (gpsEnabled ? null : (workout?.distance_km ?? 0));
+  const gpsWithoutFix = gpsEnabled && trackedDistanceKm === null;
   const loggedDuration = Math.max(1, Math.round(clock.elapsedSec));
 
   useEffect(() => {
@@ -92,29 +106,27 @@ export function GuidedRunPage() {
     if (phase === previous) return;
     prevPhaseRef.current = phase;
     if (phase === 'running' && previous === 'countdown') {
-      speech.speak(cueTextFor('START'));
+      speech.speak(cueText('START'));
       speech.beep(880);
       return;
     }
     if (phase === 'running' && previous === 'paused') {
-      speech.speak(cueTextFor('RESUME'));
+      speech.speak(cueText('RESUME'));
       return;
     }
     if (phase === 'paused') {
-      speech.speak(cueTextFor('PAUSE'));
+      speech.speak(cueText('PAUSE'));
       return;
     }
     if (phase === 'finished' && !finishedCueRef.current) {
       finishedCueRef.current = true;
-      const base = cueTextFor('FINISH', { elapsedSec: clock.elapsedSec });
+      const base = cueText('FINISH', { elapsedSec: clock.elapsedSec });
       const text =
-        gpsEnabled && geo.distanceKm > 0.01
-          ? `${base} ${cueTextFor('DISTANCE', { distanceKm: geo.distanceKm })}`
-          : base;
+        gpsEnabled && geo.distanceKm > 0.01 ? `${base} ${cueText('DISTANCE', { distanceKm: geo.distanceKm })}` : base;
       speech.speak(text);
       speech.beep(880, 250);
     }
-  }, [clock.phase, clock.elapsedSec, gpsEnabled, geo.distanceKm, speech]);
+  }, [clock.phase, clock.elapsedSec, gpsEnabled, geo.distanceKm, speech, cueText]);
 
   useEffect(() => {
     if (clock.phase !== 'countdown') return;
@@ -130,8 +142,8 @@ export function GuidedRunPage() {
       segmentIndexRef.current = current.segment.index;
       const segment = current.segment;
       const isRepeat = segment.repeatIndex !== undefined && segment.repeatTotal !== undefined;
-      const main = isRepeat ? cueTextFor('REPEAT', segment) : cueTextFor('SEGMENT_START', segment);
-      const text = segment.paceLabel ? `${main} ${cueTextFor('PACE', { paceLabel: segment.paceLabel })}` : main;
+      const main = isRepeat ? cueText('REPEAT', segment) : cueText('SEGMENT_START', segment);
+      const text = segment.paceLabel ? `${main} ${cueText('PACE', { paceLabel: segment.paceLabel })}` : main;
       speech.speak(text);
       speech.beep(isForward ? 660 : 880, 100);
     }
@@ -141,19 +153,19 @@ export function GuidedRunPage() {
       clock.elapsedSec >= timeline.totalDurationSec / 2
     ) {
       halfwaySpokenRef.current = true;
-      speech.speak(cueTextFor('HALFWAY'));
+      speech.speak(cueText('HALFWAY'));
       speech.beep(880, 120);
     }
-  }, [clock.phase, clock.elapsedSec, timeline, speech]);
+  }, [clock.phase, clock.elapsedSec, timeline, speech, cueText]);
 
   useEffect(() => {
     if (clock.phase !== 'running' || fuelingCues.length === 0) return;
     const next = fuelingCues[fuelingIndexRef.current];
     if (!next || clock.elapsedSec < next.atSec) return;
     fuelingIndexRef.current += 1;
-    speech.speak(next.text);
+    speech.speak(localize(next.text));
     speech.beep(660, 120);
-  }, [clock.phase, clock.elapsedSec, fuelingCues, speech]);
+  }, [clock.phase, clock.elapsedSec, fuelingCues, speech, localize]);
 
   const handleStart = () => {
     speech.unlock();
@@ -184,10 +196,18 @@ export function GuidedRunPage() {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="mx-auto w-full max-w-[560px] px-4 py-6">
+        <QueryError onRetry={() => void refetch()} />
+      </div>
+    );
+  }
+
   if (!workout) {
     return (
       <div className="mx-auto w-full max-w-[560px] px-4 py-6">
-        <EmptyState title="Ne nalazim ovaj trening" description="Plan je verovatno osvežen — pogledaj kalendar." />
+        <EmptyState title={t('workout:missing.title')} description={t('workout:missing.description')} />
       </div>
     );
   }
@@ -196,12 +216,12 @@ export function GuidedRunPage() {
     return (
       <div className="mx-auto w-full max-w-[560px] px-4 py-6">
         <EmptyState
-          title="Za ovaj trening nema vođenja"
-          description="Vođenje radi za trčanje sa koracima."
+          title={t('guided:empty.title')}
+          description={t('guided:empty.description')}
           action={
             <Link to={`/workout/${workout.id}`}>
               <AppButton size="sm" variant="secondary">
-                Pogledaj trening
+                {t('guided:empty.action')}
               </AppButton>
             </Link>
           }
@@ -214,38 +234,40 @@ export function GuidedRunPage() {
   const activeSegment = position?.segment ?? guidedTimeline.segments[0];
 
   const isRepeatSegment = activeSegment.repeatIndex !== undefined && activeSegment.repeatTotal !== undefined;
-  const segmentCue = isRepeatSegment ? cueTextFor('REPEAT', activeSegment) : cueTextFor('SEGMENT_START', activeSegment);
+  const segmentCue = isRepeatSegment ? cueText('REPEAT', activeSegment) : cueText('SEGMENT_START', activeSegment);
   const segmentCueWithPace = activeSegment.paceLabel
-    ? `${segmentCue} ${cueTextFor('PACE', { paceLabel: activeSegment.paceLabel })}`
+    ? `${segmentCue} ${cueText('PACE', { paceLabel: activeSegment.paceLabel })}`
     : segmentCue;
   const halfwayReached = guidedTimeline.totalDurationSec > 0 && clock.elapsedSec >= guidedTimeline.totalDurationSec / 2;
-  const finishedCue = cueTextFor('FINISH', { elapsedSec: clock.elapsedSec });
+  const finishedCue = cueText('FINISH', { elapsedSec: clock.elapsedSec });
   const finishedCueWithDistance =
     gpsEnabled && geo.distanceKm > 0.01
-      ? `${finishedCue} ${cueTextFor('DISTANCE', { distanceKm: geo.distanceKm })}`
+      ? `${finishedCue} ${cueText('DISTANCE', { distanceKm: geo.distanceKm })}`
       : finishedCue;
   const bannerText =
     clock.phase === 'idle'
-      ? 'Spremni?'
+      ? t('guided:ready')
       : clock.phase === 'countdown'
-        ? 'Pripremi se…'
+        ? t('guided:countdown.banner')
         : clock.phase === 'paused'
-          ? cueTextFor('PAUSE')
+          ? cueText('PAUSE')
           : clock.phase === 'finished'
             ? finishedCueWithDistance
             : halfwayReached
-              ? `${segmentCueWithPace} ${cueTextFor('HALFWAY')}`
+              ? `${segmentCueWithPace} ${cueText('HALFWAY')}`
               : segmentCueWithPace;
 
   const firedFuelingCount = fuelingCues.filter((cue) => cue.atSec <= clock.elapsedSec).length;
   const nextFuelingCue = fuelingCues[firedFuelingCount];
   const lastFuelingCue = firedFuelingCount > 0 ? fuelingCues[firedFuelingCount - 1] : undefined;
   const fuelingHint = lastFuelingCue
-    ? { fired: true, text: lastFuelingCue.text }
+    ? { fired: true, text: localize(lastFuelingCue.text) }
     : nextFuelingCue
       ? {
           fired: false,
-          text: `Sledeći gel: ~${Math.max(1, Math.ceil((nextFuelingCue.atSec - clock.elapsedSec) / 60))} min`,
+          text: t('content:fueling.nextGel', {
+            minutes: Math.max(1, Math.ceil((nextFuelingCue.atSec - clock.elapsedSec) / 60)),
+          }),
         }
       : undefined;
 
@@ -267,7 +289,7 @@ export function GuidedRunPage() {
   if (clock.phase === 'countdown') {
     return (
       <div className="mx-auto flex min-h-dvh w-full max-w-[560px] flex-col items-center justify-center gap-4 px-4 py-6">
-        <p className="section-label">Pripremi se</p>
+        <p className="section-label">{t('guided:countdown.label')}</p>
         <p
           key={clock.countdownValue}
           data-testid="guided-countdown"
@@ -285,32 +307,39 @@ export function GuidedRunPage() {
       <div className="mx-auto flex min-h-dvh w-full max-w-[560px] flex-col px-4 py-6">
         <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
           <CheckCircle2 className="h-10 w-10 text-success-ink" aria-hidden />
-          <h1 className="text-2xl font-semibold">Trening završen</h1>
+          <h1 className="text-2xl font-semibold">{t('guided:finish.title')}</h1>
           <StatRow
             items={[
-              { label: 'Vreme', value: formatDuration(Math.round(clock.elapsedSec)) },
-              { label: 'Distanca', value: `${formatKm(loggedDistance)} km` },
-              { label: 'Izvor', value: gpsEnabled ? 'GPS' : 'Plan' },
+              { label: t('guided:finish.time'), value: formatDuration(Math.round(clock.elapsedSec)) },
+              {
+                label: t('guided:stats.distance'),
+                value: loggedDistanceKm !== null ? `${formatKm(loggedDistanceKm)} km` : '—',
+              },
+              {
+                label: t('guided:finish.source'),
+                value: gpsEnabled ? t('guided:finish.sourceGps') : t('guided:finish.sourcePlan'),
+              },
             ]}
             className="w-full max-w-sm rounded-xl bg-surface-elevated py-1"
           />
+          {gpsWithoutFix ? <p className="text-caption text-warning-ink">{t('guided:finish.noFixHint')}</p> : null}
           <CueBanner text={bannerText} />
           {existingLog ? (
-            <p className="text-sm text-text-secondary">Trening je već zabeležen.</p>
+            <p className="text-sm text-text-secondary">{t('guided:finish.logged')}</p>
           ) : (
             <AppButton data-testid="guided-log" className="w-full max-w-sm" onClick={() => setLogOpen(true)}>
-              Zabeleži trening
+              {t('workout:log.title')}
             </AppButton>
           )}
           <AppButton variant="secondary" className="w-full max-w-sm" onClick={() => navigate(`/workout/${workout.id}`)}>
-            Pogledaj trening
+            {t('guided:finish.view')}
           </AppButton>
         </div>
         <LogWorkoutModal
           workout={workout}
           open={logOpen}
           onClose={() => setLogOpen(false)}
-          prefill={{ distanceKm: loggedDistance, durationSec: loggedDuration }}
+          prefill={{ distanceKm: loggedDistanceKm ?? undefined, durationSec: loggedDuration }}
         />
       </div>
     );
@@ -340,9 +369,9 @@ export function GuidedRunPage() {
       />
       <ConfirmDialog
         open={finishOpen}
-        title="Završiti pre kraja?"
-        description="Zabeležićemo vreme koje si do sada istrčao — ništa se ne gubi."
-        confirmLabel="Završi"
+        title={t('guided:finish.confirmTitle')}
+        description={t('guided:finish.confirmDescription')}
+        confirmLabel={t('guided:finish.confirm')}
         tone="danger"
         onConfirm={() => {
           setFinishOpen(false);

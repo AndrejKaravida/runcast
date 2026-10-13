@@ -6,6 +6,12 @@ export type PaceZone = 'E' | 'M' | 'T' | 'I' | 'R';
 export type WorkoutStatus = 'PLANNED' | 'DONE' | 'SKIPPED';
 export type PlanPhase = 'BASE' | 'BUILD' | 'PEAK' | 'TAPER' | 'RACE';
 
+export interface LocalizedText {
+  key: string;
+  params?: Record<string, string | number>;
+  suffix?: LocalizedText;
+}
+
 export interface WorkoutStep {
   label: string;
   distanceKm?: number;

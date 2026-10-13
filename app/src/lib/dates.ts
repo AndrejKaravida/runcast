@@ -1,5 +1,10 @@
+import i18n, { localeForLanguage } from '@/i18n';
+
 export function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${now.getFullYear()}-${month}-${day}`;
 }
 
 export function addDaysIso(iso: string, days: number): string {
@@ -38,28 +43,34 @@ export function lastDayOfMonth(iso: string): string {
   return addDaysIso(addMonthsIso(firstDayOfMonth(iso), 1), -1);
 }
 
-const dateFormatter = new Intl.DateTimeFormat('sr-Latn-RS', {
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short',
-  timeZone: 'UTC',
-});
-const longDateFormatter = new Intl.DateTimeFormat('sr-Latn-RS', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-  timeZone: 'UTC',
-});
-const monthFormatter = new Intl.DateTimeFormat('sr-Latn-RS', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+type DateFormatKind = 'short' | 'long' | 'month';
+
+const DATE_FORMATS: Record<DateFormatKind, Intl.DateTimeFormatOptions> = {
+  short: { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' },
+  long: { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' },
+  month: { month: 'long', year: 'numeric', timeZone: 'UTC' },
+};
+
+const formatters = new Map<string, Intl.DateTimeFormat>();
+
+function formatterFor(kind: DateFormatKind): Intl.DateTimeFormat {
+  const locale = localeForLanguage(i18n.language);
+  const cacheKey = `${kind}:${locale}`;
+  const cached = formatters.get(cacheKey);
+  if (cached) return cached;
+  const formatter = new Intl.DateTimeFormat(locale, DATE_FORMATS[kind]);
+  formatters.set(cacheKey, formatter);
+  return formatter;
+}
 
 export function formatDateShort(iso: string): string {
-  return dateFormatter.format(new Date(`${iso}T00:00:00.000Z`));
+  return formatterFor('short').format(new Date(`${iso}T00:00:00.000Z`));
 }
 
 export function formatDateLong(iso: string): string {
-  return longDateFormatter.format(new Date(`${iso}T00:00:00.000Z`));
+  return formatterFor('long').format(new Date(`${iso}T00:00:00.000Z`));
 }
 
 export function formatMonth(iso: string): string {
-  return monthFormatter.format(new Date(`${iso}T00:00:00.000Z`));
+  return formatterFor('month').format(new Date(`${iso}T00:00:00.000Z`));
 }

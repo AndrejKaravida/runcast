@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { TFunction } from 'i18next';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import { z } from 'zod';
 import { useAuth } from '@/auth/AuthProvider';
@@ -10,26 +12,34 @@ import { AppInput } from '@/components/ui/AppInput';
 import { authErrorMessage } from '@/lib/auth-errors';
 import { supabase } from '@/lib/supabase';
 
-const resetSchema = z
-  .object({
-    password: z.string().min(8, 'Lozinka ima najmanje 8 znakova'),
-    confirm: z.string(),
-  })
-  .refine((values) => values.password === values.confirm, { message: 'Lozinke se ne poklapaju', path: ['confirm'] });
+function resetSchema(t: TFunction<'auth'>) {
+  return z
+    .object({
+      password: z.string().min(8, t('validation.passwordMin')),
+      confirm: z.string(),
+    })
+    .refine((values) => values.password === values.confirm, {
+      message: t('validation.passwordMismatch'),
+      path: ['confirm'],
+    });
+}
 
-type ResetValues = z.infer<typeof resetSchema>;
+type ResetValues = z.infer<ReturnType<typeof resetSchema>>;
 
 export function ResetPasswordPage() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation('auth');
   const [serverError, setServerError] = useState<string | null>(null);
-  const { register, handleSubmit, formState } = useForm<ResetValues>({ resolver: zodResolver(resetSchema) });
+  const { register, handleSubmit, formState } = useForm<ResetValues>({
+    resolver: zodResolver(resetSchema(t)),
+  });
 
   const onSubmit = handleSubmit(async ({ password }) => {
     setServerError(null);
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
-      setServerError(authErrorMessage(error.message));
+      setServerError(t(authErrorMessage(error.message)));
       return;
     }
     navigate('/today', { replace: true });
@@ -41,12 +51,12 @@ export function ResetPasswordPage() {
     return (
       <div className="mx-auto flex min-h-dvh w-full max-w-[420px] flex-col justify-center px-4 py-10">
         <div className="space-y-2 text-center">
-          <p className="text-2xl font-semibold tracking-display">Link nije važeći</p>
-          <p className="text-sm text-text-secondary">Link za reset je istekao ili je već iskorišćen.</p>
+          <p className="text-2xl font-semibold tracking-display">{t('reset.invalidTitle')}</p>
+          <p className="text-sm text-text-secondary">{t('reset.invalidText')}</p>
         </div>
         <Link to="/forgot-password" className="mt-6">
           <AppButton variant="secondary" size="lg" className="w-full">
-            Zatraži novi link
+            {t('reset.requestNew')}
           </AppButton>
         </Link>
       </div>
@@ -55,17 +65,17 @@ export function ResetPasswordPage() {
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[420px] flex-col justify-center px-4 py-10">
-      <h1 className="text-2xl font-semibold tracking-display">Nova lozinka</h1>
+      <h1 className="text-2xl font-semibold tracking-display">{t('reset.title')}</h1>
       <form className="mt-4 space-y-4" onSubmit={onSubmit} noValidate>
         <AppInput
-          label="Nova lozinka"
+          label={t('fields.newPassword')}
           type="password"
           autoComplete="new-password"
           error={formState.errors.password?.message}
           {...register('password')}
         />
         <AppInput
-          label="Potvrdi lozinku"
+          label={t('fields.confirm')}
           type="password"
           autoComplete="new-password"
           error={formState.errors.confirm?.message}
@@ -77,7 +87,7 @@ export function ResetPasswordPage() {
           </p>
         ) : null}
         <AppButton type="submit" size="lg" className="w-full" loading={formState.isSubmitting}>
-          Sačuvaj lozinku
+          {t('reset.submit')}
         </AppButton>
       </form>
     </div>

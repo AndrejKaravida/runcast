@@ -9,10 +9,9 @@ import type {
   WorkoutDraft,
   WorkoutStep,
 } from './types';
+import { addDays, dayDiff, weekdayOf } from './dates';
 import { strengthWorkoutsForWeek } from './strength';
 import { formatPace, pacesFromVdot, vdotFromPerformance } from './vdot';
-
-const MS_PER_DAY = 86_400_000;
 
 type RaceKind = 'M' | 'HM' | '10K' | '5K';
 
@@ -113,26 +112,6 @@ interface WeekBuildParams {
   longFinish: boolean;
 }
 
-function parseIso(iso: string): Date {
-  return new Date(`${iso}T00:00:00.000Z`);
-}
-
-function toIso(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
-function addDays(iso: string, days: number): string {
-  return toIso(new Date(parseIso(iso).getTime() + days * MS_PER_DAY));
-}
-
-function dayDiff(from: string, to: string): number {
-  return Math.round((parseIso(to).getTime() - parseIso(from).getTime()) / MS_PER_DAY);
-}
-
-function weekdayOf(iso: string): number {
-  return (parseIso(iso).getUTCDay() + 6) % 7;
-}
-
 function round1(value: number): number {
   return Math.round(value * 10) / 10;
 }
@@ -180,14 +159,13 @@ interface SeriesParams {
   peakKm: number;
   longPeak: number;
   sharePeak: number;
-  daysPerWeek: number;
 }
 
 function buildSeries(params: SeriesParams): { weeksKm: number[]; longKm: number[] } {
-  const { weeks, startKm, peakKm, longPeak, sharePeak, daysPerWeek } = params;
+  const { weeks, startKm, peakKm, longPeak, sharePeak } = params;
   const nonTaper = Math.max(weeks - 3, 1);
   const peakIndex = Math.max(weeks - 4, 0);
-  const maxStep = Math.max(daysPerWeek, 10);
+  const maxStep = 10;
   const shareStart = sharePeak - 0.08;
   const longStart = startKm * shareStart;
 
@@ -481,7 +459,6 @@ export function generatePlan(config: PlanConfig): PlanDraft {
     peakKm: config.experience === 'first' ? Math.min(volume.peak, FIRST_PEAK_KM) : volume.peak,
     longPeak: config.experience === 'first' ? Math.min(longPeak, FIRST_LONG_KM) : longPeak,
     sharePeak: RACE_PEAK_SHARE[raceKind][config.volumeBand],
-    daysPerWeek: config.daysPerWeek,
   });
   const paces = anchor ? pacesFromVdot(vdotFromPerformance(anchor.distanceKm, anchor.timeSec)) : null;
 

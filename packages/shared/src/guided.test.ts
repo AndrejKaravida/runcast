@@ -138,13 +138,35 @@ describe('guided timeline', () => {
     expect(isGuidedRunType('REST')).toBe(false);
   });
 
-  it('renders Serbian cue texts', () => {
-    expect(cueTextFor('START')).toBe('Krećemo!');
-    expect(cueTextFor('SEGMENT_START', { label: 'Tempo 20 min' })).toBe('Sada: Tempo 20 min.');
-    expect(cueTextFor('REPEAT', { repeatIndex: 2, repeatTotal: 4 })).toBe('Ponavljanje 2 od 4.');
-    expect(cueTextFor('PACE', { paceLabel: '4:48' })).toBe('Tempo 4:48 po kilometru.');
-    expect(cueTextFor('HALFWAY')).toBe('Pola je — drži ritam.');
-    expect(cueTextFor('FINISH', { elapsedSec: 3661 })).toBe('Gotovo! 1:01:01 u nogama.');
-    expect(cueTextFor('DISTANCE', { distanceKm: 5.25 })).toBe('GPS distanca: 5,25 kilometara.');
+  it('vraća ključeve i parametre za svaki cue', () => {
+    expect(cueTextFor('START')).toEqual({ key: 'content:guided.cue.start' });
+    expect(cueTextFor('SEGMENT_START', { label: 'Tempo 20 min' })).toEqual({
+      key: 'content:guided.cue.segmentStart',
+      params: { label: 'Tempo 20 min' },
+    });
+    expect(cueTextFor('SEGMENT_START')).toEqual({ key: 'content:guided.cue.segmentStartFallback' });
+    expect(cueTextFor('REPEAT', { repeatIndex: 2, repeatTotal: 4 })).toEqual({
+      key: 'content:guided.cue.repeat',
+      params: { index: 2, total: 4 },
+    });
+    expect(cueTextFor('PACE', { paceLabel: '4:48' })).toEqual({
+      key: 'content:guided.cue.pace',
+      params: { pace: '4:48' },
+    });
+    expect(cueTextFor('HALFWAY')).toEqual({ key: 'content:guided.cue.halfway' });
+    expect(cueTextFor('PAUSE')).toEqual({ key: 'content:guided.cue.pause' });
+    expect(cueTextFor('SKIP', { label: 'Hlađenje' })).toEqual({
+      key: 'content:guided.cue.skip',
+      params: { label: 'Hlađenje' },
+    });
+    expect(cueTextFor('SKIP')).toEqual({ key: 'content:guided.cue.skipFallback' });
+    expect(cueTextFor('FINISH', { elapsedSec: 3661 })).toEqual({
+      key: 'content:guided.cue.finish',
+      params: { elapsed: '1:01:01' },
+    });
+    expect(cueTextFor('DISTANCE', { distanceKm: 5.25 })).toEqual({
+      key: 'content:guided.cue.distance',
+      params: { km: 5.25 },
+    });
   });
 });

@@ -3,7 +3,6 @@ import {
   formatDuration,
   formatPace,
   pacesFromVdot,
-  parseTimeToSeconds,
   predictRaceTimes,
   vdotFromPerformance,
   type RunWindow,
@@ -11,6 +10,7 @@ import {
 } from '@runcast/shared';
 import { clsx } from 'clsx';
 import { AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppInput } from '@/components/ui/AppInput';
@@ -18,25 +18,19 @@ import { AppSelect } from '@/components/ui/AppSelect';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { StatRow } from '@/components/ui/StatRow';
 import { CityPicker } from '@/components/forms/CityPicker';
-import { useGeneratePlan, type GeneratePlanInput } from '@/features/plans/queries';
+import { PlanFields } from '@/components/forms/PlanFields';
+import { useGeneratePlan } from '@/features/plans/queries';
 import { useUpdateProfile } from '@/features/profile/queries';
 import { dayDiff, todayIso } from '@/lib/dates';
+import { buildPlanInput, parseOptionalTime, tryParseTime, validatePlanDraft, type PlanDraft } from '@/lib/plan-form';
 
-const DAY_LABELS = ['Ponedeljak', 'Utorak', 'Sreda', 'Četvrtak', 'Petak', 'Subota', 'Nedelja'];
-const DAY_SHORT = ['pon', 'uto', 'sre', 'čet', 'pet', 'sub', 'ned'];
-
-const DISTANCE_OPTIONS = [
-  { value: '42.195', label: 'Maraton' },
-  { value: '21.0975', label: 'Polumaraton' },
-  { value: '10', label: '10 km' },
-  { value: '5', label: '5 km' },
-];
+const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
 const VOLUME_OPTIONS = [
-  { value: 'lt20', label: 'do 20 km' },
-  { value: '20-40', label: '20–40 km' },
-  { value: '40-60', label: '40–60 km' },
-  { value: 'gt60', label: 'preko 60 km' },
+  { value: 'lt20', labelKey: 'volume.lt20' },
+  { value: '20-40', labelKey: 'volume.from20to40' },
+  { value: '40-60', labelKey: 'volume.from40to60' },
+  { value: 'gt60', labelKey: 'volume.over60' },
 ];
 
 const REFRESH_OPTIONS = [
@@ -93,16 +87,9 @@ const initialState: WizardState = {
   sex: '',
 };
 
-function tryParseTime(value: string): number | null {
-  try {
-    return parseTimeToSeconds(value.trim());
-  } catch {
-    return null;
-  }
-}
-
 export function OnboardingPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation('onboarding');
   const generatePlan = useGeneratePlan();
   const updateProfile = useUpdateProfile();
 
@@ -115,10 +102,12 @@ export function OnboardingPage() {
     setError(null);
   }
 
-  const goalTimeSec = useMemo(() => {
-    const match = /^\d{1,2}:\d{2}:\d{2}$/.test(state.goalTime.trim());
-    return match ? tryParseTime(state.goalTime) : null;
-  }, [state.goalTime]);
+  function updatePlan(patch: Partial<PlanDraft>) {
+    setState((current) => ({ ...current, ...patch }));
+    setError(null);
+  }
+
+  const goalTimeSec = useMemo(() => parseOptionalTime(state.goalTime), [state.goalTime]);
 
   const recentTimeSec = state.recentTime.trim() ? tryParseTime(state.recentTime) : null;
 
@@ -135,7 +124,8 @@ export function OnboardingPage() {
     const feasibility =
       recentPair && goalPair
         ? (() => {
-            const [predicted] = predictRaceTimes(vdot, [goalPair.distanceKm]);
+            const predicted = predictRaceTimes(vdot, [goalPair.distanceKm])?.[0];
+            if (!predicted) return null;
             return {
               predictedSec: predicted.timeSec,
               ambitious: (goalPair.timeSec - predicted.timeSec) / predicted.timeSec < -0.03,
@@ -147,35 +137,21 @@ export function OnboardingPage() {
 
   function validateStep(): boolean {
     if (step === 0 && state.hasRace) {
-      if (!state.raceDate) {
-        setError('Izaberi datum trke');
-        return false;
-      }
-      if (state.raceDate <= todayIso()) {
-        setError('Datum trke mora biti u budućnosti');
+      const draftError = validatePlanDraft(state, ['raceDate'], todayIso());
+      if (draftError) {
+        setError(t(`errors.${draftError}`));
         return false;
       }
     }
     if (step === 1) {
-      if (state.goalTime.trim() && (!/^\d{1,2}:\d{2}:\d{2}$/.test(state.goalTime.trim()) || !goalTimeSec)) {
-        setError('Ciljno vreme unesi kao h:mm:ss (npr. 3:45:00)');
-        return false;
-      }
-      if (state.recentDistanceKm && !state.recentTime.trim()) {
-        setError('Unesi vreme poslednje trke');
-        return false;
-      }
-      if (state.recentTime.trim() && !recentTimeSec) {
-        setError('Vreme trke unesi kao mm:ss (npr. 25:30)');
-        return false;
-      }
-      if (state.recentTime.trim() && !state.recentDistanceKm) {
-        setError('Izaberi distancu poslednje trke');
+      const draftError = validatePlanDraft(state, ['goalTime', 'recentRace'], todayIso());
+      if (draftError) {
+        setError(t(`errors.${draftError}`));
         return false;
       }
     }
     if (step === 4 && (state.lat === null || state.lon === null)) {
-      setError('Izaberi grad iz rezultata pretrage');
+      setError(t('errors.cityRequired'));
       return false;
     }
     return true;
@@ -193,28 +169,19 @@ export function OnboardingPage() {
 
   async function handleGenerate() {
     setError(null);
-    const recentRace =
-      state.recentTime.trim() && state.recentDistanceKm
-        ? { distanceKm: Number(state.recentDistanceKm), timeSec: recentTimeSec as number }
-        : null;
-    const input: GeneratePlanInput = {
-      race: state.hasRace
-        ? {
-            name: state.raceName.trim() || null,
-            raceDate: state.raceDate,
-            distanceKm: Number(state.distanceKm),
-            goalTimeSec,
-          }
-        : null,
-      recentRace,
-      daysPerWeek: state.daysPerWeek,
-      longRunDay: state.longRunDay,
-      experience: state.experience,
+    const input = buildPlanInput(state, {
+      hasRace: state.hasRace,
+      raceName: state.raceName,
       volumeBand: state.volumeBand,
-    };
+    });
     try {
       await generatePlan.mutateAsync(input);
-      await updateProfile.mutateAsync({
+    } catch {
+      setError(t('errors.generateFailed'));
+      return;
+    }
+    await updateProfile
+      .mutateAsync({
         onboarding_completed: true,
         city: state.city,
         lat: state.lat,
@@ -227,11 +194,9 @@ export function OnboardingPage() {
         weight_kg: state.weightKg ? Number(state.weightKg) : null,
         birth_year: state.birthYear ? Number(state.birthYear) : null,
         sex: state.sex === '' ? null : state.sex,
-      });
-      navigate('/today', { replace: true });
-    } catch {
-      setError('Generisanje plana nije uspelo — pokušaj ponovo');
-    }
+      })
+      .catch(() => undefined);
+    navigate('/today', { replace: true });
   }
 
   const weeksToRace = state.hasRace && state.raceDate ? dayDiff(todayIso(), state.raceDate) : null;
@@ -242,8 +207,8 @@ export function OnboardingPage() {
     <div className="mx-auto flex min-h-dvh w-full max-w-[560px] flex-col px-4 py-6">
       <div className="mb-5 space-y-2">
         <div className="flex items-center justify-between text-caption text-text-muted">
-          <span className="num">Korak {step + 1} / 6</span>
-          <span>Podešavamo plan za tebe</span>
+          <span className="num">{t('header.step', { step: step + 1 })}</span>
+          <span>{t('header.tagline')}</span>
         </div>
         <div className="flex gap-1" aria-hidden>
           {Array.from({ length: 6 }).map((_, index) => (
@@ -261,83 +226,35 @@ export function OnboardingPage() {
       <div className="flex-1 space-y-4">
         {step === 0 ? (
           <div className="space-y-4">
-            <h1 className="text-2xl font-semibold tracking-display">Za koju trku se spremaš?</h1>
+            <h1 className="text-2xl font-semibold tracking-display">{t('steps.race.title')}</h1>
             <SegmentedControl
               value={state.hasRace ? 'yes' : 'no'}
               onChange={(value) => update('hasRace', value === 'yes')}
               options={[
-                { value: 'yes', label: 'Imam trku' },
-                { value: 'no', label: 'Još nemam' },
+                { value: 'yes', label: t('steps.race.hasRace') },
+                { value: 'no', label: t('steps.race.noRace') },
               ]}
             />
             {state.hasRace ? (
               <>
                 <AppInput
-                  label="Naziv trke (opciono)"
-                  placeholder="Beogradski maraton"
+                  label={t('fields.raceName')}
+                  placeholder={t('fields.raceNamePlaceholder')}
                   value={state.raceName}
                   onChange={(event) => update('raceName', event.target.value)}
                 />
-                <AppInput
-                  label="Datum trke"
-                  type="date"
-                  value={state.raceDate}
-                  onChange={(event) => update('raceDate', event.target.value)}
-                />
-                <AppSelect
-                  label="Distanca"
-                  value={state.distanceKm}
-                  onChange={(event) => update('distanceKm', event.target.value)}
-                >
-                  {DISTANCE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </AppSelect>
+                <PlanFields variant="onboarding" groups={['race']} value={state} onChange={updatePlan} />
               </>
             ) : (
-              <p className="text-sm text-text-secondary">
-                Bez trke dobijaš bazni plan za narednih 8 nedelja — lagano trčanje bez ciljnih tempa. Trku možeš dodati
-                kasnije u podešavanjima.
-              </p>
+              <p className="text-sm text-text-secondary">{t('steps.race.noRaceText')}</p>
             )}
           </div>
         ) : null}
 
         {step === 1 ? (
           <div className="space-y-4">
-            <h1 className="text-2xl font-semibold tracking-display">Čemu težiš?</h1>
-            <AppInput
-              label="Ciljno vreme (h:mm:ss, opciono)"
-              placeholder="3:45:00"
-              value={state.goalTime}
-              onChange={(event) => update('goalTime', event.target.value)}
-              hint="Npr. cilj za maraton u 3 sata i 45 minuta"
-            />
-            <div className="flex items-center gap-3 text-caption text-text-muted">
-              <span className="h-px flex-1 bg-border" />
-              ili
-              <span className="h-px flex-1 bg-border" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <AppSelect
-                label="Poslednja trka"
-                value={state.recentDistanceKm}
-                onChange={(event) => update('recentDistanceKm', event.target.value)}
-              >
-                <option value="">—</option>
-                <option value="21.0975">Polumaraton</option>
-                <option value="10">10 km</option>
-                <option value="5">5 km</option>
-              </AppSelect>
-              <AppInput
-                label="Vreme (mm:ss)"
-                placeholder="25:30"
-                value={state.recentTime}
-                onChange={(event) => update('recentTime', event.target.value)}
-              />
-            </div>
+            <h1 className="text-2xl font-semibold tracking-display">{t('steps.goal.title')}</h1>
+            <PlanFields variant="onboarding" groups={['goal']} value={state} onChange={updatePlan} />
             {preview ? (
               <div className="space-y-3 rounded-2xl bg-primary-soft p-4">
                 <p className="flex items-baseline gap-2">
@@ -357,41 +274,29 @@ export function OnboardingPage() {
                 {preview.feasibility ? (
                   <p className="text-sm text-text-secondary">
                     {preview.feasibility.ambitious
-                      ? `Cilj je ambiciozan za trenutnu formu (predviđeno ${formatDuration(preview.feasibility.predictedSec)}).`
-                      : `Cilj je realan za trenutnu formu (predviđeno ${formatDuration(preview.feasibility.predictedSec)}).`}
+                      ? t('steps.goal.ambitious', { time: formatDuration(preview.feasibility.predictedSec) })
+                      : t('steps.goal.realistic', { time: formatDuration(preview.feasibility.predictedSec) })}
                   </p>
                 ) : null}
               </div>
             ) : (
-              <p className="text-sm text-text-muted">
-                Bez rezultata dobijaš bazni plan: lagano trčanje dok ne uhvatimo formu.
-              </p>
+              <p className="text-sm text-text-muted">{t('steps.goal.noResult')}</p>
             )}
           </div>
         ) : null}
 
         {step === 2 ? (
           <div className="space-y-4">
-            <h1 className="text-2xl font-semibold tracking-display">Iskustvo i trenutna kilometraža</h1>
-            <div>
-              <p className="section-label mb-1.5">Iskustvo</p>
-              <SegmentedControl
-                value={state.experience}
-                onChange={(value) => update('experience', value)}
-                options={[
-                  { value: 'first', label: 'Prvi put' },
-                  { value: 'experienced', label: 'Iskusan' },
-                ]}
-              />
-            </div>
+            <h1 className="text-2xl font-semibold tracking-display">{t('steps.experience.title')}</h1>
+            <PlanFields variant="onboarding" groups={['experience']} value={state} onChange={updatePlan} />
             <AppSelect
-              label="Koliko kilometara prelaziš nedeljno?"
+              label={t('steps.experience.volume')}
               value={state.volumeBand}
               onChange={(event) => update('volumeBand', event.target.value as VolumeBand)}
             >
               {VOLUME_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
-                  {option.label}
+                  {t(option.labelKey)}
                 </option>
               ))}
             </AppSelect>
@@ -400,72 +305,47 @@ export function OnboardingPage() {
 
         {step === 3 ? (
           <div className="space-y-4">
-            <h1 className="text-2xl font-semibold tracking-display">Kada trčiš?</h1>
-            <div>
-              <p className="section-label mb-1.5">Koliko dana nedeljno</p>
-              <SegmentedControl
-                value={state.daysPerWeek}
-                onChange={(value) => update('daysPerWeek', value)}
-                options={[
-                  { value: 3, label: '3' },
-                  { value: 4, label: '4' },
-                  { value: 5, label: '5' },
-                  { value: 6, label: '6' },
-                ]}
-              />
-            </div>
-            <AppSelect
-              label="Dan dugog trčanja"
-              value={String(state.longRunDay)}
-              onChange={(event) => update('longRunDay', Number(event.target.value))}
-            >
-              {DAY_LABELS.map((label, index) => (
-                <option key={label} value={index}>
-                  {label}
-                </option>
-              ))}
-            </AppSelect>
+            <h1 className="text-2xl font-semibold tracking-display">{t('steps.schedule.title')}</h1>
+            <PlanFields variant="onboarding" groups={['schedule']} value={state} onChange={updatePlan} />
             <div className="space-y-2">
               <div className="grid grid-cols-7 gap-1.5">
-                {DAY_SHORT.map((label, index) => {
+                {DAY_KEYS.map((key, index) => {
                   const isLong = index === state.longRunDay;
                   return (
                     <div
-                      key={label}
+                      key={key}
                       className={clsx(
                         'flex flex-col items-center gap-1.5 rounded-lg px-1 py-2',
                         isLong ? 'bg-rain-soft' : 'bg-surface-elevated',
                       )}
                     >
-                      <span className={clsx('section-label', isLong && 'text-rain-ink')}>{label}</span>
+                      <span className={clsx('section-label', isLong && 'text-rain-ink')}>{t(`days.short.${key}`)}</span>
                       <span className={clsx('h-1.5 w-1.5 rounded-full', isLong ? 'bg-rain-ink' : 'bg-text-muted')} />
                     </div>
                   );
                 })}
               </div>
-              <p className="text-caption text-text-muted">
-                Dugi trk nosi nedelju — ostale dane raspoređujemo oko njega.
-              </p>
+              <p className="text-caption text-text-muted">{t('steps.schedule.longRunNote')}</p>
             </div>
             <div>
-              <p className="section-label mb-1.5">Deo dana za trening</p>
+              <p className="section-label mb-1.5">{t('fields.runWindow')}</p>
               <SegmentedControl
                 value={state.runWindow}
                 onChange={(value) => update('runWindow', value)}
                 options={[
-                  { value: 'morning', label: 'Jutro' },
-                  { value: 'evening', label: 'Veče' },
-                  { value: 'flexible', label: 'Fleksibilno' },
+                  { value: 'morning', label: t('window.morning') },
+                  { value: 'evening', label: t('window.evening') },
+                  { value: 'flexible', label: t('window.flexible') },
                 ]}
               />
-              <p className="mt-1.5 text-caption text-text-muted">Za jutro gledamo prognozu 06–09 h, za veče 17–21 h.</p>
+              <p className="mt-1.5 text-caption text-text-muted">{t('steps.schedule.windowNote')}</p>
             </div>
           </div>
         ) : null}
 
         {step === 4 ? (
           <div className="space-y-4">
-            <h1 className="text-2xl font-semibold tracking-display">Gde trčiš?</h1>
+            <h1 className="text-2xl font-semibold tracking-display">{t('steps.location.title')}</h1>
             <CityPicker
               city={state.city}
               onSelect={(place) => {
@@ -481,7 +361,7 @@ export function OnboardingPage() {
               }}
             />
             <div>
-              <p className="section-label mb-1.5">Osvežavanje prognoze</p>
+              <p className="section-label mb-1.5">{t('fields.weatherRefresh')}</p>
               <SegmentedControl
                 value={state.weatherRefreshMinutes}
                 onChange={(value) => update('weatherRefreshMinutes', value)}
@@ -497,7 +377,7 @@ export function OnboardingPage() {
                     : 'bg-surface-elevated text-text-muted hover:text-text-secondary',
                 )}
               >
-                Samo na otvaranje
+                {t('onOpen')}
               </button>
             </div>
           </div>
@@ -505,59 +385,64 @@ export function OnboardingPage() {
 
         {step === 5 ? (
           <div className="space-y-4">
-            <h1 className="text-2xl font-semibold tracking-display">Još samo par detalja</h1>
+            <h1 className="text-2xl font-semibold tracking-display">{t('steps.details.title')}</h1>
             <div className="grid grid-cols-2 gap-3">
               <AppInput
-                label="Visina (cm)"
+                label={t('fields.height')}
                 type="number"
                 placeholder="182"
                 value={state.heightCm}
                 onChange={(event) => update('heightCm', event.target.value)}
               />
               <AppInput
-                label="Težina (kg)"
+                label={t('fields.weight')}
                 type="number"
                 placeholder="78"
                 value={state.weightKg}
                 onChange={(event) => update('weightKg', event.target.value)}
               />
               <AppInput
-                label="Godina rođenja"
+                label={t('fields.birthYear')}
                 type="number"
                 placeholder="1993"
                 value={state.birthYear}
                 onChange={(event) => update('birthYear', event.target.value)}
               />
               <AppSelect
-                label="Pol"
+                label={t('fields.sex')}
                 value={state.sex}
                 onChange={(event) => update('sex', event.target.value as WizardState['sex'])}
               >
                 <option value="">—</option>
-                <option value="male">Muški</option>
-                <option value="female">Ženski</option>
-                <option value="other">Drugo</option>
+                <option value="male">{t('sex.male')}</option>
+                <option value="female">{t('sex.female')}</option>
+                <option value="other">{t('sex.other')}</option>
               </AppSelect>
             </div>
             <div className="space-y-2 rounded-2xl bg-surface-elevated p-4">
               {state.hasRace && state.raceDate && weeksToRace !== null && weeksToRace >= 0 ? (
                 <div>
-                  <p className="section-label">Trka</p>
-                  <p className="text-sm font-medium">{state.raceName || 'Trka bez naziva'}</p>
+                  <p className="section-label">{t('steps.details.race')}</p>
+                  <p className="text-sm font-medium">{state.raceName || t('raceFallback')}</p>
                   <p className="flex items-baseline gap-2">
                     <span className="num text-hero font-bold text-primary-ink">{weeksToRace}</span>
-                    <span className="text-sm text-text-secondary">dana do trke</span>
+                    <span className="text-sm text-text-secondary">{t('daysToRace')}</span>
                   </p>
                 </div>
               ) : (
                 <div>
-                  <p className="section-label">Plan</p>
-                  <p className="text-sm font-medium">Bazni plan · 8 nedelja</p>
+                  <p className="section-label">{t('steps.details.plan')}</p>
+                  <p className="text-sm font-medium">{t('steps.details.basePlan')}</p>
                 </div>
               )}
               <p className="num text-caption text-text-muted">
-                {weeksToRace !== null && weeksToRace >= 0 ? `${Math.ceil(weeksToRace / 7)} nedelja · ` : ''}
-                {state.daysPerWeek} dana nedeljno · dugi trk {DAY_LABELS[state.longRunDay]}
+                {weeksToRace !== null && weeksToRace >= 0
+                  ? `${t('steps.details.summaryWeeks', { weeks: Math.ceil(weeksToRace / 7) })} · `
+                  : ''}
+                {t('steps.details.summaryDays', {
+                  days: state.daysPerWeek,
+                  day: t(`days.${DAY_KEYS[state.longRunDay]}`),
+                })}
                 {preview ? ` · VDOT ${preview.vdot}` : ''}
                 {state.city ? ` · ${state.city}` : ''}
               </p>
@@ -565,7 +450,7 @@ export function OnboardingPage() {
             {willUseBasePlan ? (
               <p className="flex items-start gap-2 rounded-xl bg-warning-soft p-3 text-caption text-warning-ink">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                Bez cilja ili rezultata (ili manje od 12 nedelja do trke) dobijaš bazni plan — samo lagani treninzi.
+                {t('steps.details.baseWarning')}
               </p>
             ) : null}
           </div>
@@ -579,12 +464,12 @@ export function OnboardingPage() {
       <div className="mt-6 flex gap-3">
         {step > 0 ? (
           <AppButton type="button" variant="secondary" onClick={back} className="flex-1">
-            Nazad
+            {t('actions.back')}
           </AppButton>
         ) : null}
         {step < 5 ? (
           <AppButton type="button" onClick={next} className="flex-1">
-            Dalje
+            {t('actions.next')}
           </AppButton>
         ) : (
           <AppButton
@@ -593,7 +478,7 @@ export function OnboardingPage() {
             loading={generatePlan.isPending || updateProfile.isPending}
             className="flex-1"
           >
-            Generiši plan
+            {t('actions.generate')}
           </AppButton>
         )}
       </div>

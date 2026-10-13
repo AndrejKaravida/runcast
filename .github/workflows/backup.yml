@@ -11,26 +11,39 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Check secret
+      - name: Check secrets
         id: check
-        run: echo "ready=${{ secrets.SUPABASE_DB_URL != '' }}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "ready=${{ secrets.SUPABASE_DB_URL != '' }}" >> "$GITHUB_OUTPUT"
+          echo "encrypt=${{ secrets.BACKUP_PASSPHRASE != '' }}" >> "$GITHUB_OUTPUT"
+      - name: Warn missing passphrase
+        if: steps.check.outputs.ready == 'true' && steps.check.outputs.encrypt != 'true'
+        run: echo "::warning::BACKUP_PASSPHRASE is not set - skipping backup so no plaintext dump is uploaded"
       - name: Install postgres client 17
-        if: steps.check.outputs.ready == 'true'
+        if: steps.check.outputs.ready == 'true' && steps.check.outputs.encrypt == 'true'
         run: |
           sudo curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /usr/share/keyrings/pgdg.gpg
           sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           sudo apt-get update && sudo apt-get install -y postgresql-client-17
       - name: Dump database
-        if: steps.check.outputs.ready == 'true'
+        if: steps.check.outputs.ready == 'true' && steps.check.outputs.encrypt == 'true'
         run: |
           pg_dump --version
           pg_dump "$SUPABASE_DB_URL" --schema=public --no-owner --no-privileges -Fc -f runcast-backup.dump
           test -s runcast-backup.dump
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      - name: Encrypt dump
+        if: steps.check.outputs.ready == 'true' && steps.check.outputs.encrypt == 'true'
+        run: |
+          openssl enc -aes-256-cbc -pbkdf2 -iter 100000 -salt -in runcast-backup.dump -out runcast-backup.dump.enc -pass env:BACKUP_PASSPHRASE
+          test -s runcast-backup.dump.enc
+          rm runcast-backup.dump
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
       - uses: actions/upload-artifact@v4
-        if: steps.check.outputs.ready == 'true'
+        if: steps.check.outputs.ready == 'true' && steps.check.outputs.encrypt == 'true'
         with:
           name: runcast-backup
-          path: runcast-backup.dump
+          path: runcast-backup.dump.enc
           retention-days: 90

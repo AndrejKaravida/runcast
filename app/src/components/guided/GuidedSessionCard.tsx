@@ -1,6 +1,7 @@
 import { clsx } from 'clsx';
 import { formatDuration, type GuidedTimeline, type TimelineSegment } from '@runcast/shared';
 import { Droplets, Square, Volume2, VolumeX } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { CueBanner } from '@/components/guided/CueBanner';
 import { formatKm } from '@/components/guided/format';
 import { GuidedControls } from '@/components/guided/GuidedControls';
@@ -53,26 +54,34 @@ export function GuidedSessionCard({
   onFinish,
   onToggleMute,
 }: GuidedSessionCardProps) {
+  const { t } = useTranslation('guided');
   const segmentProgress = segment.durationSec > 0 ? 1 - remainingSec / segment.durationSec : 0;
   const nextSegment = timeline.segments[segment.index + 1] ?? null;
   const paused = phase === 'paused';
-  const gpsText = gpsStatus === 'tracking' ? 'GPS aktivan' : gpsStatus === 'denied' ? 'GPS blokiran' : 'GPS start';
+  const gpsText =
+    gpsStatus === 'tracking'
+      ? t('session.gpsTracking')
+      : gpsStatus === 'denied'
+        ? t('session.gpsDenied')
+        : t('session.gpsStart');
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[560px] flex-col px-4 py-6">
       <div className="flex items-center justify-between gap-3">
         <p className="section-label min-w-0 flex-1 truncate">
-          Korak {segment.index + 1}/{timeline.segments.length}
-          {segment.repeatIndex ? ` · ${segment.repeatIndex}/${segment.repeatTotal}` : ''}
+          {t('session.step', { index: segment.index + 1, total: timeline.segments.length })}
+          {segment.repeatIndex
+            ? t('session.repeatSuffix', { index: segment.repeatIndex, total: segment.repeatTotal })
+            : ''}
         </p>
         <div className="flex shrink-0 items-center gap-1">
-          <AppBadge tone={paused ? 'warning' : 'primary'}>{paused ? 'Pauza' : 'U toku'}</AppBadge>
-          <IconButton data-testid="guided-finish" label="Završi trening" className="h-10 w-10" onClick={onFinish}>
+          <AppBadge tone={paused ? 'warning' : 'primary'}>{t(paused ? 'session.paused' : 'session.running')}</AppBadge>
+          <IconButton data-testid="guided-finish" label={t('session.finish')} className="h-10 w-10" onClick={onFinish}>
             <Square className="h-4 w-4" aria-hidden />
           </IconButton>
           <IconButton
             data-testid="guided-mute"
-            label={muted ? 'Uključi zvuk' : 'Isključi zvuk'}
+            label={t(muted ? 'session.unmute' : 'session.mute')}
             aria-pressed={muted}
             className="h-10 w-10"
             onClick={onToggleMute}
@@ -91,7 +100,10 @@ export function GuidedSessionCard({
               {segment.paceLabel}
               <span className="text-lg font-semibold text-text-secondary"> /km</span>
             </p>
-            <p className="section-label">ciljni tempo{segment.estimated ? ' · procena' : ''}</p>
+            <p className="section-label">
+              {t('session.goalPace')}
+              {segment.estimated ? t('session.estimateSuffix') : ''}
+            </p>
           </>
         ) : (
           <p className="num text-hero font-bold tracking-display">{formatDuration(Math.ceil(remainingSec))}</p>
@@ -110,26 +122,26 @@ export function GuidedSessionCard({
         <ProgressRing value={segmentProgress} size={140} stroke={10} tone={tone === 'neutral' ? 'primary' : tone}>
           <div className="text-center">
             <p className="num text-stat font-semibold">{formatDuration(Math.ceil(remainingSec))}</p>
-            <p className="section-label">do kraja</p>
+            <p className="section-label">{t('session.toEnd')}</p>
           </div>
         </ProgressRing>
       </section>
 
       <div className="mt-5 grid grid-cols-2 gap-2">
         <StatTile
-          label="Ukupno"
+          label={t('session.total')}
           value={<span data-testid="guided-elapsed">{formatDuration(Math.floor(elapsedSec))}</span>}
         />
         <StatTile
-          label="Distanca"
+          label={t('session.distance')}
           value={gpsEnabled ? `${formatKm(gpsDistanceKm)} km` : `${formatKm(timeline.totalDistanceKm)} km`}
         />
-        <StatTile label="Tempo" value={segment.paceLabel ? `${segment.paceLabel} /km` : '—'} />
-        <StatTile label="Preostalo" value={formatDuration(Math.ceil(remainingSec))} />
-        <StatTile label="Korak" value={`${segment.index + 1}/${timeline.segments.length}`} />
+        <StatTile label={t('session.pace')} value={segment.paceLabel ? `${segment.paceLabel} /km` : '—'} />
+        <StatTile label={t('session.remaining')} value={formatDuration(Math.ceil(remainingSec))} />
+        <StatTile label={t('session.stepLabel')} value={`${segment.index + 1}/${timeline.segments.length}`} />
         <StatTile
-          label="Sledeće"
-          value={nextSegment ? nextSegment.label : 'Kraj'}
+          label={t('session.next')}
+          value={nextSegment ? nextSegment.label : t('session.end')}
           valueClassName="text-base text-text-secondary"
         />
       </div>

@@ -1,16 +1,18 @@
 import { clsx } from 'clsx';
 import { BarChart3, CalendarDays, House, Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet } from 'react-router';
 import { ThemeQuickToggle } from '@/components/ui/ThemeToggle';
 
 const tabs = [
-  { to: '/today', label: 'Danas', icon: House },
-  { to: '/plan', label: 'Plan', icon: CalendarDays },
-  { to: '/stats', label: 'Statistika', icon: BarChart3 },
-  { to: '/settings', label: 'Podešavanja', icon: Settings },
+  { to: '/today', labelKey: 'nav.today', icon: House },
+  { to: '/plan', labelKey: 'nav.plan', icon: CalendarDays },
+  { to: '/stats', labelKey: 'nav.stats', icon: BarChart3 },
+  { to: '/settings', labelKey: 'nav.settings', icon: Settings },
 ];
 
 export function TabLayout() {
+  const { t } = useTranslation();
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[720px] flex-col bg-bg">
       <header className="sticky top-0 z-40 bg-bg/85 backdrop-blur-xl backdrop-saturate-150">
@@ -28,7 +30,7 @@ export function TabLayout() {
       <nav className="fixed inset-x-0 bottom-0 z-40 bg-surface/90 backdrop-blur-xl backdrop-saturate-150">
         <div className="pointer-events-none absolute inset-x-0 -top-4 h-4 bg-gradient-to-t from-surface/80 to-transparent" />
         <div className="mx-auto grid max-w-[720px] grid-cols-4 pb-[env(safe-area-inset-bottom)]">
-          {tabs.map(({ to, label, icon: Icon }) => (
+          {tabs.map(({ to, labelKey, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -40,7 +42,7 @@ export function TabLayout() {
               }
             >
               <Icon className="h-5 w-5" aria-hidden />
-              {label}
+              {t(labelKey)}
             </NavLink>
           ))}
         </div>

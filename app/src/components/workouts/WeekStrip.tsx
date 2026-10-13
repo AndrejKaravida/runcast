@@ -1,17 +1,19 @@
 import { clsx } from 'clsx';
 import { Check, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { TONE_DOT_CLASSES, typeTone } from '@/features/workouts/utils';
 import { addDaysIso, startOfWeekIso, todayIso } from '@/lib/dates';
 import type { WorkoutsRow } from '@/types';
 
-const DAY_LABELS = ['pon', 'uto', 'sre', 'čet', 'pet', 'sub', 'ned'];
+const DAY_KEYS = ['days.mon', 'days.tue', 'days.wed', 'days.thu', 'days.fri', 'days.sat', 'days.sun'];
 
 export function WeekStrip({ workouts, today = todayIso() }: { workouts: WorkoutsRow[]; today?: string }) {
+  const { t } = useTranslation('workout');
   const weekStart = startOfWeekIso(today);
   return (
     <div className="grid grid-cols-7 gap-1">
-      {DAY_LABELS.map((label, index) => {
+      {DAY_KEYS.map((dayKey, index) => {
         const date = addDaysIso(weekStart, index);
         const workout = workouts.find((item) => item.workout_date === date);
         const isToday = date === today;
@@ -25,7 +27,7 @@ export function WeekStrip({ workouts, today = todayIso() }: { workouts: Workouts
             )}
           >
             <span className={clsx('text-caption font-medium', isToday ? 'text-primary-ink' : 'text-text-muted')}>
-              {label}
+              {t(dayKey)}
             </span>
             <span className="num text-sm font-semibold">{Number(date.slice(8, 10))}</span>
             {workout ? (

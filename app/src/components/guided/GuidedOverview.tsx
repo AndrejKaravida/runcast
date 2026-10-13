@@ -1,5 +1,6 @@
 import { formatDuration, type GuidedTimeline } from '@runcast/shared';
 import { ArrowLeft, MapPin, Play } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -27,28 +28,31 @@ export function GuidedOverview({
   onStart,
   onToggleGps,
 }: GuidedOverviewProps) {
+  const { t } = useTranslation('guided');
   const paceSegment = timeline.segments.find((segment) => segment.paceLabel);
   const statItems = [
-    { label: 'Trajanje', value: formatDuration(timeline.totalDurationSec) },
-    ...(timeline.totalDistanceKm > 0 ? [{ label: 'Distanca', value: `${formatKm(timeline.totalDistanceKm)} km` }] : []),
-    ...(paceSegment?.paceLabel ? [{ label: 'Tempo', value: `${paceSegment.paceLabel} /km` }] : []),
+    { label: t('stats.duration'), value: formatDuration(timeline.totalDurationSec) },
+    ...(timeline.totalDistanceKm > 0
+      ? [{ label: t('stats.distance'), value: `${formatKm(timeline.totalDistanceKm)} km` }]
+      : []),
+    ...(paceSegment?.paceLabel ? [{ label: t('stats.pace'), value: `${paceSegment.paceLabel} /km` }] : []),
   ];
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[560px] flex-col px-4 py-6">
       <div className="flex items-center justify-between">
         <AppButton variant="ghost" size="sm" className="-ml-2 w-auto" onClick={onBack}>
-          <ArrowLeft className="h-4 w-4" aria-hidden /> Nazad
+          <ArrowLeft className="h-4 w-4" aria-hidden /> {t('common:actions.back')}
         </AppButton>
-        {timeline.estimatedPaces ? <AppBadge tone="warning">procena tempa</AppBadge> : null}
+        {timeline.estimatedPaces ? <AppBadge tone="warning">{t('overview.estimate')}</AppBadge> : null}
       </div>
 
       <div className="mt-2 space-y-2">
-        <p className="section-label">Vođeno trčanje</p>
+        <p className="section-label">{t('overview.title')}</p>
         <h1 className="text-2xl font-semibold">{title}</h1>
         <p className="text-sm text-text-secondary">
-          {timeline.segments.length} koraka
-          {speechAvailable ? '' : ' · bez glasovnog navođenja'}
+          {t('overview.steps', { count: timeline.segments.length })}
+          {speechAvailable ? '' : t('overview.noSpeechSuffix')}
         </p>
       </div>
 
@@ -56,7 +60,7 @@ export function GuidedOverview({
 
       <section className="mt-5 space-y-1">
         <SectionHeader
-          label="Koraci"
+          label={t('overview.stepsHeader')}
           action={<span className="num text-caption text-text-muted">{formatDuration(timeline.totalDurationSec)}</span>}
         />
         <ol className="divide-y divide-border">
@@ -81,17 +85,15 @@ export function GuidedOverview({
 
       {!speechAvailable || !wakeLockSupported ? (
         <p className="mt-3 text-caption text-text-muted">
-          {!speechAvailable
-            ? 'Glasovno navođenje nije dostupno na ovom uređaju — koriste se zvuk i vizuelni prikaz.'
-            : ''}
+          {!speechAvailable ? t('overview.speechUnavailable') : ''}
           {!speechAvailable && !wakeLockSupported ? ' ' : ''}
-          {!wakeLockSupported ? 'Drži ekran uključenim — zaključavanje prekida zvuk.' : ''}
+          {!wakeLockSupported ? t('overview.wakeLock') : ''}
         </p>
       ) : null}
 
       <div className="sticky bottom-0 mt-6 space-y-2 bg-bg/90 pb-2 pt-3 backdrop-blur-xl">
         <AppButton data-testid="guided-start" size="lg" className="w-full" onClick={onStart}>
-          <Play className="h-5 w-5" aria-hidden /> Počni vođeno trčanje
+          <Play className="h-5 w-5" aria-hidden /> {t('overview.start')}
         </AppButton>
         <AppButton
           data-testid="guided-gps"
@@ -100,7 +102,7 @@ export function GuidedOverview({
           aria-pressed={gpsEnabled}
           onClick={onToggleGps}
         >
-          <MapPin className="h-4 w-4" aria-hidden /> GPS {gpsEnabled ? 'uključen' : 'isključen'}
+          <MapPin className="h-4 w-4" aria-hidden /> {t(gpsEnabled ? 'overview.gpsOn' : 'overview.gpsOff')}
         </AppButton>
       </div>
     </div>

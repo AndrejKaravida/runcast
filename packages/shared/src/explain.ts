@@ -1,4 +1,4 @@
-import type { PaceZone, PlanPaces, PlanPhase, WorkoutType } from './types';
+import type { LocalizedText, PaceZone, PlanPaces, PlanPhase, WorkoutType } from './types';
 import { formatPace } from './vdot';
 
 export interface ExplainInput {
@@ -13,78 +13,85 @@ export interface ExplainOptions {
 }
 
 export interface WorkoutExplanation {
-  why: string;
-  how: string[];
-  mistake: string;
-  effort: string;
+  why: LocalizedText;
+  how: LocalizedText[];
+  mistake: LocalizedText;
+  effortLabel: LocalizedText;
+  effortCue: LocalizedText;
 }
 
-const TYPE_CONTENT: Record<WorkoutType, WorkoutExplanation> = {
+interface TypeContent {
+  why: LocalizedText;
+  how: [LocalizedText, LocalizedText];
+  mistake: LocalizedText;
+  effortLabel: LocalizedText;
+  effortCue: LocalizedText;
+}
+
+function typeKey(type: WorkoutType, part: string): string {
+  return `content:explain.types.${type}.${part}`;
+}
+
+const TYPE_CONTENT: Record<WorkoutType, TypeContent> = {
   EASY: {
-    why: 'Lagano trčanje gradi aerobnu bazu i oporavlja te između teških treninga — zato je sporo namerno.',
-    how: ['Drži razgovorni tempo cele deonice.', 'Ako uletiš brže, uspori: plafon je brzina, ne cilj.'],
-    mistake: '„Laki" dan na umerenom tempu (RPE 6) — tada nijedan dan nije ni lak ni težak.',
-    effort: 'RPE 3–4 — pričaš u punim rečenicama bez gubljenja daha.',
+    why: { key: typeKey('EASY', 'why') },
+    how: [{ key: typeKey('EASY', 'how.0') }, { key: typeKey('EASY', 'how.1') }],
+    mistake: { key: typeKey('EASY', 'mistake') },
+    effortLabel: { key: typeKey('EASY', 'effortLabel') },
+    effortCue: { key: typeKey('EASY', 'effortCue') },
   },
   LONG: {
-    why: 'Gradi izdržljivost, ekonomičnost i mentalnu čvrstinu za završnicu trke.',
-    how: ['Kreni mirno, prvih 5 km najsporije.', 'Hidriraj se i testiraj opremu kao na trci.'],
-    mistake: 'Prebrz početak te iscedi pred kraj — trk treba da ti da samopouzdanje, ne da te slomi.',
-    effort: 'RPE 4–5 (kraj do 6) — pričaš u rečenicama, dišeš kontrolisano.',
+    why: { key: typeKey('LONG', 'why') },
+    how: [{ key: typeKey('LONG', 'how.0') }, { key: typeKey('LONG', 'how.1') }],
+    mistake: { key: typeKey('LONG', 'mistake') },
+    effortLabel: { key: typeKey('LONG', 'effortLabel') },
+    effortCue: { key: typeKey('LONG', 'effortCue') },
   },
   TEMPO: {
-    why: 'Tempo rad podiže laktatnu barijeru — tempo koji držiš ~1 h vremenom postaje lakši.',
-    how: ['Zagrevanje 2 km pa tempo blok ravnomerno, bez sursa.', 'Ako pređeš u govor u jednom slovu, preterao si.'],
-    mistake: 'Tempo na 5 km brzini nije tempo — postaje VO2max sesija i traži previše oporavka.',
-    effort: 'RPE 6–7 — komotno teško, govoriš u kratkim frazama.',
+    why: { key: typeKey('TEMPO', 'why') },
+    how: [{ key: typeKey('TEMPO', 'how.0') }, { key: typeKey('TEMPO', 'how.1') }],
+    mistake: { key: typeKey('TEMPO', 'mistake') },
+    effortLabel: { key: typeKey('TEMPO', 'effortLabel') },
+    effortCue: { key: typeKey('TEMPO', 'effortCue') },
   },
   INTERVALS: {
-    why: 'Intervali podižu VO2max — plafon aerobne snage i brzinu koju možeš da održiš.',
-    how: ['Prva 1–2 ponavljanja mirnije, poslednje jako kao prvo.', 'Oporavak: lagan trk ili hod, smiri disanje.'],
-    mistake: 'Prejak start → besmislen umor umesto produktivnog; rezultati opadaju iz repa u rep.',
-    effort: 'RPE 8–9 — teško ali kontrolisano, tehnika se ne raspada.',
+    why: { key: typeKey('INTERVALS', 'why') },
+    how: [{ key: typeKey('INTERVALS', 'how.0') }, { key: typeKey('INTERVALS', 'how.1') }],
+    mistake: { key: typeKey('INTERVALS', 'mistake') },
+    effortLabel: { key: typeKey('INTERVALS', 'effortLabel') },
+    effortCue: { key: typeKey('INTERVALS', 'effortCue') },
   },
   REPETITIONS: {
-    why: 'Repeticije ne grade izdržljivost — bruse mehaniku, korak i ekonomičnost trčanja.',
-    how: ['Svako ponavljanje brzo i opušteno, bez grča.', 'Pun oporavak pre sledećeg (hod ili lagan trk).'],
-    mistake: 'R tempo kao interval: bez punog oporavka mehanika se kvari i nema stimulusa za brzinu.',
-    effort: 'RPE 9 — kratko i čisto; kad tehnika padne, prekini seriju.',
+    why: { key: typeKey('REPETITIONS', 'why') },
+    how: [{ key: typeKey('REPETITIONS', 'how.0') }, { key: typeKey('REPETITIONS', 'how.1') }],
+    mistake: { key: typeKey('REPETITIONS', 'mistake') },
+    effortLabel: { key: typeKey('REPETITIONS', 'effortLabel') },
+    effortCue: { key: typeKey('REPETITIONS', 'effortCue') },
   },
   REST: {
-    why: 'Odmor nije pauza od treninga — adaptacija se dešava dok se telo oporavlja.',
-    how: ['Šetnja, mobilnost ili lagano istezanje 15–20 min.', 'Prioritet: san 7–9 h i normalna ishrana.'],
-    mistake: 'Popunjavanje dana junk kilometrima ili osećaj krivice — odmor je deo plana.',
-    effort: 'RPE 0–2 — danas ne treniraš, danas se gradiš.',
+    why: { key: typeKey('REST', 'why') },
+    how: [{ key: typeKey('REST', 'how.0') }, { key: typeKey('REST', 'how.1') }],
+    mistake: { key: typeKey('REST', 'mistake') },
+    effortLabel: { key: typeKey('REST', 'effortLabel') },
+    effortCue: { key: typeKey('REST', 'effortCue') },
   },
   RACE: {
-    why: 'Dan za koji je ceo plan rađen — provera forme, taktike i glave.',
-    how: ['Prvu polovinu kontrolisano, bez jurnjave za tuđim tempom.', 'Drži se svog plana tempa do kraja.'],
-    mistake: 'Prebrz start sagoreva energiju — najčešći razlog pada u drugoj polovini.',
-    effort: 'RPE 8–10 — jako, ali po planu; poslednja trećina sme da boli.',
+    why: { key: typeKey('RACE', 'why') },
+    how: [{ key: typeKey('RACE', 'how.0') }, { key: typeKey('RACE', 'how.1') }],
+    mistake: { key: typeKey('RACE', 'mistake') },
+    effortLabel: { key: typeKey('RACE', 'effortLabel') },
+    effortCue: { key: typeKey('RACE', 'effortCue') },
   },
   STRENGTH: {
-    why: 'Snaga stabilizuje zglobove i ispravlja disbalanse — manje povreda i ekonomičniji trk (+8–12% za 1–2 sesije nedeljno).',
-    how: [
-      'Kontrolisana forma iznad težine; zadnja 1–2 ponavljanja izazovna ali čista.',
-      'Težak rad nogu ne ostavljaj za dan pre ključne trčne sesije.',
-    ],
-    mistake: 'Preteško i preblizu kvalitetnog trčanja — snaga tada krade oporavak umesto da ga podrži.',
-    effort: 'RPE 6–8 — osećaš rad mišića, forma ostaje čista.',
+    why: { key: typeKey('STRENGTH', 'why') },
+    how: [{ key: typeKey('STRENGTH', 'how.0') }, { key: typeKey('STRENGTH', 'how.1') }],
+    mistake: { key: typeKey('STRENGTH', 'mistake') },
+    effortLabel: { key: typeKey('STRENGTH', 'effortLabel') },
+    effortCue: { key: typeKey('STRENGTH', 'effortCue') },
   },
 };
 
-const PHASE_NOTE: Record<PlanPhase, string> = {
-  BASE: 'Sada gradiš bazu i naviku — volumen raste, intenzitet ostaje nizak.',
-  BUILD: 'Faza gradnje: na bazu dodajemo kvalitet i držimo rast pod kontrolom.',
-  PEAK: 'Vrhunac pripreme: najzahtevniji rad, umor je očekivan i dozvoljen.',
-  TAPER: 'Taper: volumen opada da bi na start stigao svež.',
-  RACE: 'Sve je podređeno trci ove nedelje — dan koji je platio sav rad.',
-};
-
-const EFFORT_NOTE: Partial<Record<PlanPhase, string>> = {
-  TAPER: ' Drži donji kraj raspona.',
-  RACE: ' Danas je dozvoljeno sve.',
-};
+const EFFORT_SUFFIX_PHASES: ReadonlySet<PlanPhase> = new Set(['TAPER', 'RACE']);
 
 const ZONE_FIELDS: Record<Exclude<PaceZone, 'E'>, keyof PlanPaces> = {
   M: 'marathonSecPerKm',
@@ -93,10 +100,6 @@ const ZONE_FIELDS: Record<Exclude<PaceZone, 'E'>, keyof PlanPaces> = {
   R: 'repetitionSecPerKm',
 };
 
-function fmtKm(value: number): string {
-  return Number.isInteger(value) ? String(value) : value.toFixed(1).replace('.', ',');
-}
-
 function paceFor(zone: PaceZone, paces: PlanPaces): string {
   if (zone === 'E') return `${formatPace(paces.easyFastSecPerKm)}–${formatPace(paces.easySlowSecPerKm)}`;
   return formatPace(paces[ZONE_FIELDS[zone]]);
@@ -104,15 +107,29 @@ function paceFor(zone: PaceZone, paces: PlanPaces): string {
 
 export function describeWorkout(input: ExplainInput, options: ExplainOptions = {}): WorkoutExplanation {
   const base = TYPE_CONTENT[input.type];
-  const prefix = input.type === 'LONG' && input.distanceKm > 0 ? `Dugi trk ${fmtKm(input.distanceKm)} km — ` : '';
+  const useLongDistance = input.type === 'LONG' && input.distanceKm > 0;
+  const why: LocalizedText = useLongDistance
+    ? { key: typeKey('LONG', 'whyWithDistance'), params: { km: input.distanceKm } }
+    : base.why;
   const how = [...base.how];
   if (input.paceZone && options.paces) {
-    how[0] = `${how[0]} (${input.paceZone} tempo ~${paceFor(input.paceZone, options.paces)} /km)`;
+    how[0] = {
+      ...how[0],
+      suffix: {
+        key: 'content:explain.paceSuffix',
+        params: { zone: input.paceZone, pace: paceFor(input.paceZone, options.paces) },
+      },
+    };
   }
+  const effortCue: LocalizedText = EFFORT_SUFFIX_PHASES.has(input.phase)
+    ? { ...base.effortCue, suffix: { key: `content:explain.effortSuffix.${input.phase}` } }
+    : base.effortCue;
+
   return {
-    why: `${prefix}${base.why} ${PHASE_NOTE[input.phase]}`,
+    why: { ...why, suffix: { key: `content:explain.phase.${input.phase}` } },
     how,
     mistake: base.mistake,
-    effort: `${base.effort}${EFFORT_NOTE[input.phase] ?? ''}`,
+    effortLabel: base.effortLabel,
+    effortCue,
   };
 }

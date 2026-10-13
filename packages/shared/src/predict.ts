@@ -7,7 +7,7 @@ const MARATHON_KM = 42.195;
 const MARATHON_SEARCH_MIN_SEC = 1800;
 const MARATHON_SEARCH_MAX_SEC = 28800;
 const RIEGEL_EXPONENT = 1.06;
-const DISTANCE_TOLERANCE = 0.02;
+const DISTANCE_TOLERANCE = 0.004;
 const MIN_DISTANCE_KM = 3;
 
 export interface RacePrediction {
@@ -16,21 +16,27 @@ export interface RacePrediction {
   paceSecPerKm: number;
 }
 
-export function predictRaceTimes(vdot: number, distancesKm: readonly number[] = STANDARD_RACE_KM): RacePrediction[] {
+export function predictRaceTimes(
+  vdot: number,
+  distancesKm: readonly number[] = STANDARD_RACE_KM,
+): RacePrediction[] | null {
   if (!Number.isFinite(vdot)) throw new Error('vdot must be finite');
-  return distancesKm.map((distanceKm) => {
+  const predictions: RacePrediction[] = [];
+  for (const distanceKm of distancesKm) {
     if (!Number.isFinite(distanceKm) || distanceKm <= 0) throw new Error('distance must be positive');
     const scale = distanceKm / MARATHON_KM;
     let low = MARATHON_SEARCH_MIN_SEC * scale;
     let high = MARATHON_SEARCH_MAX_SEC * scale;
+    if (vdot < vdotFromPerformance(distanceKm, high) || vdot > vdotFromPerformance(distanceKm, low)) return null;
     while (high - low > 1) {
       const mid = (low + high) / 2;
       if (vdotFromPerformance(distanceKm, mid) > vdot) low = mid;
       else high = mid;
     }
     const timeSec = Math.round((low + high) / 2);
-    return { distanceKm, timeSec, paceSecPerKm: Math.round(timeSec / distanceKm) };
-  });
+    predictions.push({ distanceKm, timeSec, paceSecPerKm: Math.round(timeSec / distanceKm) });
+  }
+  return predictions;
 }
 
 export function riegelEquivalent(timeSec: number, fromKm: number, toKm: number): number {

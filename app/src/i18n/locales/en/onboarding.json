@@ -1,0 +1,123 @@
+{
+  "header": {
+    "step": "Step {{step}} / 6",
+    "tagline": "Building your plan"
+  },
+  "steps": {
+    "race": {
+      "title": "What race are you training for?",
+      "hasRace": "I have a race",
+      "noRace": "Not yet",
+      "noRaceText": "Without a race you get a base plan for the next 8 weeks — easy running with no target paces. You can add a race later in settings."
+    },
+    "goal": {
+      "title": "What are you aiming for?",
+      "goalTimeHint": "E.g. a marathon goal of 3 hours 45 minutes",
+      "or": "or",
+      "ambitious": "The goal is ambitious for your current fitness (predicted {{time}}).",
+      "realistic": "The goal is realistic for your current fitness (predicted {{time}}).",
+      "noResult": "Without a result you get a base plan: easy running until we find your form."
+    },
+    "experience": {
+      "title": "Experience and current mileage",
+      "volume": "How many kilometres do you run per week?"
+    },
+    "schedule": {
+      "title": "When do you run?",
+      "daysLabel": "How many days per week",
+      "longRunNote": "The long run anchors your week — the other days are arranged around it.",
+      "windowNote": "For mornings we check the forecast for 06–09 h, for evenings 17–21 h."
+    },
+    "location": {
+      "title": "Where do you run?"
+    },
+    "details": {
+      "title": "Just a few more details",
+      "race": "Race",
+      "plan": "Plan",
+      "basePlan": "Base plan · 8 weeks",
+      "summaryWeeks": "{{weeks}} weeks",
+      "summaryDays": "{{days}} days per week · long run {{day}}",
+      "baseWarning": "Without a goal or a result (or with less than 12 weeks to the race) you get a base plan — easy workouts only."
+    }
+  },
+  "fields": {
+    "raceName": "Race name (optional)",
+    "raceNamePlaceholder": "Belgrade Marathon",
+    "raceDate": "Race date",
+    "distance": "Distance",
+    "goalTime": "Goal time (h:mm:ss, optional)",
+    "recentRace": "Recent race",
+    "recentTime": "Time (mm:ss)",
+    "experience": "Experience",
+    "longRunDay": "Long run day",
+    "runWindow": "Time of day for training",
+    "weatherRefresh": "Forecast refresh",
+    "height": "Height (cm)",
+    "weight": "Weight (kg)",
+    "birthYear": "Birth year",
+    "sex": "Sex"
+  },
+  "distance": {
+    "marathon": "Marathon",
+    "half": "Half marathon",
+    "ten": "10 km",
+    "five": "5 km"
+  },
+  "volume": {
+    "lt20": "up to 20 km",
+    "from20to40": "20–40 km",
+    "from40to60": "40–60 km",
+    "over60": "over 60 km"
+  },
+  "experience": {
+    "first": "First time",
+    "experienced": "Experienced"
+  },
+  "window": {
+    "morning": "Morning",
+    "evening": "Evening",
+    "flexible": "Flexible"
+  },
+  "sex": {
+    "male": "Male",
+    "female": "Female",
+    "other": "Other"
+  },
+  "onOpen": "Only when opened",
+  "raceFallback": "Unnamed race",
+  "daysToRace": "days to the race",
+  "days": {
+    "mon": "Monday",
+    "tue": "Tuesday",
+    "wed": "Wednesday",
+    "thu": "Thursday",
+    "fri": "Friday",
+    "sat": "Saturday",
+    "sun": "Sunday",
+    "short": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    }
+  },
+  "actions": {
+    "back": "Back",
+    "next": "Next",
+    "generate": "Generate plan"
+  },
+  "errors": {
+    "raceDateRequired": "Pick a race date",
+    "raceDateFuture": "Race date must be in the future",
+    "goalTimeFormat": "Enter the goal time as h:mm:ss (e.g. 3:45:00)",
+    "recentTimeRequired": "Enter your recent race time",
+    "recentTimeFormat": "Enter the race time as mm:ss (e.g. 25:30)",
+    "recentDistanceRequired": "Pick your recent race distance",
+    "cityRequired": "Pick a city from the search results",
+    "generateFailed": "Plan generation failed — please try again"
+  }
+}

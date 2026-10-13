@@ -1,0 +1,88 @@
+{
+  "summary": {
+    "label": "Total distance",
+    "planned": "of {{km}} km planned to date"
+  },
+  "empty": {
+    "title": "Stats are waiting for your first workout",
+    "description": "Let's build a plan — the numbers fill in as you run.",
+    "action": "Open settings"
+  },
+  "row": {
+    "completion": "Completion",
+    "streak": "Day streak",
+    "race": "To race"
+  },
+  "weekly": {
+    "title": "Weekly kilometres",
+    "tooltip": "{{done}} of {{planned}} km",
+    "planned": "planned",
+    "done": "done",
+    "noDone": "No completed workouts yet — the bars fill in as you log sessions.",
+    "description": "How much of the plan you've run — week by week."
+  },
+  "recent": {
+    "title": "Recently logged",
+    "emptyTitle": "Your first workout is waiting",
+    "emptyDescription": "When you're ready, log a workout and the numbers fill in on their own.",
+    "fallback": "Workout"
+  },
+  "coach": {
+    "title": "Last week",
+    "planned": "Planned",
+    "done": "Done",
+    "longest": "Longest run",
+    "adherence": "Completed",
+    "sessionsOne": "{{count}} session",
+    "sessionsMany": "{{count}} sessions",
+    "underControl": "You've got everything under control — just keep going.",
+    "weekAdjusted": "The week starting {{day}}.{{month}}. has been adjusted.",
+    "applyFailed": "It didn't work — try again.",
+    "actions": {
+      "missedRuns": "Ease next week by 20%",
+      "highRpe": "Ease by 10%",
+      "rpeDrift": "No change",
+      "longRunMissed": "No change",
+      "readyToBuild": "Add 10%"
+    },
+    "tones": {
+      "positive": "Progress",
+      "warning": "Heads up",
+      "neutral": "Info"
+    }
+  },
+  "predictor": {
+    "title": "Race prediction",
+    "empty": "Add a recent race or a goal — I'll show your prediction.",
+    "outOfRange": "The result is below the VDOT model range — prediction is not reliable.",
+    "yourRace": "Your race",
+    "goalNote": "Based on your goal pace — it reflects the goal, not your current fitness.",
+    "anchorNote": "Based on a result: {{distance}} {{time}}.",
+    "method": "Estimate using the Daniels VDOT model — error grows with the distance difference (±2–4%).",
+    "benchmarkCta": "Run a benchmark"
+  },
+  "distance": {
+    "half": "Half marathon",
+    "marathon": "Marathon"
+  },
+  "pb": {
+    "title": "Personal bests",
+    "emptyTitle": "No records yet",
+    "emptyDescription": "Log a 5, 10 or 21 km run — the first record is always the sweetest.",
+    "footer": "Automatic from your logged workouts (±0.4% tolerance)."
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "description": "Week by week — who has run the most.",
+    "you": "You",
+    "rank": "You're #{{rank}} this week.",
+    "noKm": "No kilometres this week yet — be the first to run.",
+    "notPublic": "Turn on your public profile in settings to see your rank.",
+    "anonymous": "Runner",
+    "emptyTitle": "The leaderboard is still empty",
+    "emptyDescription": "Turn on your public profile and be first on the list.",
+    "emptyAction": "Open settings",
+    "sessionsOne": "{{count}} session",
+    "sessionsMany": "{{count}} sessions"
+  }
+}

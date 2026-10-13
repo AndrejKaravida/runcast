@@ -1,0 +1,61 @@
+{
+  "nav": {
+    "today": "Danas",
+    "plan": "Plan",
+    "stats": "Statistika",
+    "settings": "Podešavanja"
+  },
+  "actions": {
+    "cancel": "Otkaži",
+    "close": "Zatvori",
+    "retry": "Pokušaj ponovo",
+    "back": "Nazad",
+    "next": "Dalje",
+    "save": "Sačuvaj"
+  },
+  "type": {
+    "easy": "Lagano",
+    "long": "Dugi trk",
+    "tempo": "Tempo",
+    "intervals": "Intervali",
+    "repetitions": "Repeticije",
+    "rest": "Odmor",
+    "race": "Trka",
+    "strength": "Snaga"
+  },
+  "stats": {
+    "distance": "Distanca",
+    "duration": "Trajanje",
+    "pace": "Tempo",
+    "steps": "Koraka"
+  },
+  "status": {
+    "done": "Urađeno",
+    "skipped": "Preskočeno"
+  },
+  "loading": "Učitavanje",
+  "queryError": {
+    "title": "Ne mogu da učitam podatke",
+    "message": "Veza je trenutno slaba. Proveri internet i pokušaj ponovo."
+  },
+  "theme": {
+    "system": "Sistem",
+    "light": "Svetla",
+    "dark": "Tamna",
+    "toLight": "Uključi svetlu temu",
+    "toDark": "Uključi tamnu temu"
+  },
+  "city": {
+    "label": "Grad",
+    "placeholder": "Novi Sad",
+    "search": "Traži",
+    "tooShort": "Ukucaj bar 2 znaka naziva grada",
+    "noResults": "Nema rezultata — probaj drugi naziv",
+    "searchFailed": "Pretraga trenutno ne radi — probaj kasnije"
+  },
+  "notFound": {
+    "text": "Ova stranica ne postoji.",
+    "back": "Nazad na Danas"
+  },
+  "avatar": "Avatar"
+}

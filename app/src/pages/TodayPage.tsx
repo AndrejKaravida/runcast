@@ -5,6 +5,7 @@ import {
   isGuidedRunType,
   pickSwapCandidate,
   runWindowHours,
+  weeklyChallenge,
   type PlanPaces,
   type RunWindow,
   type WorkoutStatus,
@@ -12,7 +13,9 @@ import {
 } from '@runcast/shared';
 import { clsx } from 'clsx';
 import { ArrowRight, CalendarDays, CheckCircle2, Flame } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { AchievementToast } from '@/components/achievements/AchievementToast';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
@@ -30,6 +33,7 @@ import { PaceZoneBadge } from '@/components/workouts/PaceZoneBadge';
 import { RecentActivityCard } from '@/components/workouts/RecentActivityCard';
 import { WeekStrip } from '@/components/workouts/WeekStrip';
 import { WorkoutTypeIcon } from '@/components/workouts/WorkoutTypeIcon';
+import { useAchievementCelebration } from '@/features/achievements/seen';
 import { useCompleteWorkout, useRunLogs } from '@/features/logs/queries';
 import { nextWorkout, runStreak, weekProgress } from '@/features/plans/progress';
 import { useActivePlan, useSwapWorkouts, useWorkoutsRange } from '@/features/plans/queries';
@@ -53,6 +57,7 @@ import {
   startOfWeekIso,
   todayIso,
 } from '@/lib/dates';
+import { workoutTitle } from '@/lib/workout-title';
 
 const verdictToneClasses = {
   rain: 'border-rain-ink bg-rain-soft',
@@ -60,11 +65,11 @@ const verdictToneClasses = {
   danger: 'border-danger-ink bg-danger-soft',
 } as const;
 
-function greeting(): string {
+function greetingKey(): string {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Dobro jutro';
-  if (hour < 18) return 'Dobar dan';
-  return 'Dobro veče';
+  if (hour < 12) return 'greeting.morning';
+  if (hour < 18) return 'greeting.afternoon';
+  return 'greeting.evening';
 }
 
 function streakClasses(streak: number): string {
@@ -74,20 +79,30 @@ function streakClasses(streak: number): string {
 }
 
 export function TodayPage() {
+  const { t } = useTranslation('today');
   const { data: profile } = useProfile();
   const { data: plan, isLoading: planLoading, isError: planError, refetch: refetchPlan } = useActivePlan();
   const today = todayIso();
-  const { data: weekWorkouts = [], isLoading: workoutsLoading } = useWorkoutsRange(
-    startOfWeekIso(today),
-    endOfWeekIso(today),
-  );
-  const { data: planWorkouts = [] } = useWorkoutsRange(plan?.start_date ?? today, plan?.race_date ?? today);
+  const {
+    data: weekWorkouts = [],
+    isLoading: workoutsLoading,
+    isError: weekError,
+    refetch: refetchWeek,
+  } = useWorkoutsRange(startOfWeekIso(today), endOfWeekIso(today));
+  const {
+    data: planWorkouts = [],
+    isError: planRangeError,
+    refetch: refetchPlanRange,
+  } = useWorkoutsRange(plan?.start_date ?? today, plan?.race_date ?? today);
   const { data: logs = [] } = useRunLogs();
   const weather = useWeather();
   const swapWorkouts = useSwapWorkouts();
   const completeWorkout = useCompleteWorkout();
+  const { achievement, dismiss } = useAchievementCelebration(planWorkouts, logs, profile);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
+  const [swapError, setSwapError] = useState<string | null>(null);
+  const [completeError, setCompleteError] = useState<string | null>(null);
 
   const todayWorkout = weekWorkouts.find((workout) => workout.workout_date === today) ?? null;
   const runWindow: RunWindow = (profile?.run_window as RunWindow | undefined) ?? 'morning';
@@ -127,6 +142,23 @@ export function TodayPage() {
   const week = useMemo(() => weekProgress(weekWorkouts), [weekWorkouts]);
   const streak = useMemo(() => runStreak(planWorkouts, today), [planWorkouts, today]);
   const upcoming = useMemo(() => nextWorkout(planWorkouts, today), [planWorkouts, today]);
+  const challenge = useMemo(
+    () =>
+      plan
+        ? weeklyChallenge(
+            { start_date: plan.start_date, race_date: plan.race_date },
+            weekWorkouts.map((workout) => ({
+              id: workout.id,
+              workout_date: workout.workout_date,
+              type: workout.type as WorkoutType,
+              status: workout.status as WorkoutStatus,
+              distance_km: workout.distance_km,
+            })),
+            today,
+          )
+        : null,
+    [plan, weekWorkouts, today],
+  );
 
   if (planLoading || workoutsLoading) {
     return (
@@ -139,14 +171,16 @@ export function TodayPage() {
 
   if (planError) return <QueryError onRetry={() => void refetchPlan()} />;
 
+  if (weekError) return <QueryError onRetry={() => void refetchWeek()} />;
+
   if (!plan) {
     return (
       <EmptyState
-        title="Još nemamo plan"
-        description="Hajde da napravimo tvoj plan — trka, tempo i dani koje imaš."
+        title={t('empty.title')}
+        description={t('empty.description')}
         action={
           <Link to="/settings">
-            <AppButton size="sm">Otvori podešavanja</AppButton>
+            <AppButton size="sm">{t('empty.action')}</AppButton>
           </Link>
         }
       />
@@ -167,21 +201,21 @@ export function TodayPage() {
     upcoming && (!todayWorkout || todayWorkout.type === 'REST' || todayWorkout.status !== 'PLANNED'),
   );
   const firstName = profile?.display_name?.trim().split(/\s+/)[0] ?? null;
-  const stats = todayWorkout ? heroStats(todayWorkout, (plan.paces ?? null) as unknown as PlanPaces | null) : [];
+  const stats = todayWorkout ? heroStats(t, todayWorkout, (plan.paces ?? null) as unknown as PlanPaces | null) : [];
 
   const raceChipClickable = Boolean(raceInfo && daysToRace !== null && daysToRace >= 0);
   const raceChipContent = raceInfo ? (
     <>
-      <p className="section-label">Ciljna trka</p>
-      <p className="text-sm font-medium">{raceInfo.name ?? 'Trka bez naziva'}</p>
+      <p className="section-label">{t('race.goal')}</p>
+      <p className="text-sm font-medium">{raceInfo.name ?? t('race.untitled')}</p>
       {daysToRace !== null && daysToRace >= 0 ? (
         <p className="flex items-baseline gap-2">
           <span className="num value-swap text-hero font-bold text-primary-ink">{daysToRace}</span>
-          <span className="text-sm text-text-secondary">dana do trke</span>
+          <span className="text-sm text-text-secondary">{t('race.daysTo')}</span>
         </p>
       ) : (
         <Link to="/settings" className="block text-sm font-medium text-primary-ink hover:text-primary-ink-hover">
-          Trka je prošla — napravi novi plan
+          {t('race.passed')}
         </Link>
       )}
       <p className="num text-caption text-text-muted">
@@ -194,25 +228,41 @@ export function TodayPage() {
             style={{ width: `${Math.min(100, (planWeek / plan.weeks) * 100)}%` }}
           />
         </div>
-        <p className="num text-caption text-text-muted">
-          Nedelja {planWeek} / {plan.weeks}
-        </p>
+        <p className="num text-caption text-text-muted">{t('plan.week', { week: planWeek, weeks: plan.weeks })}</p>
       </div>
     </>
   ) : (
     <>
-      <p className="section-label">Plan</p>
-      <p className="num text-stat font-semibold">
-        Nedelja {planWeek} / {plan.weeks}
-      </p>
+      <p className="section-label">{t('plan.label')}</p>
+      <p className="num text-stat font-semibold">{t('plan.week', { week: planWeek, weeks: plan.weeks })}</p>
     </>
   );
+
+  async function handleSwap() {
+    if (!todayWorkout || !candidate) return;
+    try {
+      setSwapError(null);
+      await swapWorkouts.mutateAsync({ first: todayWorkout, second: candidate });
+    } catch {
+      setSwapError(t('verdict.swapError'));
+    }
+  }
+
+  async function handleComplete() {
+    if (!todayWorkout) return;
+    try {
+      setCompleteError(null);
+      await completeWorkout.mutateAsync(todayWorkout.id);
+    } catch {
+      setCompleteError(t('actions.completeError'));
+    }
+  }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <p className="min-w-0 truncate text-lg font-semibold">
-          {greeting()}
+          {t(greetingKey())}
           {firstName ? `, ${firstName}` : ''}
         </p>
         <span
@@ -223,7 +273,7 @@ export function TodayPage() {
         >
           <Flame className="h-4 w-4" aria-hidden />
           <span className="num font-semibold">{streak}</span>
-          <span className="whitespace-nowrap">dana u nizu</span>
+          <span className="whitespace-nowrap">{t('streak')}</span>
         </span>
       </div>
 
@@ -236,24 +286,26 @@ export function TodayPage() {
                 type={todayWorkout.type}
                 className={clsx('h-4 w-4 shrink-0', TONE_TEXT_CLASSES[typeTone(todayWorkout.type)])}
               />
-              <span className="truncate">Danas · {formatDateLong(today)}</span>
+              <span className="truncate">
+                {t('label')} · {formatDateLong(today)}
+              </span>
             </p>
             {todayWorkout.status !== 'PLANNED' ? (
               <AppBadge tone={statusTone(todayWorkout.status)}>
-                {todayWorkout.status === 'DONE' ? 'Urađeno' : 'Preskočeno'}
+                {todayWorkout.status === 'DONE' ? t('status.done') : t('status.skipped')}
               </AppBadge>
             ) : null}
           </div>
 
           <div className="flex items-start justify-between gap-3">
             <p data-testid="today-workout-title" className="text-2xl font-semibold tracking-display">
-              {todayWorkout.title}
+              {workoutTitle(t, todayWorkout)}
             </p>
             <PaceZoneBadge zone={todayWorkout.pace_zone} />
           </div>
 
           <p className="num text-sm text-text-secondary">
-            {typeLabel(todayWorkout.type)}
+            {typeLabel(t, todayWorkout.type)}
             {todayWorkout.distance_km > 0 ? ` · ${todayWorkout.distance_km} km` : ''}
             {todayWorkout.duration_sec ? ` · ${formatDuration(todayWorkout.duration_sec)}` : ''}
           </p>
@@ -266,7 +318,7 @@ export function TodayPage() {
               <p className="text-sm font-semibold">{verdict.title}</p>
               <p className="mt-0.5 text-caption text-text-secondary">
                 {verdict.description}
-                {candidate ? ` Najbliži slobodan termin: ${formatDateShort(candidate.workout_date)}.` : ''}
+                {candidate ? ` ${t('verdict.nearest', { date: formatDateShort(candidate.workout_date) })}` : ''}
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {candidate ? (
@@ -275,18 +327,16 @@ export function TodayPage() {
                     size="sm"
                     loading={swapWorkouts.isPending}
                     data-testid="swap-button"
-                    onClick={() => {
-                      if (todayWorkout && candidate)
-                        void swapWorkouts.mutateAsync({ first: todayWorkout, second: candidate });
-                    }}
+                    onClick={() => void handleSwap()}
                   >
-                    Prebaci na {formatDateShort(candidate.workout_date)}
+                    {t('verdict.swap', { date: formatDateShort(candidate.workout_date) })}
                   </AppButton>
                 ) : null}
                 <AppButton type="button" size="sm" variant="ghost" onClick={() => setBannerDismissed(true)}>
-                  Ostajem po planu
+                  {t('verdict.stay')}
                 </AppButton>
               </div>
+              {swapError ? <p className="mt-2 text-caption text-danger-ink">{swapError}</p> : null}
             </div>
           ) : null}
 
@@ -301,13 +351,13 @@ export function TodayPage() {
                     className="flex-1"
                     loading={completeWorkout.isPending}
                     data-testid="complete-strength"
-                    onClick={() => void completeWorkout.mutateAsync(todayWorkout.id)}
+                    onClick={() => void handleComplete()}
                   >
-                    <CheckCircle2 className="h-5 w-5" aria-hidden /> Završi trening
+                    <CheckCircle2 className="h-5 w-5" aria-hidden /> {t('actions.completeStrength')}
                   </AppButton>
                 ) : (
                   <AppButton size="lg" className="flex-1" data-testid="log-done" onClick={() => setLogOpen(true)}>
-                    <CheckCircle2 className="h-5 w-5" aria-hidden /> Urađeno
+                    <CheckCircle2 className="h-5 w-5" aria-hidden /> {t('actions.done')}
                   </AppButton>
                 )
               ) : null}
@@ -316,23 +366,24 @@ export function TodayPage() {
               workoutSteps(todayWorkout).length > 0 ? (
                 <Link to={`/run/${todayWorkout.id}`} className="flex-1" data-testid="start-guided">
                   <AppButton variant="secondary" size="lg" className="w-full">
-                    Vođeno
+                    {t('actions.guided')}
                   </AppButton>
                 </Link>
               ) : null}
             </div>
+            {completeError ? <p className="text-caption text-danger-ink">{completeError}</p> : null}
             <Link
               to={`/workout/${todayWorkout.id}`}
               className="block text-center text-sm font-medium text-primary-ink hover:text-primary-ink-hover"
             >
-              Pogledaj trening
+              {t('actions.view')}
             </Link>
           </div>
         </AppCard>
       ) : (
         <EmptyState
-          title="Danas je slobodan dan"
-          description="Baci pogled na kalendar — sledeći trening te čeka."
+          title={t('rest.title')}
+          description={t('rest.description')}
           icon={<CalendarDays className="h-6 w-6" />}
         />
       )}
@@ -342,7 +393,7 @@ export function TodayPage() {
           <AppCard className="space-y-2 border-primary/40 bg-gradient-to-b from-primary-soft to-transparent">
             {raceChipContent}
             <p className="flex items-center gap-1 pt-1 text-sm font-medium text-primary-ink">
-              Dan trke <ArrowRight className="h-4 w-4" aria-hidden />
+              {t('race.day')} <ArrowRight className="h-4 w-4" aria-hidden />
             </p>
           </AppCard>
         </Link>
@@ -355,12 +406,21 @@ export function TodayPage() {
         </AppCard>
       )}
 
+      {planRangeError ? (
+        <div className="flex items-center justify-between gap-2 rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-caption text-danger-ink">
+          <span>{t('rangeError')}</span>
+          <AppButton size="sm" variant="ghost" onClick={() => void refetchPlanRange()}>
+            {t('common:actions.retry')}
+          </AppButton>
+        </div>
+      ) : null}
+
       <AppCard data-testid="week-board" className="space-y-3">
         <SectionHeader
-          label="Tvoja nedelja"
+          label={t('week.title')}
           action={
             <Link to="/plan" className="text-sm font-medium text-primary-ink hover:text-primary-ink-hover">
-              Ceo plan
+              {t('week.all')}
             </Link>
           }
         />
@@ -375,11 +435,27 @@ export function TodayPage() {
               {week.doneKm} <span className="text-base font-medium text-text-secondary">/ {week.plannedKm} km</span>
             </p>
             <p className="text-caption text-text-muted">
-              {week.doneSessions} od {week.plannedSessions} treninga ove nedelje
+              {t('week.summary', { done: week.doneSessions, planned: week.plannedSessions })}
             </p>
           </div>
         </div>
         <WeekStrip workouts={weekWorkouts} today={today} />
+        {challenge ? (
+          <div
+            data-testid="weekly-challenge"
+            className="flex items-center justify-between gap-2 border-t border-border pt-3"
+          >
+            <span className="section-label">{t('content:achievements.challenge.label')}</span>
+            <span className="num flex min-w-0 items-center gap-1.5 truncate text-caption font-medium text-text-secondary">
+              {t(challenge.sessionsText.key, challenge.sessionsText.params)}
+              {challenge.longText ? (
+                <span className={challenge.longDone ? 'text-success-ink' : 'text-text-muted'}>
+                  · {t(challenge.longText.key, challenge.longText.params)}
+                </span>
+              ) : null}
+            </span>
+          </div>
+        ) : null}
       </AppCard>
 
       {showNextWorkout && upcoming ? <NextWorkoutCard workout={upcoming} today={today} /> : null}
@@ -389,7 +465,7 @@ export function TodayPage() {
         data={weather.data}
         isError={weather.isError}
         date={weatherDate}
-        dayLabel={weatherDate === today ? undefined : 'sutra'}
+        dayLabel={weatherDate === today ? undefined : t('tomorrow')}
         windowStartHour={window.startHour}
         windowEndHour={window.endHour}
         updatedAt={weather.dataUpdatedAt || null}
@@ -400,6 +476,7 @@ export function TodayPage() {
       <RecentActivityCard logs={logs} />
 
       <LogWorkoutModal workout={todayWorkout} open={logOpen} onClose={() => setLogOpen(false)} />
+      <AchievementToast achievement={achievement} onDismiss={dismiss} />
     </div>
   );
 }

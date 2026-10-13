@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { buildCoachInsights, type Insight, type InsightTone } from '@runcast/shared';
+import { useTranslation } from 'react-i18next';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
@@ -9,18 +10,10 @@ import type { RunLogsRow, WorkoutsRow } from '@/types';
 
 const APPLIED_KEY = 'runcast.coach.applied';
 
-const ACTION_LABELS: Record<string, string> = {
-  'missed-runs': 'Olakšaj sledeću nedelju 20%',
-  'high-rpe': 'Olakšaj 10%',
-  'rpe-drift': 'Bez promene',
-  'long-run-missed': 'Bez promene',
-  'ready-to-build': 'Dodaj 10%',
-};
-
-const TONE_BADGES: Record<InsightTone, { tone: 'success' | 'warning' | 'neutral'; label: string }> = {
-  positive: { tone: 'success', label: 'Napredak' },
-  warning: { tone: 'warning', label: 'Pažnja' },
-  neutral: { tone: 'neutral', label: 'Info' },
+const TONE_BADGES: Record<InsightTone, { tone: 'success' | 'warning' | 'neutral'; labelKey: string }> = {
+  positive: { tone: 'success', labelKey: 'coach.tones.positive' },
+  warning: { tone: 'warning', labelKey: 'coach.tones.warning' },
+  neutral: { tone: 'neutral', labelKey: 'coach.tones.neutral' },
 };
 
 function readApplied(): Record<string, number> {
@@ -40,10 +33,6 @@ function writeApplied(value: Record<string, number>): void {
   }
 }
 
-function sessionsLabel(count: number): string {
-  return `${count} ${count === 1 ? 'trening' : 'treninga'}`;
-}
-
 interface CoachInsightsCardProps {
   workouts: WorkoutsRow[];
   logs: RunLogsRow[];
@@ -52,10 +41,15 @@ interface CoachInsightsCardProps {
 }
 
 export function CoachInsightsCard({ workouts, logs, today, raceDate }: CoachInsightsCardProps) {
+  const { t } = useTranslation('stats');
   const scaleWeek = useScaleWeek();
   const [applied, setApplied] = useState<Record<string, number>>(readApplied);
   const [feedback, setFeedback] = useState<string | null>(null);
   const { insights, recap } = buildCoachInsights({ workouts, logs, today, plan: { raceDate } });
+
+  function sessionsLabel(count: number): string {
+    return count === 1 ? t('coach.sessionsOne', { count }) : t('coach.sessionsMany', { count });
+  }
 
   async function applyAction(insight: Insight) {
     if (!insight.action) return;
@@ -66,24 +60,27 @@ export function CoachInsightsCard({ workouts, logs, today, raceDate }: CoachInsi
       writeApplied(next);
       setApplied(next);
       setFeedback(
-        `Nedelja od ${insight.action.weekStart.slice(8, 10)}.${insight.action.weekStart.slice(5, 7)}. je prilagođena.`,
+        t('coach.weekAdjusted', {
+          day: insight.action.weekStart.slice(8, 10),
+          month: insight.action.weekStart.slice(5, 7),
+        }),
       );
     } catch {
-      setFeedback('Nije uspelo — pokušaj ponovo.');
+      setFeedback(t('coach.applyFailed'));
     }
   }
 
   const recapItems = [
-    { label: 'Planirano', value: `${recap.plannedKm} km · ${sessionsLabel(recap.plannedSessions)}` },
-    { label: 'Urađeno', value: `${recap.doneKm} km · ${sessionsLabel(recap.doneSessions)}` },
-    { label: 'Najduži trk', value: recap.longestKm > 0 ? `${recap.longestKm} km` : '—' },
-    { label: 'Ispunjeno', value: `${recap.adherencePct}%` },
+    { label: t('coach.planned'), value: `${recap.plannedKm} km · ${sessionsLabel(recap.plannedSessions)}` },
+    { label: t('coach.done'), value: `${recap.doneKm} km · ${sessionsLabel(recap.doneSessions)}` },
+    { label: t('coach.longest'), value: recap.longestKm > 0 ? `${recap.longestKm} km` : '—' },
+    { label: t('coach.adherence'), value: `${recap.adherencePct}%` },
   ];
 
   return (
     <AppCard data-testid="coach-card" className="space-y-3">
       <SectionHeader
-        label="Prošla nedelja"
+        label={t('coach.title')}
         action={
           <span className="num text-caption text-text-muted">
             {recap.weekStart.slice(8, 10)}.{recap.weekStart.slice(5, 7)}.
@@ -102,24 +99,25 @@ export function CoachInsightsCard({ workouts, logs, today, raceDate }: CoachInsi
 
       {insights.length === 0 ? (
         recap.plannedSessions > 0 ? (
-          <p className="text-sm text-text-muted">Sve držiš pod kontrolom — samo nastavi.</p>
+          <p className="text-sm text-text-muted">{t('coach.underControl')}</p>
         ) : null
       ) : (
         <ul className="space-y-3">
           {insights.map((insight) => {
             const tone = TONE_BADGES[insight.tone];
-            const label = ACTION_LABELS[insight.id];
             const weekApplied = insight.action ? applied[insight.action.weekStart] !== undefined : false;
             return (
               <li key={insight.id} className="space-y-2 rounded-xl bg-surface-elevated p-3">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm font-semibold">{insight.title}</p>
-                  <AppBadge tone={tone.tone}>{tone.label}</AppBadge>
+                  <p className="text-sm font-semibold">{t(insight.titleKey, insight.titleParams)}</p>
+                  <AppBadge tone={tone.tone}>{t(tone.labelKey)}</AppBadge>
                 </div>
-                <p className="text-caption text-text-secondary">{insight.description}</p>
-                {insight.action && label && !weekApplied ? (
+                <p className="text-caption text-text-secondary">
+                  {t(insight.descriptionKey, insight.descriptionParams)}
+                </p>
+                {insight.action && insight.actionLabelKey && !weekApplied ? (
                   <AppButton size="sm" loading={scaleWeek.isPending} onClick={() => void applyAction(insight)}>
-                    {label}
+                    {t(insight.actionLabelKey)}
                   </AppButton>
                 ) : null}
               </li>

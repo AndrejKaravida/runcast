@@ -1,13 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { addDays, weekdayOf } from './dates';
 import { generatePlan } from './plan-generator';
 import { strengthDaysFor, strengthWorkoutsForWeek, type StrengthWeekInput } from './strength';
 import type { PlanConfig, WorkoutDraft } from './types';
 
 const RUN_TYPES = ['EASY', 'LONG', 'TEMPO', 'INTERVALS', 'REPETITIONS', 'RACE'];
-
-function weekday(iso: string): number {
-  return (new Date(`${iso}T00:00:00.000Z`).getUTCDay() + 6) % 7;
-}
 
 const fullConfig: PlanConfig = {
   raceDate: '2026-05-10',
@@ -112,15 +109,13 @@ describe('generatePlan strength integration', () => {
       const plan = generatePlan({ ...fullConfig, longRunDay });
       const byWeek = workoutsByWeek(plan.workouts);
       const race = plan.workouts.at(-1);
-      const raceEve = race
-        ? new Date(new Date(`${race.date}T00:00:00.000Z`).getTime() - 86_400_000).toISOString().slice(0, 10)
-        : null;
+      const raceEve = race ? addDays(race.date, -1) : null;
       for (const week of byWeek.values()) {
         const runDays = week
           .filter((workout) => RUN_TYPES.includes(workout.type))
-          .map((workout) => weekday(workout.date));
+          .map((workout) => weekdayOf(workout.date));
         for (const session of week.filter((workout) => workout.type === 'STRENGTH')) {
-          const day = weekday(session.date);
+          const day = weekdayOf(session.date);
           expect(runDays).not.toContain(day);
           expect(day).not.toBe((longRunDay + 6) % 7);
           expect(session.date).not.toBe(raceEve);
@@ -141,7 +136,9 @@ describe('generatePlan strength integration', () => {
     const plan = generatePlan(fullConfig);
     const byWeek = workoutsByWeek(plan.workouts);
     const days = (week: number) =>
-      (byWeek.get(week) ?? []).filter((workout) => workout.type === 'STRENGTH').map((workout) => weekday(workout.date));
+      (byWeek.get(week) ?? [])
+        .filter((workout) => workout.type === 'STRENGTH')
+        .map((workout) => weekdayOf(workout.date));
     const titles = (week: number) =>
       (byWeek.get(week) ?? []).filter((workout) => workout.type === 'STRENGTH').map((workout) => workout.title);
     expect(days(0)).toEqual([1, 5]);

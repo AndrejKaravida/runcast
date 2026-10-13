@@ -1,0 +1,122 @@
+{
+  "title": {
+    "easy": "Lako trčanje {{km}} km",
+    "long": "Dugi trk {{km}} km",
+    "tempo": "Tempo {{minutes}} min",
+    "intervals": "Intervali {{reps}}×1000 m",
+    "repetitions": "Repeticije {{reps}}×200 m",
+    "race": "TRKA {{km}} km"
+  },
+  "why": {
+    "title": "Zašto ovaj trening",
+    "mistake": "Česta greška"
+  },
+  "fueling": {
+    "title": "Gorivo",
+    "feelsLike": "osećaj {{temp}}°",
+    "pre": "Pre",
+    "preMorning": "Pre · obrok do 07:00",
+    "preEvening": "Pre · obrok do {{time}}:00",
+    "during": "Tokom",
+    "water": "Voda:",
+    "short": "Kratko je — voda je dovoljna, gel nije neophodan.",
+    "hot": "Vruće je — gel na ~30 min i više vode.",
+    "after": "Posle"
+  },
+  "log": {
+    "title": "Zabeleži trening",
+    "distance": "Distanca (km)",
+    "duration": "Trajanje (h:mm:ss)",
+    "rpe": "Težina (RPE)",
+    "rpeValue": "RPE {{rpe}} od 10",
+    "notes": "Beleška (opciono)",
+    "notesPlaceholder": "Kako je bilo?",
+    "errorDuration": "Trajanje unesi kao mm:ss ili h:mm:ss",
+    "errorInvalid": "Proveri distancu (km), trajanje i RPE",
+    "errorSave": "Čuvanje nije uspelo — pokušaj ponovo"
+  },
+  "missing": {
+    "title": "Ne nalazim ovaj trening",
+    "description": "Plan je verovatno osvežen — pogledaj kalendar.",
+    "action": "Nazad na plan"
+  },
+  "meta": {
+    "phase": "Faza {{phase}}",
+    "week": "Nedelja {{week}}/{{weeks}}"
+  },
+  "steps": {
+    "title": "Koraci"
+  },
+  "logged": {
+    "title": "Zabeleženo"
+  },
+  "actions": {
+    "skip": "Preskoči",
+    "done": "Urađeno",
+    "completeStrength": "Završi trening",
+    "guided": "Vođeno trčanje",
+    "raceDay": "Strategija za dan trke",
+    "googleCalendar": "Dodaj u Google kalendar",
+    "error": "Akcija nije uspela — pokušaj ponovo"
+  },
+  "skip": {
+    "title": "Preskoči trening?",
+    "description": "Označićemo ga kao preskočen. Ne utiče na realizaciju plana.",
+    "error": "Preskakanje nije uspelo — pokušaj ponovo"
+  },
+  "next": {
+    "eyebrow": "Sledeći trening",
+    "tomorrow": "Sutra"
+  },
+  "recent": {
+    "title": "Poslednje aktivnosti",
+    "all": "Sve",
+    "workout": "Trening"
+  },
+  "days": {
+    "mon": "pon",
+    "tue": "uto",
+    "wed": "sre",
+    "thu": "čet",
+    "fri": "pet",
+    "sat": "sub",
+    "sun": "ned"
+  },
+  "weather": {
+    "title": "Vreme za termin {{from}}–{{to}} h",
+    "titleDay": "Vreme za {{day}} termin {{from}}–{{to}} h",
+    "updated": "Ažurirano: {{time}}",
+    "source": "Vreme: Open-Meteo",
+    "refresh": "Osveži prognozu",
+    "error": "Prognoza trenutno ćuti. Osveži je.",
+    "inWindow": "U terminu: {{temp}}° · kiša {{rain}}% · od {{time}} h",
+    "loading": "Gledam prognozu…",
+    "none": "Nema podataka za tvoj termin."
+  },
+  "assessment": {
+    "storm": {
+      "title": "Grmljavina u terminu treninga",
+      "description": "Predlog: prebaci trening ili odradi indoor varijantu."
+    },
+    "rain": {
+      "title": "Kiša — {{pct}}% šanse",
+      "description": "Očekuje se do {{mm}} mm u tvom terminu."
+    },
+    "heat": {
+      "title": "Vruće — osećaj {{temp}}°C",
+      "description": "Predlog: pomeri trening ranije ili na veče."
+    },
+    "cold": {
+      "title": "Hladno — osećaj {{temp}}°C",
+      "description": "Predlog: indoor trening ili dodatni sloj."
+    },
+    "wind": {
+      "title": "Jak vetar — udari do {{gust}} km/h",
+      "description": "Na otvorenom biće teže nego obično."
+    },
+    "air": {
+      "title": "Loš vazduh — PM2.5 {{pm25}}",
+      "description": "Predlog: indoor ili drugi termin."
+    }
+  }
+}

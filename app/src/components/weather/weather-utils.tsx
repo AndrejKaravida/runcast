@@ -10,6 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { WeatherAssessment } from '@runcast/shared';
+import i18n from '@/i18n';
 
 export function weatherIcon(code: number): LucideIcon {
   if (code === 0) return Sun;
@@ -33,38 +34,38 @@ export function assessmentText(assessment: WeatherAssessment): AssessmentText | 
   switch (assessment.code) {
     case 'STORM':
       return {
-        title: 'Grmljavina u terminu treninga',
-        description: 'Predlog: prebaci trening ili odradi indoor varijantu.',
+        title: i18n.t('workout:assessment.storm.title'),
+        description: i18n.t('workout:assessment.storm.description'),
         tone: 'danger',
       };
     case 'RAIN':
       return {
-        title: `Kiša — ${assessment.details.precipProbabilityPct}% šanse`,
-        description: `Očekuje se do ${assessment.details.precipMm} mm u tvom terminu.`,
+        title: i18n.t('workout:assessment.rain.title', { pct: assessment.details.precipProbabilityPct }),
+        description: i18n.t('workout:assessment.rain.description', { mm: assessment.details.precipMm }),
         tone: 'rain',
       };
     case 'HEAT':
       return {
-        title: `Vruće — osećaj ${assessment.details.apparentC}°C`,
-        description: 'Predlog: pomeri trening ranije ili na veče.',
+        title: i18n.t('workout:assessment.heat.title', { temp: assessment.details.apparentC }),
+        description: i18n.t('workout:assessment.heat.description'),
         tone: 'warning',
       };
     case 'COLD':
       return {
-        title: `Hladno — osećaj ${assessment.details.apparentC}°C`,
-        description: 'Predlog: indoor trening ili dodatni sloj.',
+        title: i18n.t('workout:assessment.cold.title', { temp: assessment.details.apparentC }),
+        description: i18n.t('workout:assessment.cold.description'),
         tone: 'rain',
       };
     case 'WIND':
       return {
-        title: `Jak vetar — udari do ${assessment.details.windGustKmh} km/h`,
-        description: 'Na otvorenom biće teže nego obično.',
+        title: i18n.t('workout:assessment.wind.title', { gust: assessment.details.windGustKmh }),
+        description: i18n.t('workout:assessment.wind.description'),
         tone: 'warning',
       };
     case 'AIR':
       return {
-        title: `Loš vazduh — PM2.5 ${assessment.details.pm25}`,
-        description: 'Predlog: indoor ili drugi termin.',
+        title: i18n.t('workout:assessment.air.title', { pm25: assessment.details.pm25 }),
+        description: i18n.t('workout:assessment.air.description'),
         tone: 'warning',
       };
     default:

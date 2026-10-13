@@ -1,35 +1,38 @@
 import { formatDuration, formatPace, isGuidedRunType, type PlanPaces, type WorkoutStep } from '@runcast/shared';
+import type { TFunction } from 'i18next';
 import type { WorkoutsRow } from '@/types';
 
 export function workoutSteps(row: WorkoutsRow): WorkoutStep[] {
   return Array.isArray(row.steps) ? (row.steps as unknown as WorkoutStep[]) : [];
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  EASY: 'Lagano',
-  LONG: 'Dugi trk',
-  TEMPO: 'Tempo',
-  INTERVALS: 'Intervali',
-  REPETITIONS: 'Repeticije',
-  REST: 'Odmor',
-  RACE: 'Trka',
-  STRENGTH: 'Snaga',
+const TYPE_KEYS: Record<string, string> = {
+  EASY: 'common:type.easy',
+  LONG: 'common:type.long',
+  TEMPO: 'common:type.tempo',
+  INTERVALS: 'common:type.intervals',
+  REPETITIONS: 'common:type.repetitions',
+  REST: 'common:type.rest',
+  RACE: 'common:type.race',
+  STRENGTH: 'common:type.strength',
 };
 
-export function typeLabel(type: string): string {
-  return TYPE_LABELS[type] ?? type;
+export function typeLabel(t: TFunction, type: string): string {
+  const key = TYPE_KEYS[type];
+  return key ? t(key) : type;
 }
 
-const PHASE_LABELS: Record<string, string> = {
-  BASE: 'Baza',
-  BUILD: 'Izgradnja',
-  PEAK: 'Vrh',
-  TAPER: 'Taper',
-  RACE: 'Trka',
+const PHASE_KEYS: Record<string, string> = {
+  BASE: 'plan:phase.base',
+  BUILD: 'plan:phase.build',
+  PEAK: 'plan:phase.peak',
+  TAPER: 'plan:phase.taper',
+  RACE: 'plan:phase.race',
 };
 
-export function phaseLabel(phase: string): string {
-  return PHASE_LABELS[phase] ?? phase;
+export function phaseLabel(t: TFunction, phase: string): string {
+  const key = PHASE_KEYS[phase];
+  return key ? t(key) : phase;
 }
 
 export type Tone = 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'rain';
@@ -107,16 +110,16 @@ export interface HeroStat {
   value: string;
 }
 
-export function heroStats(row: WorkoutsRow, paces: PlanPaces | null): HeroStat[] {
+export function heroStats(t: TFunction, row: WorkoutsRow, paces: PlanPaces | null): HeroStat[] {
   const stats: HeroStat[] = [];
-  if (row.distance_km > 0) stats.push({ label: 'Distanca', value: `${row.distance_km} km` });
+  if (row.distance_km > 0) stats.push({ label: t('common:stats.distance'), value: `${row.distance_km} km` });
   const duration = workoutDurationSec(row);
-  if (duration && stats.length < 3) stats.push({ label: 'Trajanje', value: formatDuration(duration) });
+  if (duration && stats.length < 3) stats.push({ label: t('common:stats.duration'), value: formatDuration(duration) });
   const pace = isGuidedRunType(row.type) ? workoutPaceLabel(row, paces) : null;
-  if (pace && stats.length < 3) stats.push({ label: 'Tempo', value: `${pace} /km` });
+  if (pace && stats.length < 3) stats.push({ label: t('common:stats.pace'), value: `${pace} /km` });
   const stepCount = workoutSteps(row).length;
   if (row.type === 'STRENGTH' && stepCount > 0 && stats.length < 3) {
-    stats.push({ label: 'Koraka', value: String(stepCount) });
+    stats.push({ label: t('common:stats.steps'), value: String(stepCount) });
   }
   return stats;
 }

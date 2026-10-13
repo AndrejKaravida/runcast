@@ -1,0 +1,53 @@
+{
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening"
+  },
+  "streak": "days in a row",
+  "label": "Today",
+  "status": {
+    "done": "Done",
+    "skipped": "Skipped"
+  },
+  "actions": {
+    "completeStrength": "Finish workout",
+    "done": "Done",
+    "guided": "Guided",
+    "view": "View workout",
+    "completeError": "Couldn't save — try again"
+  },
+  "empty": {
+    "title": "No plan yet",
+    "description": "Let's build your plan — race, pace and the days you have.",
+    "action": "Open settings"
+  },
+  "rest": {
+    "title": "Today is a rest day",
+    "description": "Take a look at the calendar — your next workout is waiting."
+  },
+  "race": {
+    "goal": "Goal race",
+    "untitled": "Untitled race",
+    "daysTo": "days to race",
+    "passed": "The race is over — create a new plan",
+    "day": "Race day"
+  },
+  "plan": {
+    "label": "Plan",
+    "week": "Week {{week}} / {{weeks}}"
+  },
+  "verdict": {
+    "nearest": "Nearest free slot: {{date}}.",
+    "swap": "Move to {{date}}",
+    "stay": "I'll stick to the plan",
+    "swapError": "Swap failed — try again"
+  },
+  "week": {
+    "title": "Your week",
+    "all": "Full plan",
+    "summary": "{{done}} of {{planned}} workouts this week"
+  },
+  "tomorrow": "tomorrow",
+  "rangeError": "Part of the plan didn't load."
+}

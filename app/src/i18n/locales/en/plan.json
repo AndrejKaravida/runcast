@@ -1,0 +1,43 @@
+{
+  "empty": {
+    "title": "No plan yet",
+    "description": "Let's build your plan — race, pace and the days you have.",
+    "action": "Open settings"
+  },
+  "days": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  },
+  "phase": {
+    "base": "Base",
+    "build": "Build",
+    "peak": "Peak",
+    "taper": "Taper",
+    "race": "Race"
+  },
+  "header": {
+    "label": "Your plan",
+    "week": "Week {{week}} / {{weeks}}",
+    "daysToRace": "{{days}} days to race",
+    "racePassed": "The race is over",
+    "daysPerWeek": "{{days}} days per week"
+  },
+  "month": {
+    "title": "Month",
+    "previous": "Previous month",
+    "next": "Next month",
+    "today": "Back to today"
+  },
+  "week": {
+    "current": "This week",
+    "first": "First week of the month",
+    "free": "Free day",
+    "recovery": "Recovery day",
+    "none": "No workout"
+  }
+}

@@ -52,6 +52,14 @@ export const router = createBrowserRouter([
             path: '/race-day',
             lazy: async () => ({ Component: (await import('@/pages/RaceDayPage')).RaceDayPage }),
           },
+          {
+            path: '/benchmark',
+            lazy: async () => ({ Component: (await import('@/pages/BenchmarkPage')).BenchmarkPage }),
+          },
+          {
+            path: '/leaderboard',
+            lazy: async () => ({ Component: (await import('@/pages/LeaderboardPage')).LeaderboardPage }),
+          },
         ],
       },
     ],

@@ -20,15 +20,27 @@ describe('buildFuelingPlan', () => {
   it('LONG 100 min: gelovi na 40 i 75 min, bez gela u zadnjih 10 min', () => {
     const plan = buildFuelingPlan({ type: 'LONG', durationSec: 100 * MIN });
     expect(plan?.during.map((cue) => cue.atSec)).toEqual([40 * MIN, 75 * MIN]);
-    expect(plan?.during[0]?.text).toContain('Gel 1');
-    expect(plan?.during[1]?.text).toContain('Gel 2');
+    expect(plan?.during[0]?.text).toEqual({ key: 'content:fueling.during.gel', params: { index: 1 } });
+    expect(plan?.during[1]?.text).toEqual({ key: 'content:fueling.during.gel', params: { index: 2 } });
   });
 
   it('kratak LONG nema gelove ali ima pre i posle', () => {
     const plan = buildFuelingPlan({ type: 'LONG', durationSec: 60 * MIN });
     expect(plan?.during).toEqual([]);
     expect(plan?.pre.length).toBeGreaterThanOrEqual(3);
-    expect(plan?.post.length).toBeGreaterThanOrEqual(1);
+    expect(plan?.post.map((line) => line.key)).toEqual([
+      'content:fueling.post.recovery',
+      'content:fueling.post.rehydrate',
+    ]);
+  });
+
+  it('užina se bira po trajanju', () => {
+    const long = buildFuelingPlan({ type: 'LONG', durationSec: 100 * MIN });
+    const medium = buildFuelingPlan({ type: 'LONG', durationSec: 70 * MIN });
+    const short = buildFuelingPlan({ type: 'LONG', durationSec: 45 * MIN });
+    expect(long?.pre[1]?.key).toBe('content:fueling.pre.snackLong');
+    expect(medium?.pre[1]?.key).toBe('content:fueling.pre.snackMedium');
+    expect(short?.pre[1]?.key).toBe('content:fueling.pre.snackShort');
   });
 
   it('trajanje izvodi iz distance i tempa kada nema durationSec', () => {
@@ -38,7 +50,7 @@ describe('buildFuelingPlan', () => {
 
   it('RACE dodaje liniju o probi gelova', () => {
     const plan = buildFuelingPlan({ type: 'RACE', durationSec: 180 * MIN });
-    expect(plan?.pre.some((line) => line.includes('probaj'))).toBe(true);
+    expect(plan?.pre.some((line) => line.key === 'content:fueling.pre.race')).toBe(true);
     expect(plan?.during.length).toBeGreaterThan(0);
   });
 
@@ -49,15 +61,15 @@ describe('buildFuelingPlan', () => {
 });
 
 describe('hydrationForTemp', () => {
-  it('vraća pojas za svaku temperaturu', () => {
-    expect(hydrationForTemp(3)).toContain('400–500');
-    expect(hydrationForTemp(10)).toContain('500–600');
-    expect(hydrationForTemp(20)).toContain('600–700');
-    expect(hydrationForTemp(28)).toContain('700–800');
+  it('vraća ključ pojasa za svaku temperaturu', () => {
+    expect(hydrationForTemp(3)).toBe('content:fueling.hydration.cold');
+    expect(hydrationForTemp(10)).toBe('content:fueling.hydration.cool');
+    expect(hydrationForTemp(20)).toBe('content:fueling.hydration.warm');
+    expect(hydrationForTemp(28)).toBe('content:fueling.hydration.hot');
   });
 
-  it('bez temperature daje opseg bez brojanja unosa', () => {
-    expect(hydrationForTemp(null)).toContain('400–800');
-    expect(hydrationForTemp(undefined)).toContain('400–800');
+  it('bez temperature daje podrazumevani pojas', () => {
+    expect(hydrationForTemp(null)).toBe('content:fueling.hydration.default');
+    expect(hydrationForTemp(undefined)).toBe('content:fueling.hydration.default');
   });
 });

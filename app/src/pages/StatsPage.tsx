@@ -1,7 +1,10 @@
 import { useMemo } from 'react';
 import { formatDuration, formatPace, type PlanAnchor, type PlanPaces } from '@runcast/shared';
 import { BarChart3, History } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { AchievementToast } from '@/components/achievements/AchievementToast';
+import { AchievementsGrid } from '@/components/achievements/AchievementsGrid';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -13,6 +16,7 @@ import { StatRow } from '@/components/ui/StatRow';
 import { CoachInsightsCard } from '@/components/workouts/CoachInsightsCard';
 import { PersonalBestsCard } from '@/components/workouts/PersonalBestsCard';
 import { PredictorCard } from '@/components/workouts/PredictorCard';
+import { useAchievementCelebration } from '@/features/achievements/seen';
 import { useRunLogs } from '@/features/logs/queries';
 import { adherencePct, isRunWorkout, loggedKm, runStreak, weeklyKmSeries } from '@/features/plans/progress';
 import { useActivePlan, useWorkoutsRange } from '@/features/plans/queries';
@@ -23,6 +27,7 @@ function weekLabel(week: string): string {
 }
 
 export function StatsPage() {
+  const { t } = useTranslation('stats');
   const today = todayIso();
   const { data: plan, isLoading: planLoading, isError: planError, refetch } = useActivePlan();
   const { data: workouts = [], isLoading: workoutsLoading } = useWorkoutsRange(
@@ -30,6 +35,7 @@ export function StatsPage() {
     plan?.race_date ?? today,
   );
   const { data: logs = [] } = useRunLogs();
+  const { achievements, achievement, dismiss } = useAchievementCelebration(workouts, logs, undefined);
 
   const stats = useMemo(() => {
     const series = weeklyKmSeries(workouts, today, 8);
@@ -42,7 +48,7 @@ export function StatsPage() {
     return {
       doneKm: loggedKm(logs),
       plannedToDate,
-      completion: adherencePct(workouts, plan?.start_date ?? today, today),
+      completion: Math.min(100, adherencePct(workouts, plan?.start_date ?? today, today)),
       streak: runStreak(workouts, today),
       series,
       maxWeek: Math.max(...series.map((entry) => entry.planned), 1),
@@ -55,12 +61,12 @@ export function StatsPage() {
   if (!plan) {
     return (
       <EmptyState
-        title="Statistika još čeka prvi trening"
-        description="Napravimo plan — brojevi se pune sami dok trčiš."
+        title={t('empty.title')}
+        description={t('empty.description')}
         icon={<BarChart3 className="h-6 w-6" />}
         action={
           <Link to="/settings">
-            <AppButton size="sm">Otvori podešavanja</AppButton>
+            <AppButton size="sm">{t('empty.action')}</AppButton>
           </Link>
         }
       />
@@ -76,12 +82,12 @@ export function StatsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <p className="section-label">Ukupno pređeno</p>
+        <p className="section-label">{t('summary.label')}</p>
         <p className="flex items-baseline gap-2">
           <span className="num value-swap text-hero font-bold">{stats.doneKm}</span>
           <span className="text-base font-medium text-text-secondary">km</span>
         </p>
-        <p className="num text-caption text-text-muted">od {stats.plannedToDate} km planiranih do danas</p>
+        <p className="num text-caption text-text-muted">{t('summary.planned', { km: stats.plannedToDate })}</p>
         <div className="h-1.5 overflow-hidden rounded-full bg-surface-elevated">
           <div className="h-full rounded-full bg-primary" style={{ width: `${progressPct}%` }} />
         </div>
@@ -89,9 +95,9 @@ export function StatsPage() {
 
       <StatRow
         items={[
-          { label: 'Realizacija', value: `${stats.completion}%` },
-          { label: 'Dani u nizu', value: `${stats.streak}` },
-          { label: 'Do trke', value: daysToRace >= 0 ? `${daysToRace}` : '—' },
+          { label: t('row.completion'), value: `${stats.completion}%` },
+          { label: t('row.streak'), value: `${stats.streak}` },
+          { label: t('row.race'), value: daysToRace >= 0 ? `${daysToRace}` : '—' },
         ]}
         className="rounded-xl bg-surface-elevated py-1"
       />
@@ -99,7 +105,14 @@ export function StatsPage() {
       <CoachInsightsCard workouts={workouts} logs={logs} today={today} raceDate={plan.race_date} />
 
       <AppCard className="space-y-3">
-        <SectionHeader label="Nedeljni kilometri" />
+        <SectionHeader
+          label={t('weekly.title')}
+          action={
+            <Link to="/leaderboard" className="text-caption font-semibold text-primary-ink">
+              {t('leaderboard.title')} →
+            </Link>
+          }
+        />
         <div className="flex gap-1.5">
           {stats.series.map((entry) => {
             const isCurrent = entry.week === startOfWeekIso(today);
@@ -108,7 +121,10 @@ export function StatsPage() {
                 <span className="num h-4 text-caption text-text-muted">
                   {entry.done > 0 ? Math.round(entry.done) : ''}
                 </span>
-                <div className="relative h-24 w-5 sm:w-6" title={`${entry.done} od ${entry.planned} km`}>
+                <div
+                  className="relative h-24 w-5 sm:w-6"
+                  title={t('weekly.tooltip', { done: entry.done, planned: entry.planned })}
+                >
                   <div
                     className="absolute inset-x-0 bottom-0 rounded-t-md border border-border bg-surface-elevated"
                     style={{ height: `${Math.max((entry.planned / stats.maxWeek) * 100, entry.planned > 0 ? 4 : 0)}%` }}
@@ -134,31 +150,36 @@ export function StatsPage() {
         <div className="flex items-center gap-4 text-caption text-text-muted">
           <span className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-sm border border-border bg-surface-elevated" />
-            planirano
+            {t('weekly.planned')}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-sm bg-chart-bar" />
-            urađeno
+            {t('weekly.done')}
           </span>
         </div>
         {stats.series.length > 0 && stats.series.every((entry) => entry.done === 0) ? (
-          <p className="text-caption text-text-muted">
-            Još nema urađenih treninga — kolone se pune kako beležiš treninge.
-          </p>
+          <p className="text-caption text-text-muted">{t('weekly.noDone')}</p>
         ) : (
-          <p className="text-caption text-text-muted">Koliko si istrčao od planiranog — nedelja po nedelja.</p>
+          <p className="text-caption text-text-muted">{t('weekly.description')}</p>
         )}
       </AppCard>
 
+      <AchievementsGrid achievements={achievements} />
+
       <PredictorCard paces={paces} anchor={anchor} raceDistanceKm={plan.races?.distance_km ?? null} />
+      <Link to="/benchmark" className="block">
+        <AppButton variant="secondary" className="w-full">
+          {t('predictor.benchmarkCta')}
+        </AppButton>
+      </Link>
       <PersonalBestsCard logs={logs} />
 
       <div className="space-y-2">
-        <SectionHeader label="Poslednje zabeleženo" />
+        <SectionHeader label={t('recent.title')} />
         {logs.length === 0 ? (
           <EmptyState
-            title="Prvi trening još čeka"
-            description="Kad budeš spreman, zabeleži trening i brojevi se pune sami."
+            title={t('recent.emptyTitle')}
+            description={t('recent.emptyDescription')}
             icon={<History className="h-6 w-6" />}
           />
         ) : (
@@ -167,7 +188,7 @@ export function StatsPage() {
               <ListRow
                 key={log.id}
                 eyebrow={formatDateShort(log.log_date)}
-                title={log.distance_km ? `${log.distance_km} km` : 'Trening'}
+                title={log.distance_km ? `${log.distance_km} km` : t('recent.fallback')}
                 value={
                   <>
                     {log.duration_sec ? <span>{formatDuration(log.duration_sec)}</span> : null}
@@ -180,6 +201,8 @@ export function StatsPage() {
           </div>
         )}
       </div>
+
+      <AchievementToast achievement={achievement} onDismiss={dismiss} />
     </div>
   );
 }

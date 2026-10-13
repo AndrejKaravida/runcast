@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { AnimatePresence, motion, useDragControls, useReducedMotion } from 'motion/react';
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { IconButton } from '@/components/ui/IconButton';
 
 interface AppModalProps {
@@ -17,11 +18,17 @@ const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 export function AppModal({ open, onClose, title, children, className }: AppModalProps) {
+  const { t } = useTranslation();
   const titleId = useId();
   const reduceMotion = useReducedMotion();
   const dragControls = useDragControls();
   const sheetRef = useRef<HTMLDivElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -29,7 +36,7 @@ export function AppModal({ open, onClose, title, children, className }: AppModal
     sheetRef.current?.focus();
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (event.key !== 'Tab') return;
@@ -54,7 +61,7 @@ export function AppModal({ open, onClose, title, children, className }: AppModal
       document.body.style.overflow = '';
       restoreFocusRef.current?.focus();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   return createPortal(
     <AnimatePresence>
@@ -107,7 +114,7 @@ export function AppModal({ open, onClose, title, children, className }: AppModal
               ) : (
                 <span />
               )}
-              <IconButton label="Zatvori" onClick={onClose} className="-mr-2 h-9 w-9">
+              <IconButton label={t('actions.close')} onClick={onClose} className="-mr-2 h-9 w-9">
                 <X className="h-4 w-4" />
               </IconButton>
             </div>

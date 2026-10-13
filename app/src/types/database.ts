@@ -65,6 +65,7 @@ export type Database = {
       };
       profiles: {
         Row: {
+          avatar_url: string | null;
           birth_year: number | null;
           city: string | null;
           created_at: string;
@@ -75,6 +76,7 @@ export type Database = {
           lat: number | null;
           lon: number | null;
           onboarding_completed: boolean;
+          public_profile: boolean;
           run_window: string;
           sex: string | null;
           units: string;
@@ -85,6 +87,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          avatar_url?: string | null;
           birth_year?: number | null;
           city?: string | null;
           created_at?: string;
@@ -95,6 +98,7 @@ export type Database = {
           lat?: number | null;
           lon?: number | null;
           onboarding_completed?: boolean;
+          public_profile?: boolean;
           run_window?: string;
           sex?: string | null;
           units?: string;
@@ -104,6 +108,7 @@ export type Database = {
           weight_kg?: number | null;
         };
         Update: {
+          avatar_url?: string | null;
           birth_year?: number | null;
           city?: string | null;
           created_at?: string;
@@ -114,6 +119,7 @@ export type Database = {
           lat?: number | null;
           lon?: number | null;
           onboarding_completed?: boolean;
+          public_profile?: boolean;
           run_window?: string;
           sex?: string | null;
           units?: string;
@@ -291,7 +297,25 @@ export type Database = {
         };
         Returns: string;
       };
+      log_workout: {
+        Args: { p_distance_km: number; p_duration_sec: number; p_notes: string; p_rpe: number; p_workout_id: string };
+        Returns: undefined;
+      };
+      recalibrate_plan: { Args: { p_anchor: Json; p_pace_map: Json; p_paces: Json }; Returns: undefined };
+      scale_week_volume: { Args: { p_factor: number; p_week_start: string }; Returns: undefined };
       swap_workouts: { Args: { p_first: string; p_second: string }; Returns: undefined };
+      weekly_leaderboard: {
+        Args: { p_week_start: string };
+        Returns: {
+          avatar_url: string;
+          display_name: string;
+          distance_km: number;
+          is_public: boolean;
+          rank: number;
+          sessions: number;
+          user_id: string;
+        }[];
+      };
     };
     Enums: {
       [_ in never]: never;

@@ -15,12 +15,14 @@ import {
 } from '@runcast/shared';
 import { clsx } from 'clsx';
 import { ArrowLeft, CalendarPlus, CheckCircle2, SkipForward } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { QueryError } from '@/components/ui/QueryError';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { StatRow } from '@/components/ui/StatRow';
@@ -48,10 +50,11 @@ import {
 import { dayDiff, formatDateLong, todayIso } from '@/lib/dates';
 
 export function WorkoutPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams();
   const today = todayIso();
-  const { data: workout, isLoading } = useWorkout(id);
+  const { data: workout, isLoading, isError, refetch } = useWorkout(id);
   const { data: plan } = useActivePlan();
   const { data: profile } = useProfile();
   const { data: logs = [] } = useRunLogs();
@@ -60,6 +63,8 @@ export function WorkoutPage() {
   const completeWorkout = useCompleteWorkout();
   const [logOpen, setLogOpen] = useState(false);
   const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
+  const [skipError, setSkipError] = useState<string | null>(null);
+  const [completeError, setCompleteError] = useState<string | null>(null);
 
   const runWindow: RunWindow = (profile?.run_window as RunWindow | undefined) ?? 'morning';
   const window = runWindowHours(runWindow);
@@ -73,16 +78,24 @@ export function WorkoutPage() {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="mx-auto w-full max-w-[560px] px-4 py-6">
+        <QueryError onRetry={() => void refetch()} />
+      </div>
+    );
+  }
+
   if (!workout) {
     return (
       <div className="mx-auto w-full max-w-[560px] px-4 py-6">
         <EmptyState
-          title="Ne nalazim ovaj trening"
-          description="Plan je verovatno osvežen — pogledaj kalendar."
+          title={t('workout:missing.title')}
+          description={t('workout:missing.description')}
           action={
             <Link to="/plan">
               <AppButton size="sm" variant="secondary">
-                Nazad na plan
+                {t('workout:missing.action')}
               </AppButton>
             </Link>
           }
@@ -108,9 +121,9 @@ export function WorkoutPage() {
     },
     { paces: (plan?.paces ?? null) as unknown as PlanPaces | null },
   );
-  const stats = heroStats(workout, (plan?.paces ?? null) as unknown as PlanPaces | null);
+  const stats = heroStats(t, workout, (plan?.paces ?? null) as unknown as PlanPaces | null);
   const planWeek = plan ? Math.min(Math.floor(dayDiff(plan.start_date, today) / 7) + 1, plan.weeks) : null;
-  const planWeekLabel = plan && planWeek ? ` · Nedelja ${planWeek}/${plan.weeks}` : '';
+  const planWeekLabel = plan && planWeek ? ` · ${t('workout:meta.week', { week: planWeek, weeks: plan.weeks })}` : '';
   const totalDuration = workoutDurationSec(workout);
   const canAct = workout.status === 'PLANNED' && workout.type !== 'REST';
   const fuelingTimeline = buildStepTimeline(
@@ -139,11 +152,32 @@ export function WorkoutPage() {
     paceSecPerKm: fuelingTimeline.segments[0]?.paceSecPerKm,
   });
 
+  async function handleComplete() {
+    if (!workout) return;
+    try {
+      setCompleteError(null);
+      await completeWorkout.mutateAsync(workout.id);
+    } catch {
+      setCompleteError(t('workout:actions.error'));
+    }
+  }
+
+  async function handleSkip() {
+    if (!workout) return;
+    try {
+      setSkipError(null);
+      await skipWorkout.mutateAsync(workout.id);
+      setSkipConfirmOpen(false);
+    } catch {
+      setSkipError(t('workout:skip.error'));
+    }
+  }
+
   return (
     <div className="mx-auto w-full max-w-[560px] space-y-5 px-4 py-6">
       <div className="flex items-center justify-between">
         <AppButton variant="ghost" size="sm" className="-ml-2 w-auto" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-4 w-4" aria-hidden /> Nazad
+          <ArrowLeft className="h-4 w-4" aria-hidden /> {t('common:actions.back')}
         </AppButton>
         <div className="flex items-center gap-1">
           {googleCalendarUrl ? (
@@ -152,18 +186,18 @@ export function WorkoutPage() {
               target="_blank"
               rel="noopener noreferrer"
               data-testid="add-google"
-              aria-label="Dodaj u Google kalendar"
+              aria-label={t('workout:actions.googleCalendar')}
               className="block"
             >
               <AppButton variant="ghost" size="sm" className="w-auto">
                 <CalendarPlus className="h-4 w-4" aria-hidden />
-                <span className="hidden sm:inline">Dodaj u Google kalendar</span>
+                <span className="hidden sm:inline">{t('workout:actions.googleCalendar')}</span>
               </AppButton>
             </a>
           ) : null}
           {canAct ? (
             <AppButton variant="ghost" size="sm" className="-mr-2 w-auto" onClick={() => setSkipConfirmOpen(true)}>
-              <SkipForward className="h-4 w-4" aria-hidden /> Preskoči
+              <SkipForward className="h-4 w-4" aria-hidden /> {t('workout:actions.skip')}
             </AppButton>
           ) : null}
         </div>
@@ -180,7 +214,7 @@ export function WorkoutPage() {
           </p>
           {workout.status !== 'PLANNED' ? (
             <AppBadge tone={statusTone(workout.status)}>
-              {workout.status === 'DONE' ? 'Urađeno' : 'Preskočeno'}
+              {workout.status === 'DONE' ? t('common:status.done') : t('common:status.skipped')}
             </AppBadge>
           ) : null}
         </div>
@@ -189,7 +223,7 @@ export function WorkoutPage() {
           <PaceZoneBadge zone={workout.pace_zone} />
         </div>
         <p className="text-sm text-text-secondary">
-          {typeLabel(workout.type)} · Faza {phaseLabel(workout.phase)}
+          {typeLabel(t, workout.type)} · {t('workout:meta.phase', { phase: phaseLabel(t, workout.phase) })}
           {planWeekLabel}
         </p>
         {stats.length >= 2 ? (
@@ -200,7 +234,7 @@ export function WorkoutPage() {
       {steps.length > 0 ? (
         <section className="space-y-1">
           <SectionHeader
-            label="Koraci"
+            label={t('workout:steps.title')}
             action={
               totalDuration ? (
                 <span className="num text-caption text-text-muted">{formatDuration(totalDuration)}</span>
@@ -233,7 +267,7 @@ export function WorkoutPage() {
 
       {log ? (
         <AppCard className="space-y-2 border-l-2 border-l-success-ink">
-          <SectionHeader label="Zabeleženo" />
+          <SectionHeader label={t('workout:logged.title')} />
           <div className="flex flex-wrap items-center gap-2 text-sm">
             {log.distance_km ? <AppBadge tone="neutral">{log.distance_km} km</AppBadge> : null}
             {log.duration_sec ? <AppBadge tone="neutral">{formatDuration(log.duration_sec)}</AppBadge> : null}
@@ -269,19 +303,20 @@ export function WorkoutPage() {
               className="w-full"
               loading={completeWorkout.isPending}
               data-testid="complete-strength"
-              onClick={() => void completeWorkout.mutateAsync(workout.id)}
+              onClick={() => void handleComplete()}
             >
-              <CheckCircle2 className="h-5 w-5" aria-hidden /> Završi trening
+              <CheckCircle2 className="h-5 w-5" aria-hidden /> {t('workout:actions.completeStrength')}
             </AppButton>
           ) : (
             <AppButton size="lg" className="w-full" onClick={() => setLogOpen(true)}>
-              <CheckCircle2 className="h-5 w-5" aria-hidden /> Urađeno
+              <CheckCircle2 className="h-5 w-5" aria-hidden /> {t('workout:actions.done')}
             </AppButton>
           )}
+          {completeError ? <p className="text-caption text-danger-ink">{completeError}</p> : null}
           {!isStrength && isGuidedRunType(workout.type) && steps.length > 0 ? (
             <Link to={`/run/${workout.id}`} className="block" data-testid="start-guided">
               <AppButton variant="secondary" size="lg" className="w-full">
-                Vođeno trčanje
+                {t('workout:actions.guided')}
               </AppButton>
             </Link>
           ) : null}
@@ -291,7 +326,7 @@ export function WorkoutPage() {
       {workout.type === 'RACE' ? (
         <Link to="/race-day" className="block" data-testid="race-day-link">
           <AppButton variant="secondary" size="lg" className="w-full">
-            Strategija za dan trke
+            {t('workout:actions.raceDay')}
           </AppButton>
         </Link>
       ) : null}
@@ -299,15 +334,17 @@ export function WorkoutPage() {
       <LogWorkoutModal workout={workout} open={logOpen} onClose={() => setLogOpen(false)} />
       <ConfirmDialog
         open={skipConfirmOpen}
-        title="Preskoči trening?"
-        description="Označićemo ga kao preskočen. Ne utiče na realizaciju plana."
-        confirmLabel="Preskoči"
+        title={t('workout:skip.title')}
+        description={t('workout:skip.description')}
+        confirmLabel={t('workout:actions.skip')}
         tone="danger"
         loading={skipWorkout.isPending}
-        onConfirm={() => {
-          void skipWorkout.mutateAsync(workout.id).then(() => setSkipConfirmOpen(false));
+        error={skipError ?? undefined}
+        onConfirm={() => void handleSkip()}
+        onClose={() => {
+          setSkipConfirmOpen(false);
+          setSkipError(null);
         }}
-        onClose={() => setSkipConfirmOpen(false)}
       />
     </div>
   );

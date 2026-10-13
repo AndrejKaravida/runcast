@@ -1,0 +1,43 @@
+{
+  "empty": {
+    "title": "Još nemamo plan",
+    "description": "Hajde da napravimo tvoj plan — trka, tempo i dani koje imaš.",
+    "action": "Otvori podešavanja"
+  },
+  "days": {
+    "mon": "pon",
+    "tue": "uto",
+    "wed": "sre",
+    "thu": "čet",
+    "fri": "pet",
+    "sat": "sub",
+    "sun": "ned"
+  },
+  "phase": {
+    "base": "Baza",
+    "build": "Izgradnja",
+    "peak": "Vrh",
+    "taper": "Taper",
+    "race": "Trka"
+  },
+  "header": {
+    "label": "Tvoj plan",
+    "week": "Nedelja {{week}} / {{weeks}}",
+    "daysToRace": "{{days}} dana do trke",
+    "racePassed": "Trka je prošla",
+    "daysPerWeek": "{{days}} dana nedeljno"
+  },
+  "month": {
+    "title": "Mesec",
+    "previous": "Prethodni mesec",
+    "next": "Sledeći mesec",
+    "today": "Vrati na danas"
+  },
+  "week": {
+    "current": "Ova nedelja",
+    "first": "Prva nedelja meseca",
+    "free": "Slobodan dan",
+    "recovery": "Dan za oporavak",
+    "none": "Bez treninga"
+  }
+}

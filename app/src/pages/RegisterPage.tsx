@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { TFunction } from 'i18next';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import { z } from 'zod';
 import { AppButton } from '@/components/ui/AppButton';
@@ -8,22 +10,30 @@ import { AppInput } from '@/components/ui/AppInput';
 import { authErrorMessage } from '@/lib/auth-errors';
 import { supabase } from '@/lib/supabase';
 
-const registerSchema = z
-  .object({
-    displayName: z.string().min(2, 'Ime ima najmanje 2 znaka').max(80),
-    email: z.string().email('Unesi ispravan email'),
-    password: z.string().min(8, 'Lozinka ima najmanje 8 znakova'),
-    confirm: z.string(),
-  })
-  .refine((values) => values.password === values.confirm, { message: 'Lozinke se ne poklapaju', path: ['confirm'] });
+function registerSchema(t: TFunction<'auth'>) {
+  return z
+    .object({
+      displayName: z.string().min(2, t('validation.nameMin')).max(80),
+      email: z.string().email(t('validation.email')),
+      password: z.string().min(8, t('validation.passwordMin')),
+      confirm: z.string(),
+    })
+    .refine((values) => values.password === values.confirm, {
+      message: t('validation.passwordMismatch'),
+      path: ['confirm'],
+    });
+}
 
-type RegisterValues = z.infer<typeof registerSchema>;
+type RegisterValues = z.infer<ReturnType<typeof registerSchema>>;
 
 export function RegisterPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation('auth');
   const [serverError, setServerError] = useState<string | null>(null);
   const [confirmationSent, setConfirmationSent] = useState(false);
-  const { register, handleSubmit, formState } = useForm<RegisterValues>({ resolver: zodResolver(registerSchema) });
+  const { register, handleSubmit, formState } = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema(t)),
+  });
 
   const onSubmit = handleSubmit(async ({ displayName, email, password }) => {
     setServerError(null);
@@ -33,7 +43,7 @@ export function RegisterPage() {
       options: { data: { display_name: displayName } },
     });
     if (error) {
-      setServerError(authErrorMessage(error.message));
+      setServerError(t(authErrorMessage(error.message)));
       return;
     }
     if (data.session) {
@@ -47,14 +57,12 @@ export function RegisterPage() {
     return (
       <div className="mx-auto flex min-h-dvh w-full max-w-[420px] flex-col justify-center px-4 py-10">
         <div className="space-y-2 text-center">
-          <p className="text-2xl font-semibold tracking-display">Proveri svoj email</p>
-          <p className="text-sm text-text-secondary">
-            Poslali smo ti link za potvrdu naloga. Klikni na njega pa se prijavi.
-          </p>
+          <p className="text-2xl font-semibold tracking-display">{t('register.confirmationTitle')}</p>
+          <p className="text-sm text-text-secondary">{t('register.confirmationText')}</p>
         </div>
         <Link to="/login" className="mt-6">
           <AppButton variant="secondary" size="lg" className="w-full">
-            Nazad na prijavu
+            {t('backToLogin')}
           </AppButton>
         </Link>
       </div>
@@ -67,37 +75,37 @@ export function RegisterPage() {
         <p className="text-3xl font-bold tracking-display">
           Run<span className="text-primary-ink">Cast</span>
         </p>
-        <p className="mt-2 text-sm text-text-secondary">Napravi nalog i dobij plan spreman za kišne dane.</p>
+        <p className="mt-2 text-sm text-text-secondary">{t('register.tagline')}</p>
       </div>
       <form className="space-y-4" onSubmit={onSubmit} noValidate>
         <AppInput
-          label="Ime"
+          label={t('fields.name')}
           autoComplete="name"
-          placeholder="Kako da te zovemo"
+          placeholder={t('register.namePlaceholder')}
           error={formState.errors.displayName?.message}
           {...register('displayName')}
         />
         <AppInput
-          label="Email"
+          label={t('fields.email')}
           type="email"
           autoComplete="email"
-          placeholder="ti@primer.com"
+          placeholder={t('emailPlaceholder')}
           error={formState.errors.email?.message}
           {...register('email')}
         />
         <AppInput
-          label="Lozinka"
+          label={t('fields.password')}
           type="password"
           autoComplete="new-password"
-          placeholder="Najmanje 8 znakova"
+          placeholder={t('register.passwordPlaceholder')}
           error={formState.errors.password?.message}
           {...register('password')}
         />
         <AppInput
-          label="Potvrdi lozinku"
+          label={t('fields.confirm')}
           type="password"
           autoComplete="new-password"
-          placeholder="Ponovi lozinku"
+          placeholder={t('register.confirmPlaceholder')}
           error={formState.errors.confirm?.message}
           {...register('confirm')}
         />
@@ -107,13 +115,13 @@ export function RegisterPage() {
           </p>
         ) : null}
         <AppButton type="submit" size="lg" className="w-full" loading={formState.isSubmitting}>
-          Napravi nalog
+          {t('register.submit')}
         </AppButton>
       </form>
       <p className="mt-4 text-center text-sm text-text-secondary">
-        Već imaš nalog?{' '}
+        {t('register.haveAccount')}{' '}
         <Link className="font-medium text-primary-ink hover:text-primary-ink-hover" to="/login">
-          Prijavi se
+          {t('login.submit')}
         </Link>
       </p>
     </div>

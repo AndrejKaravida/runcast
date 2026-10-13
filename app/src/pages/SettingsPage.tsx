@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { formatDuration, parseTimeToSeconds, type PlanPaces, type RunWindow, type VolumeBand } from '@runcast/shared';
+import { formatDuration, type PlanPaces, type RunWindow, type VolumeBand } from '@runcast/shared';
 import { Download, LogOut, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
@@ -10,16 +12,18 @@ import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { AvatarUpload } from '@/components/profile/AvatarUpload';
 import { CityPicker } from '@/components/forms/CityPicker';
+import { PlanFields } from '@/components/forms/PlanFields';
 import { useExportPlanIcs } from '@/features/plans/export';
 import { useActivePlan, useGeneratePlan, type GeneratePlanInput } from '@/features/plans/queries';
 import { useProfile, useUpdateProfile } from '@/features/profile/queries';
 import { useAuth } from '@/auth/AuthProvider';
+import { setLanguage, type AppLanguage } from '@/i18n';
 import { dayDiff, formatDateShort, todayIso } from '@/lib/dates';
 import { authErrorMessage } from '@/lib/auth-errors';
+import { buildPlanInput, validatePlanDraft, type PlanDraft } from '@/lib/plan-form';
 import type { ProfilesRow } from '@/types';
-
-const DAY_LABELS = ['Ponedeljak', 'Utorak', 'Sreda', 'Četvrtak', 'Petak', 'Subota', 'Nedelja'];
 
 const REFRESH_OPTIONS = [
   { value: 30, label: '30 min' },
@@ -40,18 +44,7 @@ interface ProfileForm {
   sex: 'male' | 'female' | 'other' | '';
   runWindow: RunWindow;
   weatherRefreshMinutes: number | null;
-}
-
-interface PlanForm {
-  raceDate: string;
-  distanceKm: string;
-  goalTime: string;
-  recentDistanceKm: string;
-  recentTime: string;
-  daysPerWeek: 3 | 4 | 5 | 6;
-  longRunDay: number;
-  experience: 'first' | 'experienced';
-  volumeBand: VolumeBand;
+  publicProfile: boolean;
 }
 
 function profileFormFrom(profile: ProfilesRow): ProfileForm {
@@ -66,52 +59,29 @@ function profileFormFrom(profile: ProfilesRow): ProfileForm {
     sex: (profile.sex as ProfileForm['sex']) ?? '',
     runWindow: profile.run_window as RunWindow,
     weatherRefreshMinutes: profile.weather_refresh_minutes,
+    publicProfile: profile.public_profile,
   };
-}
-
-function tryParseTime(value: string): number | null {
-  try {
-    return parseTimeToSeconds(value.trim());
-  } catch {
-    return null;
-  }
 }
 
 export function SettingsPage() {
   const { session, signOut } = useAuth();
+  const { t, i18n } = useTranslation('settings');
   const { data: profile } = useProfile();
   const { data: plan } = useActivePlan();
   const updateProfile = useUpdateProfile();
   const generatePlan = useGeneratePlan();
   const exportPlan = useExportPlanIcs();
 
-  const [formOverride, setFormOverride] = useState<ProfileForm | null>(null);
-  const [planForm, setPlanForm] = useState<PlanForm | null>(null);
+  const language: AppLanguage = i18n.resolvedLanguage === 'en' ? 'en' : 'sr';
+
+  const [profileForm, setProfileForm] = useState<ProfileForm | null>(null);
+  const [planForm, setPlanForm] = useState<PlanDraft | null>(null);
   const [pendingInput, setPendingInput] = useState<GeneratePlanInput | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fuelingOn, setFuelingOn] = useState(() => localStorage.getItem('runcast.fueling') !== 'off');
 
-  const form = formOverride ?? (profile ? profileFormFrom(profile) : null);
-
-  function setForm(next: ProfileForm) {
-    setFormOverride(next);
-  }
-
-  function buildPlanForm(): PlanForm {
-    const race = plan?.races ?? null;
-    return {
-      raceDate: race?.race_date ?? plan?.race_date ?? '',
-      distanceKm: race ? String(race.distance_km) : '42.195',
-      goalTime: race?.goal_time_sec ? formatDuration(race.goal_time_sec) : '',
-      recentDistanceKm: '',
-      recentTime: '',
-      daysPerWeek: (plan?.days_per_week as 3 | 4 | 5 | 6) ?? 4,
-      longRunDay: plan?.long_run_day ?? 6,
-      experience: (profile?.experience as 'first' | 'experienced') ?? 'first',
-      volumeBand: (profile?.volume_band as VolumeBand) ?? '20-40',
-    };
-  }
+  const form = profileForm ?? (profile ? profileFormFrom(profile) : null);
 
   async function handleSaveProfile() {
     if (!form) return;
@@ -129,60 +99,56 @@ export function SettingsPage() {
         sex: form.sex === '' ? null : form.sex,
         run_window: form.runWindow,
         weather_refresh_minutes: form.weatherRefreshMinutes,
+        public_profile: form.publicProfile,
       });
-      setNotice('Profil je sačuvan.');
+      setProfileForm(null);
+      setNotice(t('profile.saved'));
     } catch (caught) {
-      setError(caught instanceof Error ? authErrorMessage(caught.message) : 'Čuvanje nije uspelo');
+      setError(caught instanceof Error ? t(authErrorMessage(caught.message)) : t('errors.saveFailed'));
     }
   }
 
-  function buildPlanInput(): GeneratePlanInput | null {
+  function buildPlanForm(): PlanDraft {
+    const race = plan?.races ?? null;
+    return {
+      raceDate: race?.race_date ?? plan?.race_date ?? '',
+      distanceKm: race ? String(race.distance_km) : '42.195',
+      goalTime: race?.goal_time_sec ? formatDuration(race.goal_time_sec) : '',
+      recentDistanceKm: '',
+      recentTime: '',
+      daysPerWeek: (plan?.days_per_week as 3 | 4 | 5 | 6) ?? 4,
+      longRunDay: plan?.long_run_day ?? 6,
+      experience: profile?.experience === 'experienced' ? 'experienced' : 'first',
+    };
+  }
+
+  function collectPlanInput(): GeneratePlanInput | null {
     if (!planForm) return null;
     setError(null);
     setNotice(null);
-    if (!planForm.raceDate) {
-      setError('Izaberi datum trke ili ciljni datum');
+    const draftError = validatePlanDraft(planForm, ['raceDate', 'goalTime', 'recentRace'], todayIso());
+    if (draftError) {
+      setError(t(`errors.${draftError}`));
       return null;
     }
-    if (planForm.raceDate <= todayIso()) {
-      setError('Datum mora biti u budućnosti');
-      return null;
-    }
-    const goalTimeSec = planForm.goalTime.trim() ? tryParseTime(planForm.goalTime) : null;
-    if (planForm.goalTime.trim() && !goalTimeSec) {
-      setError('Ciljno vreme unesi kao h:mm:ss (npr. 3:45:00)');
-      return null;
-    }
-    const recentTimeSec = planForm.recentTime.trim() ? tryParseTime(planForm.recentTime) : null;
-    if (planForm.recentTime.trim() && (!recentTimeSec || !planForm.recentDistanceKm)) {
-      setError('Za poslednju trku izaberi distancu i vreme kao mm:ss');
-      return null;
-    }
-    return {
-      race: { name: null, raceDate: planForm.raceDate, distanceKm: Number(planForm.distanceKm), goalTimeSec },
-      recentRace:
-        recentTimeSec && planForm.recentDistanceKm
-          ? { distanceKm: Number(planForm.recentDistanceKm), timeSec: recentTimeSec }
-          : null,
-      daysPerWeek: planForm.daysPerWeek,
-      longRunDay: planForm.longRunDay,
-      experience: planForm.experience,
-      volumeBand: planForm.volumeBand,
-    };
+    return buildPlanInput(planForm, {
+      hasRace: true,
+      volumeBand: (profile?.volume_band as VolumeBand | null) ?? '20-40',
+    });
   }
 
   async function runGenerate(input: GeneratePlanInput) {
     try {
       await generatePlan.mutateAsync(input);
       setPlanForm(null);
-      setNotice('Novi plan je spreman, stari je arhiviran.');
+      setNotice(t('plan.generated'));
     } catch {
-      setError('Plan nije uspeo da se napravi — hajde ponovo.');
+      setError(t('plan.generateFailed'));
     }
   }
 
   function handleGenerateClick() {
-    const input = buildPlanInput();
+    const input = collectPlanInput();
     if (!input) return;
     const usesBasePlan = !input.recentRace && !input.race?.goalTimeSec;
     if (usesBasePlan) {
@@ -202,9 +168,9 @@ export function SettingsPage() {
         runWindow: (profile?.run_window as RunWindow | undefined) ?? 'morning',
         paces: (plan.paces ?? null) as unknown as PlanPaces | null,
       });
-      setNotice('Plan je izvezen.');
+      setNotice(t('plan.exported'));
     } catch {
-      setError('Izvoz nije uspeo — hajde ponovo.');
+      setError(t('plan.exportFailed'));
     }
   }
 
@@ -213,7 +179,21 @@ export function SettingsPage() {
   return (
     <div className="space-y-6">
       <section className="space-y-2">
-        <SectionHeader label="Izgled" />
+        <SectionHeader label={t('language.label')} />
+        <AppCard>
+          <SegmentedControl
+            value={language}
+            onChange={setLanguage}
+            options={[
+              { value: 'sr', label: t('language.sr') },
+              { value: 'en', label: t('language.en') },
+            ]}
+          />
+        </AppCard>
+      </section>
+
+      <section className="space-y-2">
+        <SectionHeader label={t('appearance.label')} />
         <AppCard>
           <ThemeToggle />
         </AppCard>
@@ -221,72 +201,83 @@ export function SettingsPage() {
 
       {form ? (
         <section className="space-y-2">
-          <SectionHeader label="Profil" />
+          <SectionHeader label={t('profile.label')} />
           <AppCard className="space-y-4">
-            <AppInput
-              label="Ime"
-              value={form.displayName}
-              onChange={(event) => setForm({ ...form, displayName: event.target.value })}
+            <AvatarUpload
+              avatarUrl={profile?.avatar_url ?? null}
+              displayName={form.displayName.trim() || profile?.display_name || null}
             />
+            <AppInput
+              label={t('profile.name')}
+              value={form.displayName}
+              onChange={(event) => setProfileForm({ ...form, displayName: event.target.value })}
+            />
+            <div data-testid="public-profile">
+              <p className="section-label mb-1.5">{t('profile.publicProfile')}</p>
+              <SegmentedControl
+                value={form.publicProfile ? 'on' : 'off'}
+                onChange={(value) => setProfileForm({ ...form, publicProfile: value === 'on' })}
+                options={[
+                  { value: 'on', label: t('profile.publicProfilePublic') },
+                  { value: 'off', label: t('profile.publicProfilePrivate') },
+                ]}
+              />
+              <p className="mt-2 text-caption text-text-muted">{t('profile.publicProfileHint')}</p>
+              <Link to="/leaderboard" className="mt-2 inline-flex text-caption font-medium text-primary-ink">
+                {t('profile.openLeaderboard')}
+              </Link>
+            </div>
             <CityPicker
               city={form.city}
-              onSelect={(place) => setForm({ ...form, city: place.name, lat: place.lat, lon: place.lon })}
+              onSelect={(place) => setProfileForm({ ...form, city: place.name, lat: place.lat, lon: place.lon })}
               onManualInput={() => {
-                if (form.lat !== null || form.lon !== null) setForm({ ...form, lat: null, lon: null });
+                if (form.lat !== null || form.lon !== null) setProfileForm({ ...form, lat: null, lon: null });
               }}
             />
             <div className="grid grid-cols-3 gap-3">
               <AppInput
-                label="Visina (cm)"
+                label={t('profile.height')}
                 type="number"
                 value={form.heightCm}
-                onChange={(event) => setForm({ ...form, heightCm: event.target.value })}
+                onChange={(event) => setProfileForm({ ...form, heightCm: event.target.value })}
               />
               <AppInput
-                label="Težina (kg)"
+                label={t('profile.weight')}
                 type="number"
                 value={form.weightKg}
-                onChange={(event) => setForm({ ...form, weightKg: event.target.value })}
+                onChange={(event) => setProfileForm({ ...form, weightKg: event.target.value })}
               />
               <AppInput
-                label="Rođenje"
+                label={t('profile.birthYear')}
                 type="number"
                 value={form.birthYear}
-                onChange={(event) => setForm({ ...form, birthYear: event.target.value })}
+                onChange={(event) => setProfileForm({ ...form, birthYear: event.target.value })}
               />
             </div>
             <AppSelect
-              label="Pol"
+              label={t('profile.sex')}
               value={form.sex}
-              onChange={(event) => setForm({ ...form, sex: event.target.value as ProfileForm['sex'] })}
+              onChange={(event) => setProfileForm({ ...form, sex: event.target.value as ProfileForm['sex'] })}
             >
               <option value="">—</option>
-              <option value="male">Muški</option>
-              <option value="female">Ženski</option>
-              <option value="other">Drugo</option>
+              <option value="male">{t('profile.sexMale')}</option>
+              <option value="female">{t('profile.sexFemale')}</option>
+              <option value="other">{t('profile.sexOther')}</option>
             </AppSelect>
-          </AppCard>
-        </section>
-      ) : null}
-
-      {form ? (
-        <section className="space-y-2">
-          <SectionHeader label="Trening" />
-          <AppCard className="space-y-4">
             <div>
-              <p className="section-label mb-1.5">Deo dana za trening</p>
+              <p className="section-label mb-1.5">{t('training.runWindow')}</p>
               <SegmentedControl
                 value={form.runWindow}
-                onChange={(value) => setForm({ ...form, runWindow: value })}
+                onChange={(runWindow) => setProfileForm({ ...form, runWindow })}
                 options={[
-                  { value: 'morning', label: 'Jutro' },
-                  { value: 'evening', label: 'Veče' },
-                  { value: 'flexible', label: 'Fleksibilno' },
+                  { value: 'morning', label: t('training.runWindowMorning') },
+                  { value: 'evening', label: t('training.runWindowEvening') },
+                  { value: 'flexible', label: t('training.runWindowFlexible') },
                 ]}
               />
             </div>
             <div>
-              <p className="section-label mb-1.5">Podsetnici za gorivo</p>
+              <p className="section-label mb-1.5">{t('training.fueling')}</p>
               <SegmentedControl
                 value={fuelingOn ? 'on' : 'off'}
                 onChange={(value) => {
@@ -294,159 +285,105 @@ export function SettingsPage() {
                   localStorage.setItem('runcast.fueling', value);
                 }}
                 options={[
-                  { value: 'on', label: 'Uključeno' },
-                  { value: 'off', label: 'Isključeno' },
+                  { value: 'on', label: t('training.fuelingOn') },
+                  { value: 'off', label: t('training.fuelingOff') },
                 ]}
               />
             </div>
             <div>
-              <p className="section-label mb-1.5">Osvežavanje prognoze</p>
+              <p className="section-label mb-1.5">{t('training.weatherRefresh')}</p>
               <SegmentedControl
                 value={form.weatherRefreshMinutes}
-                onChange={(value) => setForm({ ...form, weatherRefreshMinutes: value })}
+                onChange={(weatherRefreshMinutes) => setProfileForm({ ...form, weatherRefreshMinutes })}
                 options={REFRESH_OPTIONS}
               />
               <button
                 type="button"
-                onClick={() => setForm({ ...form, weatherRefreshMinutes: null })}
+                onClick={() => setProfileForm({ ...form, weatherRefreshMinutes: null })}
                 className={`mt-2 rounded-lg px-3 py-1.5 text-caption font-medium ${
                   form.weatherRefreshMinutes === null
                     ? 'bg-rain-soft text-rain-ink'
                     : 'bg-surface-elevated text-text-muted hover:text-text-secondary'
                 }`}
               >
-                Samo na otvaranje
+                {t('training.onOpen')}
               </button>
             </div>
             <AppButton onClick={() => void handleSaveProfile()} loading={updateProfile.isPending}>
-              Sačuvaj profil
+              {t('training.saveProfile')}
             </AppButton>
           </AppCard>
         </section>
       ) : null}
 
       <section className="space-y-2">
-        <SectionHeader label="Plan" action={plan ? <AppBadge tone="primary">{plan.weeks} nedelja</AppBadge> : null} />
+        <SectionHeader
+          label={t('plan.label')}
+          action={plan ? <AppBadge tone="primary">{t('plan.weeks', { weeks: plan.weeks })}</AppBadge> : null}
+        />
         {plan ? (
           <AppCard className="space-y-2 border-primary/40 bg-gradient-to-b from-primary-soft to-transparent">
-            <p className="section-label">Ciljna trka</p>
-            <p className="text-sm font-medium">{plan.races?.name ?? 'Trka bez naziva'}</p>
+            <p className="section-label">{t('plan.goalRace')}</p>
+            <p className="text-sm font-medium">{plan.races?.name ?? t('plan.raceFallback')}</p>
             {daysToRace !== null && daysToRace >= 0 ? (
               <p className="flex items-baseline gap-2">
                 <span className="num text-hero font-bold text-primary-ink">{daysToRace}</span>
-                <span className="text-sm text-text-secondary">dana do trke</span>
+                <span className="text-sm text-text-secondary">{t('plan.daysToRace')}</span>
               </p>
             ) : null}
             <p className="num text-caption text-text-muted">
-              {formatDateShort(plan.race_date)} · {plan.days_per_week} dana nedeljno · faze: baza → izgradnja → vrh →
-              taper
+              {t('plan.meta', { date: formatDateShort(plan.race_date), days: plan.days_per_week })}
             </p>
+            <div className="rounded-xl bg-surface-elevated p-3">
+              <p className="text-sm text-text-secondary">{t('plan.benchmarkHint')}</p>
+              <Link
+                to="/benchmark"
+                className="mt-1 inline-block text-sm font-medium text-primary-ink hover:text-primary-ink-hover"
+              >
+                {t('plan.benchmarkCta')}
+              </Link>
+            </div>
             <AppButton
               variant="secondary"
               className="w-full"
               loading={exportPlan.isPending}
               onClick={() => void handleExportPlan()}
             >
-              <Download className="h-4 w-4" aria-hidden /> Izvezi plan (.ics)
+              <Download className="h-4 w-4" aria-hidden /> {t('plan.export')}
             </AppButton>
           </AppCard>
         ) : (
           <AppCard>
-            <p className="text-sm text-text-muted">Još nemamo plan.</p>
+            <p className="text-sm text-text-muted">{t('plan.noPlan')}</p>
           </AppCard>
         )}
         {planForm ? (
           <AppCard className="space-y-3">
-            <p className="text-sm font-medium">Novi plan (stari se arhivira)</p>
-            <AppInput
-              label="Datum trke / ciljni datum"
-              type="date"
-              value={planForm.raceDate}
-              onChange={(event) => setPlanForm({ ...planForm, raceDate: event.target.value })}
+            <p className="text-sm font-medium">{t('plan.newPlan')}</p>
+            <PlanFields
+              variant="settings"
+              groups={['race', 'goal', 'schedule', 'experience']}
+              value={planForm}
+              onChange={(patch) => setPlanForm({ ...planForm, ...patch })}
             />
-            <AppSelect
-              label="Distanca"
-              value={planForm.distanceKm}
-              onChange={(event) => setPlanForm({ ...planForm, distanceKm: event.target.value })}
-            >
-              <option value="42.195">Maraton</option>
-              <option value="21.0975">Polumaraton</option>
-              <option value="10">10 km</option>
-              <option value="5">5 km</option>
-            </AppSelect>
-            <div className="grid grid-cols-2 gap-3">
-              <AppInput
-                label="Ciljno vreme (opciono)"
-                placeholder="3:45:00"
-                value={planForm.goalTime}
-                onChange={(event) => setPlanForm({ ...planForm, goalTime: event.target.value })}
-              />
-              <AppInput
-                label="Ref. distanca (km)"
-                placeholder="10"
-                value={planForm.recentDistanceKm}
-                onChange={(event) => setPlanForm({ ...planForm, recentDistanceKm: event.target.value })}
-              />
-            </div>
-            <AppInput
-              label="Ref. vreme (mm:ss, opciono)"
-              placeholder="50:30"
-              value={planForm.recentTime}
-              onChange={(event) => setPlanForm({ ...planForm, recentTime: event.target.value })}
-            />
-            <div>
-              <p className="section-label mb-1.5">Dani nedeljno</p>
-              <SegmentedControl
-                value={planForm.daysPerWeek}
-                onChange={(value) => setPlanForm({ ...planForm, daysPerWeek: value })}
-                options={[
-                  { value: 3, label: '3' },
-                  { value: 4, label: '4' },
-                  { value: 5, label: '5' },
-                  { value: 6, label: '6' },
-                ]}
-              />
-            </div>
-            <AppSelect
-              label="Dan dugog trčanja"
-              value={String(planForm.longRunDay)}
-              onChange={(event) => setPlanForm({ ...planForm, longRunDay: Number(event.target.value) })}
-            >
-              {DAY_LABELS.map((label, index) => (
-                <option key={label} value={index}>
-                  {label}
-                </option>
-              ))}
-            </AppSelect>
-            <div>
-              <p className="section-label mb-1.5">Iskustvo</p>
-              <SegmentedControl
-                value={planForm.experience}
-                onChange={(value) => setPlanForm({ ...planForm, experience: value })}
-                options={[
-                  { value: 'first', label: 'Prvi put' },
-                  { value: 'experienced', label: 'Iskusan' },
-                ]}
-              />
-            </div>
             <div className="flex gap-3">
               <AppButton variant="secondary" className="flex-1" onClick={() => setPlanForm(null)}>
-                Otkaži
+                {t('cancel')}
               </AppButton>
               <AppButton className="flex-1" loading={generatePlan.isPending} onClick={() => handleGenerateClick()}>
-                <RefreshCw className="h-4 w-4" aria-hidden /> Generiši
+                <RefreshCw className="h-4 w-4" aria-hidden /> {t('plan.generate')}
               </AppButton>
             </div>
           </AppCard>
         ) : (
           <AppButton variant="secondary" className="w-full" onClick={() => setPlanForm(buildPlanForm())}>
-            <RefreshCw className="h-4 w-4" aria-hidden /> Generiši novi plan
+            <RefreshCw className="h-4 w-4" aria-hidden /> {t('plan.generateNew')}
           </AppButton>
         )}
       </section>
 
       <section className="space-y-2">
-        <SectionHeader label="Nalog" />
+        <SectionHeader label={t('account.label')} />
         <AppCard className="space-y-2">
           <p className="break-all text-caption text-text-muted">{session?.user.email}</p>
           <AppButton
@@ -457,7 +394,7 @@ export function SettingsPage() {
               void signOut();
             }}
           >
-            <LogOut className="h-4 w-4" aria-hidden /> Odjavi se
+            <LogOut className="h-4 w-4" aria-hidden /> {t('account.signOut')}
           </AppButton>
         </AppCard>
       </section>
@@ -473,9 +410,9 @@ export function SettingsPage() {
 
       <ConfirmDialog
         open={pendingInput !== null}
-        title="Generisati bazni plan?"
-        description="Bez ciljnog vremena ili rezultata trke, plan nema kvalitetne treninge ni ciljne tempe — dobijaš samo lagano trčanje. Nastaviti?"
-        confirmLabel="Generiši bazni plan"
+        title={t('plan.baseConfirmTitle')}
+        description={t('plan.baseConfirmText')}
+        confirmLabel={t('plan.baseConfirmAction')}
         loading={generatePlan.isPending}
         onConfirm={() => {
           const input = pendingInput;

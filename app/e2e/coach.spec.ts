@@ -1,10 +1,13 @@
 import { expect, test, type Page } from '@playwright/test';
-import { isoFromNow, register, uniqueEmail } from './helpers';
+import { isoFromNow, mockGeocoding, register, uniqueEmail } from './helpers';
 
 const MS_PER_DAY = 86_400_000;
 
 function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${now.getFullYear()}-${month}-${day}`;
 }
 
 function addDaysIso(iso: string, days: number): string {
@@ -12,7 +15,7 @@ function addDaysIso(iso: string, days: number): string {
 }
 
 function todayWeekdayIndex(): number {
-  return (new Date().getUTCDay() + 6) % 7;
+  return (new Date().getDay() + 6) % 7;
 }
 
 function kmFromLabel(label: string): number {
@@ -53,6 +56,7 @@ async function openTargetRun(page: Page, date: string): Promise<string> {
 
 test('adaptivni trener: RPE insajt skalira sledeću nedelju', async ({ page }) => {
   const email = uniqueEmail('coach');
+  await mockGeocoding(page);
   await register(page, email);
   await completeOnboarding(page);
 

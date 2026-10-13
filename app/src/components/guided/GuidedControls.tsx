@@ -1,4 +1,5 @@
 import { Pause, Play, SkipBack, SkipForward } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { AppButton } from '@/components/ui/AppButton';
 import type { GuidedPhase } from '@/components/guided/useGuidedClock';
 
@@ -11,17 +12,18 @@ interface GuidedControlsProps {
 }
 
 export function GuidedControls({ phase, canGoBack, onTogglePause, onNext, onBack }: GuidedControlsProps) {
+  const { t } = useTranslation('guided');
   const paused = phase === 'paused';
   return (
     <div className="space-y-2">
       <AppButton data-testid="guided-pause" size="lg" className="w-full" onClick={onTogglePause}>
         {paused ? (
           <>
-            <Play className="h-5 w-5" aria-hidden /> Nastavi
+            <Play className="h-5 w-5" aria-hidden /> {t('controls.resume')}
           </>
         ) : (
           <>
-            <Pause className="h-5 w-5" aria-hidden /> Pauza
+            <Pause className="h-5 w-5" aria-hidden /> {t('controls.pause')}
           </>
         )}
       </AppButton>
@@ -33,10 +35,10 @@ export function GuidedControls({ phase, canGoBack, onTogglePause, onNext, onBack
           disabled={!canGoBack}
           onClick={onBack}
         >
-          <SkipBack className="h-4 w-4" aria-hidden /> Nazad
+          <SkipBack className="h-4 w-4" aria-hidden /> {t('common:actions.back')}
         </AppButton>
         <AppButton data-testid="guided-next" variant="secondary" className="flex-1" onClick={onNext}>
-          Dalje <SkipForward className="h-4 w-4" aria-hidden />
+          {t('common:actions.next')} <SkipForward className="h-4 w-4" aria-hidden />
         </AppButton>
       </div>
     </div>

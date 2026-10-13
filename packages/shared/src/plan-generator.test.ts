@@ -1,26 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { addDays, dayDiff, weekdayOf } from './dates';
 import { generatePlan } from './plan-generator';
 import type { PlanConfig, VolumeBand, WorkoutDraft } from './types';
 
 const QUALITY_TYPES = ['TEMPO', 'INTERVALS', 'REPETITIONS'];
 const RUN_TYPES = ['EASY', 'LONG', 'TEMPO', 'INTERVALS', 'REPETITIONS', 'RACE'];
-const MS_PER_DAY = 86_400_000;
-
-function parseIso(iso: string): number {
-  return new Date(`${iso}T00:00:00.000Z`).getTime();
-}
-
-function addDaysIso(iso: string, days: number): string {
-  return new Date(parseIso(iso) + days * MS_PER_DAY).toISOString().slice(0, 10);
-}
-
-function dayDiff(from: string, to: string): number {
-  return Math.round((parseIso(to) - parseIso(from)) / MS_PER_DAY);
-}
-
-function weekday(iso: string): number {
-  return (new Date(`${iso}T00:00:00.000Z`).getUTCDay() + 6) % 7;
-}
 
 const fullConfig: PlanConfig = {
   raceDate: '2026-05-10',
@@ -82,11 +66,19 @@ describe('generatePlan', () => {
     expect(last?.distanceKm).toBe(42.195);
   });
 
+  it('keeps the numeric(6,2) stored race distance within the 0.01 km card tolerance', () => {
+    const race = generatePlan(fullConfig).workouts.at(-1);
+    const stored = Math.round((race?.distanceKm ?? 0) * 100) / 100;
+    expect(race?.distanceKm).toBe(42.195);
+    expect(stored).toBe(42.2);
+    expect(Math.abs(stored - (race?.distanceKm ?? 0))).toBeLessThan(0.01);
+  });
+
   it('keeps every long run on the chosen day', () => {
     const plan = generatePlan(fullConfig);
     for (const workout of plan.workouts) {
       if (workout.date === fullConfig.raceDate) continue;
-      if (weekday(workout.date) === fullConfig.longRunDay) expect(workout.type).toBe('LONG');
+      if (weekdayOf(workout.date) === fullConfig.longRunDay) expect(workout.type).toBe('LONG');
     }
     expect(plan.workouts.filter((workout) => workout.type === 'LONG')).toHaveLength(17);
   });
@@ -135,7 +127,7 @@ describe('generatePlan', () => {
     }
     for (const workout of plan.workouts) {
       if (workout.weekIndex === plan.weeks - 1) continue;
-      if (weekday(workout.date) === 0) expect(workout.type).toBe('LONG');
+      if (weekdayOf(workout.date) === 0) expect(workout.type).toBe('LONG');
     }
   });
 
@@ -181,7 +173,7 @@ describe('generatePlan weekday alignment', () => {
     expect(plan.workouts.at(-1)?.date).toBe('2026-05-10');
     for (const workout of plan.workouts) {
       if (workout.date === fullConfig.raceDate) continue;
-      if (weekday(workout.date) === fullConfig.longRunDay) expect(workout.type).toBe('LONG');
+      if (weekdayOf(workout.date) === fullConfig.longRunDay) expect(workout.type).toBe('LONG');
     }
     const longRuns = plan.workouts.filter((workout) => workout.type === 'LONG');
     expect(longRuns.length).toBeGreaterThanOrEqual(16);
@@ -189,7 +181,7 @@ describe('generatePlan weekday alignment', () => {
 
   it('keeps long runs at least a week away from the race for every race weekday', () => {
     for (let offset = 0; offset < 7; offset++) {
-      const raceDate = addDaysIso('2026-05-11', offset);
+      const raceDate = addDays('2026-05-11', offset);
       const plan = generatePlan({ ...fullConfig, raceDate });
       const longRuns = plan.workouts.filter((workout) => workout.type === 'LONG');
       for (const longRun of longRuns) {
@@ -216,7 +208,7 @@ describe('generatePlan weekday alignment', () => {
       const forbidden = new Set([(longRunDay + 6) % 7, longRunDay, (longRunDay + 1) % 7]);
       for (const workout of plan.workouts) {
         if (!QUALITY_TYPES.includes(workout.type)) continue;
-        expect(forbidden.has(weekday(workout.date))).toBe(false);
+        expect(forbidden.has(weekdayOf(workout.date))).toBe(false);
       }
     }
   });

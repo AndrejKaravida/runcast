@@ -15,6 +15,7 @@ import {
   type RunWindow,
 } from '@runcast/shared';
 import { ArrowLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
@@ -32,19 +33,19 @@ import { dayDiff, formatDateLong, todayIso } from '@/lib/dates';
 const CHECKLIST_STORAGE_PREFIX = 'runcast.raceDay.checklist';
 const FORECAST_HORIZON_DAYS = 6;
 
-const FINAL_WEEK_TIPS = [
-  'Taper: smanji volumen, ali zadrži kratka ubrzanja da ostaneš šarp.',
-  'Probaj doručak i kompletnu opremu pre trke — ništa novo na dan trke.',
-  'Ugljene hidrate raspodeli kroz obroke umesto jednog velikog obroka.',
-  'Reši logistiku: ruta do starta, preuzimanje broja i drop-bag.',
-  'Spavaj dobro dve noći pre — noć pred trku je često nervozna i to je u redu.',
-  'Šejkaut dan pre po želji: 15–20 min lagano i par ubrzanja.',
+const FINAL_WEEK_TIP_KEYS = [
+  'finalWeek.tip1',
+  'finalWeek.tip2',
+  'finalWeek.tip3',
+  'finalWeek.tip4',
+  'finalWeek.tip5',
+  'finalWeek.tip6',
 ];
 
-const CHECKLIST_GROUPS: { key: ChecklistGroup; label: string }[] = [
-  { key: 'dan_pre', label: 'Veče pre' },
-  { key: 'jutro', label: 'Jutro' },
-  { key: 'staza', label: 'Na stazi' },
+const CHECKLIST_GROUPS: { key: ChecklistGroup; labelKey: string }[] = [
+  { key: 'dan_pre', labelKey: 'checklist.evening' },
+  { key: 'jutro', labelKey: 'checklist.morning' },
+  { key: 'staza', labelKey: 'checklist.course' },
 ];
 
 function readChecklist(storageKey: string): string[] {
@@ -88,12 +89,13 @@ interface RaceChecklistCardProps {
 }
 
 function RaceChecklistCard({ raceDate, items }: RaceChecklistCardProps) {
+  const { t } = useTranslation('race');
   const checklist = useRaceChecklist(raceDate, items);
 
   return (
     <AppCard data-testid="race-checklist" className="space-y-3">
       <SectionHeader
-        label="Checklist"
+        label={t('checklist.title')}
         action={
           <span className="num text-caption text-text-muted">
             {checklist.checked.length}/{items.length}
@@ -102,7 +104,7 @@ function RaceChecklistCard({ raceDate, items }: RaceChecklistCardProps) {
       />
       {CHECKLIST_GROUPS.map((group) => (
         <div key={group.key} className="space-y-1">
-          <p className="section-label">{group.label}</p>
+          <p className="section-label">{t(group.labelKey)}</p>
           <ul className="divide-y divide-border">
             {items
               .filter((item) => item.group === group.key)
@@ -115,7 +117,9 @@ function RaceChecklistCard({ raceDate, items }: RaceChecklistCardProps) {
                       checked={checklist.checked.includes(item.id)}
                       onChange={() => checklist.toggle(item.id)}
                     />
-                    <span className="min-w-0 flex-1 text-sm text-text-secondary">{item.label}</span>
+                    <span className="min-w-0 flex-1 text-sm text-text-secondary">
+                      {t(item.label.key, item.label.params)}
+                    </span>
                   </label>
                 </li>
               ))}
@@ -127,6 +131,7 @@ function RaceChecklistCard({ raceDate, items }: RaceChecklistCardProps) {
 }
 
 export function RaceDayPage() {
+  const { t } = useTranslation('race');
   const navigate = useNavigate();
   const today = todayIso();
   const { data: plan, isLoading, isError, refetch } = useActivePlan();
@@ -134,19 +139,21 @@ export function RaceDayPage() {
   const weather = useWeather();
   const raceInfo = plan?.races ?? null;
   const distanceKm = raceInfo?.distance_km ?? 0;
+  const hasDistance = distanceKm > 0;
   const raceDate = raceInfo?.race_date ?? today;
   const daysToRace = raceInfo ? dayDiff(today, raceInfo.race_date) : null;
   const runWindow: RunWindow = (profile?.run_window as RunWindow | undefined) ?? 'morning';
   const window = runWindowHours(runWindow);
 
   const goalTimeSec = useMemo(() => {
-    if (!raceInfo) return null;
+    if (!raceInfo || raceInfo.distance_km <= 0) return null;
     if (raceInfo.goal_time_sec) return raceInfo.goal_time_sec;
     const vdot = vdotFromPlan({
       paces: (plan?.paces ?? null) as unknown as PlanPaces | null,
       anchor: (plan?.anchor ?? null) as unknown as PlanAnchor | null,
     });
-    return vdot ? predictRaceTimes(vdot, [raceInfo.distance_km])[0].timeSec : null;
+    if (!vdot) return null;
+    return predictRaceTimes(vdot, [raceInfo.distance_km])?.[0]?.timeSec ?? null;
   }, [raceInfo, plan?.paces, plan?.anchor]);
 
   const weatherNote = useMemo(() => {
@@ -186,11 +193,11 @@ export function RaceDayPage() {
     return (
       <div className="mx-auto w-full max-w-[560px] px-4 py-6">
         <EmptyState
-          title="Nema aktivne trke"
-          description="Napravi plan sa ciljnom trkom da otvoriš strategiju za dan trke."
+          title={t('empty.title')}
+          description={t('empty.description')}
           action={
             <Link to="/settings">
-              <AppButton size="sm">Otvori podešavanja</AppButton>
+              <AppButton size="sm">{t('openSettings')}</AppButton>
             </Link>
           }
         />
@@ -202,30 +209,31 @@ export function RaceDayPage() {
     <div className="mx-auto w-full max-w-[560px] space-y-5 px-4 py-6">
       <div className="flex items-center justify-between">
         <AppButton variant="ghost" size="sm" className="-ml-2 w-auto" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-4 w-4" aria-hidden /> Nazad
+          <ArrowLeft className="h-4 w-4" aria-hidden /> {t('common:actions.back')}
         </AppButton>
       </div>
 
       <AppCard className="space-y-2 border-primary/40 bg-gradient-to-b from-primary-soft to-transparent">
-        <p className="section-label">Dan trke</p>
-        <h1 className="text-2xl font-semibold tracking-display">{raceInfo.name ?? 'Trka bez naziva'}</h1>
+        <p className="section-label">{t('label')}</p>
+        <h1 className="text-2xl font-semibold tracking-display">{raceInfo.name ?? t('untitled')}</h1>
         <p className="num text-sm text-text-secondary">
-          {formatDateLong(raceInfo.race_date)} · {raceInfo.distance_km} km
+          {formatDateLong(raceInfo.race_date)}
+          {hasDistance ? ` · ${raceInfo.distance_km} km` : ''}
         </p>
         {daysToRace !== null && daysToRace >= 0 ? (
           <p className="flex items-baseline gap-2">
             <span className="num value-swap text-hero font-bold text-primary-ink">{daysToRace}</span>
             <span className="text-sm text-text-secondary">
-              {daysToRace === 0 ? 'danas je dan trke' : 'dana do trke'}
+              {daysToRace === 0 ? t('daysTo.today') : t('daysTo.upcoming')}
             </span>
           </p>
         ) : null}
         {goalTimeSec ? (
           <StatRow
             items={[
-              { label: 'Ciljno vreme', value: formatDuration(goalTimeSec) },
+              { label: t('goal.time'), value: formatDuration(goalTimeSec) },
               {
-                label: 'Ciljni tempo',
+                label: t('goal.pace'),
                 value: `${formatPace(Math.round(goalTimeSec / raceInfo.distance_km))} /km`,
               },
             ]}
@@ -233,19 +241,19 @@ export function RaceDayPage() {
           />
         ) : (
           <div className="rounded-xl bg-surface-elevated p-3">
-            <p className="text-sm text-text-secondary">Postavi ciljno vreme da dobiješ plan tempa.</p>
+            <p className="text-sm text-text-secondary">{hasDistance ? t('goal.missing') : t('goal.missingDistance')}</p>
             <Link
               to="/settings"
               className="mt-1 inline-block text-sm font-medium text-primary-ink hover:text-primary-ink-hover"
             >
-              Otvori podešavanja
+              {t('openSettings')}
             </Link>
           </div>
         )}
         {weatherNote ? (
           <div className="rounded-xl bg-surface-elevated p-3">
-            <p className="section-label">Prognoza za trku</p>
-            <p className="mt-1 text-sm text-text-secondary">{weatherNote}</p>
+            <p className="section-label">{t('forecast')}</p>
+            <p className="mt-1 text-sm text-text-secondary">{t(weatherNote.key, weatherNote.params)}</p>
           </div>
         ) : null}
       </AppCard>
@@ -255,14 +263,14 @@ export function RaceDayPage() {
       <RaceChecklistCard key={raceDate} raceDate={raceDate} items={items} />
 
       <AppCard className="space-y-2">
-        <SectionHeader label="Poslednja nedelja" />
+        <SectionHeader label={t('finalWeek.title')} />
         <ul className="space-y-1.5">
-          {FINAL_WEEK_TIPS.map((tip) => (
-            <li key={tip} className="flex gap-2 text-sm text-text-secondary">
+          {FINAL_WEEK_TIP_KEYS.map((key) => (
+            <li key={key} className="flex gap-2 text-sm text-text-secondary">
               <span className="text-primary-ink" aria-hidden>
                 •
               </span>
-              <span className="min-w-0 flex-1">{tip}</span>
+              <span className="min-w-0 flex-1">{t(key)}</span>
             </li>
           ))}
         </ul>

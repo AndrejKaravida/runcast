@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { isoFromNow, register, uniqueEmail } from './helpers';
+import { isoFromNow, mockGeocoding, register, uniqueEmail } from './helpers';
 
 test('predikcija trke i lični rekordi', async ({ page }) => {
   const email = uniqueEmail('predictor');
+  await mockGeocoding(page);
   await register(page, email);
 
   await page.getByLabel('Naziv trke (opciono)').fill('F3 trka');
@@ -17,7 +18,7 @@ test('predikcija trke i lični rekordi', async ({ page }) => {
   await page.getByRole('button', { name: 'Dalje' }).click();
 
   await page.getByRole('button', { name: 'Dalje' }).click();
-  await page.getByLabel('Dan dugog trčanja').selectOption('0');
+  await page.getByLabel('Dan dugog trčanja').selectOption(String((new Date().getDay() + 6) % 7));
   await page.getByRole('button', { name: 'Dalje' }).click();
 
   await page.getByLabel('Grad', { exact: true }).fill('Novi Sad');

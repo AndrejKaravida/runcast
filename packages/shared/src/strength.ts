@@ -1,6 +1,5 @@
 import type { Experience, PlanPhase, WorkoutDraft, WorkoutStep } from './types';
-
-const MS_PER_DAY = 86_400_000;
+import { addDays, weekdayOf } from './dates';
 
 export interface StrengthWeekInput {
   weekStart: string;
@@ -42,22 +41,6 @@ const STRENGTH_STEP_SEC = 150;
 const CORE_STEP_SEC = 90;
 const PLYO_STEP_SEC = 60;
 const TAPER_MIN_DAYS = 10;
-
-function parseIso(iso: string): Date {
-  return new Date(`${iso}T00:00:00.000Z`);
-}
-
-function toIso(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
-
-function addDays(iso: string, days: number): string {
-  return toIso(new Date(parseIso(iso).getTime() + days * MS_PER_DAY));
-}
-
-function weekdayOf(iso: string): number {
-  return (parseIso(iso).getUTCDay() + 6) % 7;
-}
 
 export function strengthDaysFor(input: StrengthWeekInput): number[] {
   if (input.isRaceWeek || input.phase === 'RACE') return [];

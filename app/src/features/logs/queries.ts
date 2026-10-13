@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/auth/AuthProvider';
+import { todayIso } from '@/lib/dates';
 import { supabase } from '@/lib/supabase';
 import type { RunLogsRow, WorkoutsRow } from '@/types';
 
@@ -18,29 +19,17 @@ function invalidateWorkoutData(queryClient: ReturnType<typeof useQueryClient>) {
 }
 
 export function useLogWorkout() {
-  const { session } = useAuth();
   const queryClient = useQueryClient();
-  const userId = session?.user.id as string;
   return useMutation({
     mutationFn: async (input: LogWorkoutInput) => {
-      const { error: logError } = await supabase.from('run_logs').insert({
-        user_id: userId,
-        workout_id: input.workout.id,
-        log_date: input.workout.workout_date,
-        distance_km: input.distanceKm,
-        duration_sec: input.durationSec,
-        avg_pace_sec_per_km: Math.round(input.durationSec / input.distanceKm),
-        rpe: input.rpe,
-        notes: input.notes ?? null,
+      const { error } = await supabase.rpc('log_workout', {
+        p_workout_id: input.workout.id,
+        p_distance_km: input.distanceKm,
+        p_duration_sec: input.durationSec,
+        p_rpe: input.rpe,
+        p_notes: input.notes ?? '',
       });
-      if (logError) throw logError;
-
-      const { error: workoutError } = await supabase
-        .from('workouts')
-        .update({ status: 'DONE' })
-        .eq('id', input.workout.id)
-        .eq('user_id', userId);
-      if (workoutError) throw workoutError;
+      if (error) throw error;
     },
     onSuccess: () => invalidateWorkoutData(queryClient),
   });
@@ -74,6 +63,32 @@ export function useCompleteWorkout() {
         .update({ status: 'DONE' })
         .eq('id', workoutId)
         .eq('user_id', userId);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidateWorkoutData(queryClient),
+  });
+}
+
+export interface BenchmarkLogInput {
+  distanceKm: number;
+  durationSec: number;
+}
+
+export function useSaveBenchmarkLog() {
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+  const userId = session?.user.id as string;
+  return useMutation({
+    mutationFn: async (input: BenchmarkLogInput) => {
+      const { error } = await supabase.from('run_logs').insert({
+        user_id: userId,
+        workout_id: null,
+        log_date: todayIso(),
+        distance_km: input.distanceKm,
+        duration_sec: input.durationSec,
+        avg_pace_sec_per_km: Math.round(input.durationSec / input.distanceKm),
+        notes: 'Benchmark',
+      });
       if (error) throw error;
     },
     onSuccess: () => invalidateWorkoutData(queryClient),

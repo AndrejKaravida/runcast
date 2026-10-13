@@ -1,9 +1,10 @@
+import type { LocalizedText } from './types';
 import type { WeatherAssessment } from './weather-rules';
 
 export type RaceStrategy = 'even' | 'negative';
 
 export interface PaceSplit {
-  label: string;
+  label: LocalizedText;
   distanceKm: number;
   paceSecPerKm: number;
   segmentSec: number;
@@ -14,7 +15,7 @@ export type ChecklistGroup = 'dan_pre' | 'jutro' | 'staza';
 
 export interface ChecklistItem {
   id: string;
-  label: string;
+  label: LocalizedText;
   group: ChecklistGroup;
 }
 
@@ -31,10 +32,6 @@ function round3(value: number): number {
   return Math.round(value * 1000) / 1000;
 }
 
-function fmtKm(value: number): string {
-  return Number.isInteger(value) ? String(value) : value.toFixed(1).replace('.', ',');
-}
-
 function segmentDistances(distanceKm: number): number[] {
   const segKm: number = distanceKm >= 10 ? SEGMENT_KM : SHORT_SEGMENT_KM;
   const fullCount = Math.floor(distanceKm / segKm + 1e-9);
@@ -44,9 +41,9 @@ function segmentDistances(distanceKm: number): number[] {
   return segments.length > 0 ? segments : [round3(distanceKm)];
 }
 
-function splitLabel(fromKm: number, toKm: number, index: number, segKm: number): string {
-  if (segKm < SEGMENT_KM) return `${index + 1}. km`;
-  return `${fmtKm(fromKm)}–${fmtKm(toKm)} km`;
+function splitLabel(fromKm: number, toKm: number, index: number, segKm: number): LocalizedText {
+  if (segKm < SEGMENT_KM) return { key: 'content:raceday.split.single', params: { index: index + 1 } };
+  return { key: 'content:raceday.split.range', params: { from: fromKm, to: toKm } };
 }
 
 export function buildPacePlan(goalTimeSec: number, distanceKm: number, strategy: RaceStrategy): PaceSplit[] {
@@ -90,57 +87,53 @@ export function buildPacePlan(goalTimeSec: number, distanceKm: number, strategy:
 export function raceChecklist(distanceKm: number): ChecklistItem[] {
   const long = distanceKm >= LONG_RACE_KM;
   return [
-    { id: 'kit', label: 'Spakuj opremu: patike, čarape, šorc i majicu (probano u treningu)', group: 'dan_pre' },
-    { id: 'bib', label: 'Prikvači startni broj na majicu', group: 'dan_pre' },
-    { id: 'watch', label: 'Napuni sat i telefon', group: 'dan_pre' },
-    ...(long ? [{ id: 'fuel', label: 'Pripremi gelove, elektrolite i flašicu', group: 'dan_pre' as const }] : []),
-    { id: 'logistics', label: 'Proveri rutu do starta i preuzimanje broja', group: 'dan_pre' },
+    { id: 'kit', label: { key: 'content:raceday.checklist.kit' }, group: 'dan_pre' },
+    { id: 'bib', label: { key: 'content:raceday.checklist.bib' }, group: 'dan_pre' },
+    { id: 'watch', label: { key: 'content:raceday.checklist.watch' }, group: 'dan_pre' },
+    ...(long ? [{ id: 'fuel', label: { key: 'content:raceday.checklist.fuel' }, group: 'dan_pre' as const }] : []),
+    { id: 'logistics', label: { key: 'content:raceday.checklist.logistics' }, group: 'dan_pre' },
     ...(long
-      ? [
-          {
-            id: 'drop-bag',
-            label: 'Spakuj drop-bag: suvu majicu, užinu i patike za posle',
-            group: 'dan_pre' as const,
-          },
-        ]
+      ? [{ id: 'drop-bag', label: { key: 'content:raceday.checklist.dropBag' }, group: 'dan_pre' as const }]
       : []),
-    { id: 'alarm', label: 'Postavi dva alarma', group: 'dan_pre' },
-    { id: 'breakfast', label: 'Doručak 2–3 h pre starta (probano u treningu)', group: 'jutro' },
-    { id: 'hydrate', label: 'Popij 200–300 ml vode 60–90 min pre starta', group: 'jutro' },
-    { id: 'antichafe', label: 'Anti-chafe na butine, pazuh i stopala', group: 'jutro' },
-    { id: 'toilet', label: 'WC 30–45 min pre starta', group: 'jutro' },
+    { id: 'alarm', label: { key: 'content:raceday.checklist.alarm' }, group: 'dan_pre' },
+    { id: 'breakfast', label: { key: 'content:raceday.checklist.breakfast' }, group: 'jutro' },
+    { id: 'hydrate', label: { key: 'content:raceday.checklist.hydrate' }, group: 'jutro' },
+    { id: 'antichafe', label: { key: 'content:raceday.checklist.antichafe' }, group: 'jutro' },
+    { id: 'toilet', label: { key: 'content:raceday.checklist.toilet' }, group: 'jutro' },
     {
       id: 'warmup',
-      label: long ? 'Kratko zagrevanje 10 min + par ubrzanja' : 'Zagrevanje 10–15 min + 2–4 ubrzanja',
+      label: { key: long ? 'content:raceday.checklist.warmupLong' : 'content:raceday.checklist.warmupShort' },
       group: 'jutro',
     },
     {
       id: 'first-km',
-      label: long ? 'Prvi km disciplinovano — 5–10 s/km sporije od cilja' : 'Kontrolisano jako od starta, bez sprinta',
+      label: { key: long ? 'content:raceday.checklist.firstKmLong' : 'content:raceday.checklist.firstKmShort' },
       group: 'staza',
     },
-    ...(long
-      ? [{ id: 'gel-plan', label: 'Gel svakih 30–35 min + voda na svakoj stanici', group: 'staza' as const }]
-      : []),
-    { id: 'effort', label: 'Po vetru i uzbrdici trči po naporu, ne po satu', group: 'staza' },
-    { id: 'finish', label: long ? 'Zadnja 2 km pusti ako imaš' : 'Zadnji km pusti sve', group: 'staza' },
+    ...(long ? [{ id: 'gel-plan', label: { key: 'content:raceday.checklist.gelPlan' }, group: 'staza' as const }] : []),
+    { id: 'effort', label: { key: 'content:raceday.checklist.effort' }, group: 'staza' },
+    {
+      id: 'finish',
+      label: { key: long ? 'content:raceday.checklist.finishLong' : 'content:raceday.checklist.finishShort' },
+      group: 'staza',
+    },
   ];
 }
 
-export function raceWeatherNote(assessment: WeatherAssessment): string | null {
+export function raceWeatherNote(assessment: WeatherAssessment): LocalizedText | null {
   switch (assessment.code) {
     case 'STORM':
-      return 'Grmljavina — proveri pravila trke i drži se plana ishrane.';
+      return { key: 'content:raceday.weather.storm' };
     case 'RAIN':
-      return 'Kiša — anti-chafe, kapica i suve čarape; tempo ostaje isti.';
+      return { key: 'content:raceday.weather.rain' };
     case 'HEAT':
-      return 'Vruće — kreni konzervativnije i pij na svakoj stanici.';
+      return { key: 'content:raceday.weather.heat' };
     case 'COLD':
-      return 'Hladno — slojevi za čekanje na startu i duže zagrevanje.';
+      return { key: 'content:raceday.weather.cold' };
     case 'WIND':
-      return 'Vetar — trči po naporu, ne juri tempo po satu.';
+      return { key: 'content:raceday.weather.wind' };
     case 'AIR':
-      return 'Loš vazduh — smanji intenzitet i prati kako se osećaš.';
+      return { key: 'content:raceday.weather.air' };
     default:
       return null;
   }

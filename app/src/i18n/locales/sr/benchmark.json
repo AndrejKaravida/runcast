@@ -1,0 +1,53 @@
+{
+  "label": "Test trka",
+  "title": "Izmeri pravu formu",
+  "description": "Istrči 5 ili 10 km punim tempom i osveži tempe — plan tako prati tvoj napredak.",
+  "distance": {
+    "label": "Distanca",
+    "km5": "5 km",
+    "km10": "10 km"
+  },
+  "instructions": {
+    "title": "Kako se izvodi",
+    "warmup": "Zagrevanje: 10 minuta lagano.",
+    "effort": "Onda punim tempom — kao na pravoj trci.",
+    "cooldown": "Hlađenje: 5 do 10 minuta lagano.",
+    "hint": "Ravna deonica ili staza daje najtačniji rezultat."
+  },
+  "start": "Počni",
+  "clock": {
+    "pause": "Pauza",
+    "resume": "Nastavi",
+    "finish": "Završi"
+  },
+  "result": {
+    "title": "Rezultat",
+    "time": "Vreme (mm:ss)",
+    "distance": "Distanca (km)",
+    "save": "Sačuvaj rezultat",
+    "errorTime": "Vreme unesi kao mm:ss ili h:mm:ss.",
+    "errorDistance": "Unesi ispravnu distancu.",
+    "errorSave": "Čuvanje nije uspelo — pokušaj ponovo."
+  },
+  "suggestion": {
+    "title": "Predlog novih tempa",
+    "vdot": "VDOT {{vdot}}",
+    "faster": "{{delta}} s/km brže",
+    "slower": "{{delta}} s/km sporije",
+    "same": "isti tempo",
+    "raceWarning": "Do trke je {{days}} dana — predlažemo da nove tempe primeniš posle trke.",
+    "accept": "Prihvati nove tempe",
+    "reject": "Odbij",
+    "rejected": "Tempi ostaju nepromenjeni.",
+    "updated": "Tempi ažurirani",
+    "updatedHint": "Plan i budući treninzi sada koriste nove tempe.",
+    "error": "Nije uspelo — pokušaj ponovo."
+  },
+  "zones": {
+    "E": "Lagan",
+    "M": "Maraton",
+    "T": "Tempo",
+    "I": "Interval",
+    "R": "Repeticija"
+  }
+}

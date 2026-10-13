@@ -1,4 +1,4 @@
-import type { PaceZone, PlanPaces, WorkoutStep } from './types';
+import type { LocalizedText, PaceZone, PlanPaces, WorkoutStep } from './types';
 import { formatDuration, formatPace } from './vdot';
 
 const GUIDED_RUN_TYPES = new Set(['EASY', 'LONG', 'TEMPO', 'INTERVALS', 'REPETITIONS']);
@@ -182,33 +182,36 @@ export function elapsedAfterSkip(timeline: GuidedTimeline, segmentIndex: number)
   return Math.min(total, timeline.totalDurationSec);
 }
 
-function formatKilometers(value: number): string {
-  return String(Math.round(value * 100) / 100).replace('.', ',');
-}
-
-export function cueTextFor(kind: GuidedCueKind, context: GuidedCueContext = {}): string {
+export function cueTextFor(kind: GuidedCueKind, context: GuidedCueContext = {}): LocalizedText {
   switch (kind) {
     case 'START':
-      return 'Krećemo!';
+      return { key: 'content:guided.cue.start' };
     case 'SEGMENT_START':
-      return `Sada: ${context.label ?? 'korak'}.`;
+      return context.label
+        ? { key: 'content:guided.cue.segmentStart', params: { label: context.label } }
+        : { key: 'content:guided.cue.segmentStartFallback' };
     case 'REPEAT':
-      return `Ponavljanje ${context.repeatIndex ?? 1} od ${context.repeatTotal ?? 1}.`;
+      return {
+        key: 'content:guided.cue.repeat',
+        params: { index: context.repeatIndex ?? 1, total: context.repeatTotal ?? 1 },
+      };
     case 'PACE':
-      return `Tempo ${context.paceLabel ?? ''} po kilometru.`;
+      return { key: 'content:guided.cue.pace', params: { pace: context.paceLabel ?? '' } };
     case 'SEGMENT_END':
-      return 'Korak završen.';
+      return { key: 'content:guided.cue.segmentEnd' };
     case 'HALFWAY':
-      return 'Pola je — drži ritam.';
+      return { key: 'content:guided.cue.halfway' };
     case 'PAUSE':
-      return 'Pauza — diši.';
+      return { key: 'content:guided.cue.pause' };
     case 'RESUME':
-      return 'Idemo dalje.';
+      return { key: 'content:guided.cue.resume' };
     case 'SKIP':
-      return `Prelazimo na: ${context.label ?? 'sledeći korak'}.`;
+      return context.label
+        ? { key: 'content:guided.cue.skip', params: { label: context.label } }
+        : { key: 'content:guided.cue.skipFallback' };
     case 'FINISH':
-      return `Gotovo! ${formatDuration(context.elapsedSec ?? 0)} u nogama.`;
+      return { key: 'content:guided.cue.finish', params: { elapsed: formatDuration(context.elapsedSec ?? 0) } };
     case 'DISTANCE':
-      return `GPS distanca: ${formatKilometers(context.distanceKm ?? 0)} kilometara.`;
+      return { key: 'content:guided.cue.distance', params: { km: context.distanceKm ?? 0 } };
   }
 }

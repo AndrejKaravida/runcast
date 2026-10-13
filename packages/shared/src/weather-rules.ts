@@ -1,5 +1,6 @@
 import type { HourlyForecast } from './weather';
 import type { RunWindow, WorkoutStatus, WorkoutType } from './types';
+import { addDays, parseIso, startOfWeek } from './dates';
 
 export const WEATHER_RULES = {
   rainProbabilityPct: 60,
@@ -22,8 +23,6 @@ export interface SwapCandidate {
   date: string;
   type: WorkoutType;
 }
-
-const MS_PER_DAY = 86_400_000;
 
 export function runWindowHours(runWindow: RunWindow): { startHour: number; endHour: number } {
   if (runWindow === 'morning') return { startHour: 6, endHour: 9 };
@@ -111,12 +110,6 @@ export function assessWorkoutWeather(params: {
   return { code: null, severity: 'none', suggestion: 'keep', details: {} };
 }
 
-function startOfWeek(iso: string): string {
-  const date = new Date(`${iso}T00:00:00.000Z`);
-  const weekday = (date.getUTCDay() + 6) % 7;
-  return new Date(date.getTime() - weekday * MS_PER_DAY).toISOString().slice(0, 10);
-}
-
 export function pickSwapCandidate(
   target: { id: string; date: string; type: WorkoutType; status: WorkoutStatus },
   weekWorkouts: { id: string; date: string; type: WorkoutType; status: WorkoutStatus }[],
@@ -131,20 +124,15 @@ export function pickSwapCandidate(
       workout.type !== 'RACE' &&
       workout.date >= target.date &&
       (weekStart !== undefined
-        ? workout.date >= weekStart && workout.date <= addDaysIso(weekStart, 6)
+        ? workout.date >= weekStart && workout.date <= addDays(weekStart, 6)
         : startOfWeek(workout.date) === targetWeek),
   );
   const easy = eligible.filter((workout) => workout.type === 'EASY');
   const pool = easy.length > 0 ? easy : eligible.filter((workout) => workout.type === 'REST');
   if (pool.length === 0) return null;
 
-  const distance = (date: string): number =>
-    Math.abs(new Date(`${date}T00:00:00.000Z`).getTime() - new Date(`${target.date}T00:00:00.000Z`).getTime());
+  const distance = (date: string): number => Math.abs(parseIso(date).getTime() - parseIso(target.date).getTime());
   const sorted = [...pool].sort((a, b) => distance(a.date) - distance(b.date) || a.date.localeCompare(b.date));
   const best = sorted[0];
   return { id: best.id, date: best.date, type: best.type };
-}
-
-function addDaysIso(iso: string, days: number): string {
-  return new Date(new Date(`${iso}T00:00:00.000Z`).getTime() + days * MS_PER_DAY).toISOString().slice(0, 10);
 }

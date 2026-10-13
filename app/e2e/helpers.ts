@@ -18,7 +18,26 @@ export async function register(page: Page, email: string) {
   await page.waitForURL('**/onboarding');
 }
 
+export async function mockGeocoding(page: Page) {
+  await page.route('**/geocoding-api.open-meteo.com/**', (route) =>
+    route.fulfill({
+      json: {
+        results: [
+          {
+            name: 'Novi Sad',
+            country: 'Serbia',
+            admin1: 'Vojvodina',
+            latitude: 45.2517,
+            longitude: 19.8369,
+          },
+        ],
+      },
+    }),
+  );
+}
+
 export async function completeOnboarding(page: Page) {
+  await mockGeocoding(page);
   await page.getByLabel('Naziv trke (opciono)').fill('E2E maraton');
   await page.getByLabel('Datum trke', { exact: true }).fill(isoFromNow(126));
   await page.getByRole('button', { name: 'Dalje' }).click();
@@ -29,7 +48,7 @@ export async function completeOnboarding(page: Page) {
 
   await page.getByRole('button', { name: 'Dalje' }).click();
 
-  await page.getByLabel('Dan dugog trčanja').selectOption('0');
+  await page.getByLabel('Dan dugog trčanja').selectOption(String((new Date().getDay() + 6) % 7));
   await page.getByRole('button', { name: 'Dalje' }).click();
 
   await page.getByLabel('Grad', { exact: true }).fill('Novi Sad');
