@@ -46,7 +46,7 @@ export function TabLayout() {
           )}
         />
       </header>
-      <main className="flex-1 px-4 pb-28 pt-4">
+      <main className="flex-1 px-4 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] pt-4">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={location.pathname}
@@ -59,36 +59,37 @@ export function TabLayout() {
           </motion.div>
         </AnimatePresence>
       </main>
-      <nav className="fixed inset-x-0 bottom-0 z-40 bg-surface/90 backdrop-blur-xl backdrop-saturate-150">
-        <div className="pointer-events-none absolute inset-x-0 -top-4 h-4 bg-gradient-to-t from-surface/80 to-transparent" />
-        <div className="mx-auto grid max-w-[720px] grid-cols-4 pb-[env(safe-area-inset-bottom)]">
-          {tabs.map(({ to, labelKey, icon: Icon }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                clsx(
-                  'relative flex select-none flex-col items-center gap-1 py-2.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/60 active:scale-[0.97]',
-                  isActive ? 'text-primary-ink' : 'text-text-secondary hover:text-text',
-                )
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  {isActive ? (
-                    <motion.span
-                      layoutId="tab-pill"
-                      transition={pillTransition}
-                      aria-hidden
-                      className="absolute inset-x-2 top-1 bottom-1 rounded-xl bg-primary-soft"
-                    />
-                  ) : null}
-                  <Icon className="relative z-10 h-5 w-5" aria-hidden />
-                  <span className="relative z-10">{t(labelKey)}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
+      <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+        <div className="pointer-events-auto mx-auto max-w-[420px] rounded-2xl border border-border/70 bg-surface/85 shadow-card backdrop-blur-xl backdrop-saturate-150">
+          <div className="grid grid-cols-4 p-1.5">
+            {tabs.map(({ to, labelKey, icon: Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                className={({ isActive }) =>
+                  clsx(
+                    'relative flex select-none flex-col items-center gap-0.5 rounded-xl py-2 text-caption font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-[0.97]',
+                    isActive ? 'text-primary-ink' : 'text-text-secondary hover:text-text',
+                  )
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    {isActive ? (
+                      <motion.span
+                        layoutId="tab-pill"
+                        transition={pillTransition}
+                        aria-hidden
+                        className="absolute inset-0 rounded-xl bg-primary-soft"
+                      />
+                    ) : null}
+                    <Icon className="relative z-10 h-5 w-5" aria-hidden />
+                    <span className="relative z-10">{t(labelKey)}</span>
+                  </>
+                )}
+              </NavLink>
+            ))}
+          </div>
         </div>
       </nav>
     </div>

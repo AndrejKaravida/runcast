@@ -33,16 +33,25 @@ koji je već podešen.
 
 ## iOS: build i instalacija (besplatno, bez Apple Developer naloga)
 
-Preduslov: **Xcode** (App Store, ~10 GB) i besplatan Apple ID. Potpis traje 7 dana, pa se
-ponavlja build nedeljno. Detaljno uputstvo je u odgovoru nakon prve native faze; kratko:
+**Xcode 27 je instaliran** i iOS projekat je verifikovan build-om za simulator (Xcode 27, iOS 26.5
+runtime). Ako `xcodebuild` prijavi da je aktivna CommandLineTools, koristi `DEVELOPER_DIR` override
+(bez sudo):
 
-1. Instaliraj Xcode → `sudo xcode-select -s /Applications/Xcode.app`
-2. `npm run build -w app && npx cap sync ios` (u `app/`)
-3. Otvori `app/ios/App/App.xcodeproj`
-4. Signing & Capabilities → Team: izaberi svoj (Personal Team) → promeni Bundle Identifier ako
+```bash
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
+  xcodebuild -project app/ios/App/App.xcodeproj -scheme App \
+  -sdk iphonesimulator -configuration Debug -destination 'generic/platform=iOS Simulator' \
+  CODE_SIGNING_ALLOWED=NO build
+```
+
+Za pokretanje na pravom telefonu (besplatan Apple ID, potpis traje 7 dana):
+
+1. `npm run build -w app && npx cap sync ios` (u `app/`)
+2. Otvori `app/ios/App/App.xcodeproj` u Xcode-u
+3. Signing & Capabilities → Team: izaberi svoj (Personal Team) → promeni Bundle Identifier ako
    Xcode traži jedinstven
-5. Poveži iPhone kablom → izaberi ga kao target → Run
-6. Na telefonu: Settings → General → VPN & Device Management → verifikuj svoj developer profil
+4. Poveži iPhone kablom → izaberi ga kao target → Run
+5. Na telefonu: Settings → General → VPN & Device Management → verifikuj svoj developer profil
 
 Za trajnu instalaciju (bez 7-dnevnog ciklusa) treba Apple Developer Program ($99/god) ili
 distribucija preko TestFlight-a; PWA ostaje kao potpuno funkcionalna alternativa bez ikakvih

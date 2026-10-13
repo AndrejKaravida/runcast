@@ -260,8 +260,6 @@ export function TodayPage() {
 
   return (
     <div className="space-y-4">
-      <WeatherHero data={weather.data} isError={weather.isError} date={today} runWindow={runWindow} />
-
       <div className="flex items-center justify-between gap-3">
         <p className="min-w-0 truncate text-lg font-semibold">
           {t(greetingKey())}
@@ -308,6 +306,8 @@ export function TodayPage() {
           icon={<CalendarDays className="h-6 w-6" />}
         />
       )}
+
+      <WeatherHero data={weather.data} isError={weather.isError} date={today} runWindow={runWindow} />
 
       <RaceChip plan={plan} daysToRace={daysToRace} planWeek={planWeek} />
 
