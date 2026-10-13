@@ -60,7 +60,7 @@ describe('strengthDaysFor', () => {
 describe('strengthWorkoutsForWeek', () => {
   it('builds contract-conform drafts with sets and reps steps', () => {
     const sessions = strengthWorkoutsForWeek(weekInput);
-    expect(sessions.map((session) => session.title)).toEqual(['Snaga A — noge i core', 'Snaga B — glute i core']);
+    expect(sessions.map((session) => session.title)).toEqual(['Snaga A: noge i core', 'Snaga B: glute i core']);
     expect(sessions.map((session) => session.date)).toEqual(['2026-01-06', '2026-01-10']);
     for (const session of sessions) {
       expect(session.type).toBe('STRENGTH');
@@ -74,7 +74,7 @@ describe('strengthWorkoutsForWeek', () => {
       for (const step of session.steps) {
         expect(step.label.length).toBeGreaterThan(0);
         expect(step.durationSec).toBeGreaterThan(0);
-        expect(step.label).toMatch(/(— \d+×\d+|— \d+ min|— \d+ s)/);
+        expect(step.label).toMatch(/(\d+×\d+|\d+ min)/);
       }
       expect(session.steps.reduce((sum, step) => sum + (step.durationSec ?? 0), 0)).toBe(session.durationSec);
     }
@@ -88,7 +88,7 @@ describe('strengthWorkoutsForWeek', () => {
     expect(beginner[0].steps.some((step) => step.label.includes('3×12'))).toBe(true);
     expect(beginner[0].steps.some((step) => step.label.includes('Poskoci'))).toBe(false);
     const peak = strengthWorkoutsForWeek({ ...weekInput, phase: 'PEAK', daysToRace: 20 });
-    expect(peak.map((session) => session.title)).toEqual(['Snaga — održavanje', 'Mobilnost 20 min']);
+    expect(peak.map((session) => session.title)).toEqual(['Snaga: održavanje', 'Mobilnost 20 min']);
     const taper = strengthWorkoutsForWeek({ ...weekInput, phase: 'TAPER', phaseWeek: 0, daysToRace: 20 });
     expect(taper).toHaveLength(1);
     expect(taper[0].title).toBe('Mobilnost 20 min');
@@ -139,9 +139,9 @@ describe('generatePlan strength integration', () => {
       (byWeek.get(week) ?? []).filter((workout) => workout.type === 'STRENGTH').map((workout) => workout.title);
     expect(days(0)).toEqual([1, 5]);
     expect(days(5)).toEqual([1, 5]);
-    expect(titles(0)).toEqual(['Snaga A — noge i core', 'Mobilnost 20 min']);
-    expect(titles(5)).toEqual(['Snaga A — noge i core', 'Snaga B — glute i core']);
-    expect(titles(13)).toEqual(['Snaga — održavanje', 'Mobilnost 20 min']);
+    expect(titles(0)).toEqual(['Snaga A: noge i core', 'Mobilnost 20 min']);
+    expect(titles(5)).toEqual(['Snaga A: noge i core', 'Snaga B: glute i core']);
+    expect(titles(13)).toEqual(['Snaga: održavanje', 'Mobilnost 20 min']);
     expect(days(15)).toEqual([1]);
     expect(days(16)).toEqual([1]);
     expect(days(17)).toEqual([]);

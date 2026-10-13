@@ -1,4 +1,5 @@
 import { trainingLoad, type LoadBand } from '@runcast/shared';
+import { motion, useReducedMotion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppCard } from '@/components/ui/AppCard';
@@ -30,6 +31,7 @@ interface LoadCardProps {
 
 export function LoadCard({ logs, today }: LoadCardProps) {
   const { t } = useTranslation('stats');
+  const reduceMotion = useReducedMotion();
   const load = trainingLoad(logs, today);
   const weeks = Array.from({ length: WEEKS }, (_, index) => load.days.slice(index * 7, index * 7 + 7));
   const weekSums = weeks.map((days) => round1(days.reduce((sum, day) => sum + day.load, 0)));
@@ -46,9 +48,16 @@ export function LoadCard({ logs, today }: LoadCardProps) {
           <div key={weeks[index][0].date} className="flex min-w-0 flex-1 flex-col items-center gap-1">
             <span className="num h-4 text-caption text-text-muted">{sum > 0 ? Math.round(sum) : ''}</span>
             <div className="relative h-24 w-5 sm:w-6" title={t('load.barTooltip', { load: sum })}>
-              <div
+              <motion.div
                 className="absolute inset-x-0 bottom-0 rounded-t-md bg-chart-bar"
-                style={{ height: `${(sum / maxWeek) * 100}%` }}
+                style={{ height: `${(sum / maxWeek) * 100}%`, transformOrigin: 'bottom' }}
+                initial={reduceMotion ? false : { scaleY: 0 }}
+                animate={{ scaleY: 1 }}
+                transition={
+                  reduceMotion
+                    ? { duration: 0 }
+                    : { type: 'spring', bounce: 0, duration: 0.35, delay: Math.min(index, 6) * 0.035 }
+                }
               />
             </div>
             <span className="num max-w-full truncate text-caption text-text-muted">

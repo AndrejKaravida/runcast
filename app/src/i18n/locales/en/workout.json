@@ -19,8 +19,8 @@
     "preEvening": "Before · meal by {{time}}:00",
     "during": "During",
     "water": "Water:",
-    "short": "It's short — water is enough, a gel isn't necessary.",
-    "hot": "It's hot — a gel at ~30 min and more water.",
+    "short": "It's short. Water is enough, a gel isn't necessary.",
+    "hot": "It's hot. A gel at ~30 min and more water.",
     "after": "After"
   },
   "log": {
@@ -33,11 +33,11 @@
     "notesPlaceholder": "How did it go?",
     "errorDuration": "Enter the duration as mm:ss or h:mm:ss",
     "errorInvalid": "Check the distance (km), duration and RPE",
-    "errorSave": "Saving failed — try again"
+    "errorSave": "Saving failed. Try again"
   },
   "missing": {
     "title": "Can't find this workout",
-    "description": "The plan was probably refreshed — check the calendar.",
+    "description": "The plan was probably refreshed. Check the calendar.",
     "action": "Back to plan"
   },
   "meta": {
@@ -57,12 +57,21 @@
     "guided": "Guided run",
     "raceDay": "Race day strategy",
     "googleCalendar": "Add to Google Calendar",
-    "error": "Action failed — try again"
+    "error": "Action failed. Try again"
   },
   "skip": {
     "title": "Skip this workout?",
     "description": "We'll mark it as skipped. It doesn't affect plan progress.",
-    "error": "Couldn't skip — try again"
+    "error": "Couldn't skip. Try again"
+  },
+  "move": {
+    "action": "Move",
+    "title": "Move workout",
+    "description": "Pick a day to swap with. Workouts trade days.",
+    "date": "New date",
+    "confirm": "Move",
+    "missing": "Pick a day that exists in the plan",
+    "error": "Move failed. Try again"
   },
   "next": {
     "eyebrow": "Next workout",
@@ -99,23 +108,23 @@
       "description": "Suggestion: move the workout or do the indoor version."
     },
     "rain": {
-      "title": "Rain — {{pct}}% chance",
+      "title": "Rain, {{pct}}% chance",
       "description": "Up to {{mm}} mm expected in your workout window."
     },
     "heat": {
-      "title": "Hot — feels {{temp}}°C",
+      "title": "Hot, feels {{temp}}°C",
       "description": "Suggestion: move the workout earlier or to the evening."
     },
     "cold": {
-      "title": "Cold — feels {{temp}}°C",
+      "title": "Cold, feels {{temp}}°C",
       "description": "Suggestion: indoor workout or an extra layer."
     },
     "wind": {
-      "title": "Strong wind — gusts up to {{gust}} km/h",
+      "title": "Strong wind, gusts up to {{gust}} km/h",
       "description": "It'll be harder than usual outdoors."
     },
     "air": {
-      "title": "Poor air — PM2.5 {{pm25}}",
+      "title": "Poor air, PM2.5 {{pm25}}",
       "description": "Suggestion: indoor or another time."
     }
   }

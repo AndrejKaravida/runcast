@@ -15,22 +15,22 @@
     "done": "Done",
     "guided": "Guided",
     "view": "View workout",
-    "completeError": "Couldn't save — try again"
+    "completeError": "Couldn't save. Try again"
   },
   "empty": {
     "title": "No plan yet",
-    "description": "Let's build your plan — race, pace and the days you have.",
+    "description": "Let's build your plan: race, pace and the days you have.",
     "action": "Open settings"
   },
   "rest": {
     "title": "Today is a rest day",
-    "description": "Take a look at the calendar — your next workout is waiting."
+    "description": "Take a look at the calendar. Your next workout is waiting."
   },
   "race": {
     "goal": "Goal race",
     "untitled": "Untitled race",
     "daysTo": "days to race",
-    "passed": "The race is over — create a new plan",
+    "passed": "The race is over. Create a new plan",
     "day": "Race day"
   },
   "plan": {
@@ -41,7 +41,7 @@
     "nearest": "Nearest free slot: {{date}}.",
     "swap": "Move to {{date}}",
     "stay": "I'll stick to the plan",
-    "swapError": "Swap failed — try again"
+    "swapError": "Swap failed. Try again"
   },
   "week": {
     "title": "Your week",
@@ -49,5 +49,10 @@
     "summary": "{{done}} of {{planned}} workouts this week"
   },
   "tomorrow": "tomorrow",
+  "weather": {
+    "best": "Best window today: {{from}}–{{to}}h · score {{score}}",
+    "earlier": "Suggestion: run before {{hour}}h",
+    "conditions": "{{pct}}% rain · wind {{wind}} km/h"
+  },
   "rangeError": "Part of the plan didn't load."
 }

@@ -163,8 +163,14 @@ export type Database = {
           id: string;
           language: string;
           p256dh: string;
+          remind_hour: number;
+          remind_missed: boolean;
           remind_race_week: boolean;
+          remind_recap: boolean;
+          remind_today: boolean;
           remind_training: boolean;
+          remind_weather: boolean;
+          timezone: string;
           user_id: string;
         };
         ComputedFields: never;
@@ -175,8 +181,14 @@ export type Database = {
           id?: string;
           language?: string;
           p256dh: string;
+          remind_hour?: number;
+          remind_missed?: boolean;
           remind_race_week?: boolean;
+          remind_recap?: boolean;
+          remind_today?: boolean;
           remind_training?: boolean;
+          remind_weather?: boolean;
+          timezone?: string;
           user_id: string;
         };
         Update: {
@@ -186,8 +198,14 @@ export type Database = {
           id?: string;
           language?: string;
           p256dh?: string;
+          remind_hour?: number;
+          remind_missed?: boolean;
           remind_race_week?: boolean;
+          remind_recap?: boolean;
+          remind_today?: boolean;
           remind_training?: boolean;
+          remind_weather?: boolean;
+          timezone?: string;
           user_id?: string;
         };
         Relationships: [];
@@ -343,6 +361,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      apply_week_plan: { Args: { p_assignments: Json }; Returns: number };
       create_plan_with_workouts: {
         Args: {
           p_anchor: Json;

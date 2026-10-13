@@ -36,10 +36,10 @@ export async function mockGeocoding(page: Page) {
   );
 }
 
-export async function completeOnboarding(page: Page) {
+export async function completeOnboarding(page: Page, raceDate = isoFromNow(126)) {
   await mockGeocoding(page);
   await page.getByLabel('Naziv trke (opciono)').fill('E2E maraton');
-  await page.getByLabel('Datum trke', { exact: true }).fill(isoFromNow(126));
+  await page.getByLabel('Datum trke', { exact: true }).fill(raceDate);
   await page.getByRole('button', { name: 'Dalje' }).click();
 
   await page.getByLabel(/Ciljno vreme/).fill('3:45:00');
@@ -132,6 +132,18 @@ export function lightRainFixture() {
     weatherCode: 3,
     wind: 8,
     gusts: 15,
+  });
+}
+
+export function sunnyFixture() {
+  return forecastFixture({
+    temperature: 16,
+    apparent: 16,
+    probability: 0,
+    precipitation: 0,
+    weatherCode: 1,
+    wind: 6,
+    gusts: 12,
   });
 }
 

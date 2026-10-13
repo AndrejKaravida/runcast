@@ -33,8 +33,10 @@ export function AchievementToast({ achievement, onDismiss }: AchievementToastPro
             data-testid="achievement-toast"
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12 }}
-            transition={{ duration: reduceMotion ? 0 : 0.22, ease: 'easeOut' }}
+            exit={
+              reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, transition: { duration: 0.18, ease: 'easeOut' } }
+            }
+            transition={reduceMotion ? { duration: 0 } : { type: 'spring', bounce: 0.15, duration: 0.3 }}
             className="pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-2xl border border-primary/40 bg-surface p-3.5 shadow-card"
           >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary-ink">

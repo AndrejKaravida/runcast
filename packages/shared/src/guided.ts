@@ -1,4 +1,5 @@
 import { isRunType, type LocalizedText, type PaceZone, type PlanPaces, type WorkoutStep } from './types';
+import { normalizeStepLabel } from './format';
 import { formatDuration, formatPace } from './vdot';
 
 export const DEFAULT_PACE_SEC_PER_KM = 360;
@@ -108,9 +109,9 @@ export function buildStepTimeline(workout: GuidedWorkoutInput, paces: PlanPaces 
   let cursor = 0;
 
   while (cursor < timeable.length) {
-    const label = timeable[cursor].step.label;
+    const label = normalizeStepLabel(timeable[cursor].step.label);
     let end = cursor;
-    while (end + 1 < timeable.length && timeable[end + 1].step.label === label) end += 1;
+    while (end + 1 < timeable.length && normalizeStepLabel(timeable[end + 1].step.label) === label) end += 1;
     const repeatTotal = end - cursor + 1;
 
     for (let offset = 0; offset < repeatTotal; offset += 1) {

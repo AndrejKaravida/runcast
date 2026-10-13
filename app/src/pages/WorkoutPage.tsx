@@ -6,6 +6,7 @@ import {
   formatDuration,
   formatPace,
   isGuidedRunType,
+  normalizeStepLabel,
   runWindowHours,
   type PaceZone,
   type PlanPhase,
@@ -13,13 +14,15 @@ import {
   type WorkoutType,
 } from '@runcast/shared';
 import { clsx } from 'clsx';
-import { ArrowLeft, CalendarPlus, CheckCircle2, SkipForward } from 'lucide-react';
+import { ArrowLeft, CalendarClock, CalendarPlus, CheckCircle2, SkipForward } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
+import { AppInput } from '@/components/ui/AppInput';
 import { AppLinkButton } from '@/components/ui/AppLinkButton';
+import { AppModal } from '@/components/ui/AppModal';
 import { buttonClassName } from '@/components/ui/button-styles';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -36,7 +39,7 @@ import { WorkoutTypeIcon } from '@/components/workouts/WorkoutTypeIcon';
 import { useCompleteWorkout, useRunLogs, useSkipWorkout } from '@/features/logs/queries';
 import { buildGoogleCalendarUrlForWorkout } from '@/features/plans/export';
 import { planPaces } from '@/features/plans/plan-data';
-import { useActivePlan, useWorkout } from '@/features/plans/queries';
+import { useActivePlan, useMoveWorkout, useWorkout } from '@/features/plans/queries';
 import { useProfile } from '@/features/profile/queries';
 import { useWeather } from '@/features/weather/queries';
 import {
@@ -49,7 +52,7 @@ import {
   workoutDurationSec,
   workoutSteps,
 } from '@/features/workouts/utils';
-import { dayDiff, formatDateLong, todayIso } from '@/lib/dates';
+import { addDaysIso, dayDiff, formatDateLong, todayIso } from '@/lib/dates';
 
 export function WorkoutPage() {
   const { t } = useTranslation();
@@ -63,10 +66,14 @@ export function WorkoutPage() {
   const weather = useWeather();
   const skipWorkout = useSkipWorkout();
   const completeWorkout = useCompleteWorkout();
+  const moveWorkout = useMoveWorkout();
   const [logOpen, setLogOpen] = useState(false);
   const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
   const [skipError, setSkipError] = useState<string | null>(null);
   const [completeError, setCompleteError] = useState<string | null>(null);
+  const [moveOpen, setMoveOpen] = useState(false);
+  const [moveDate, setMoveDate] = useState(() => addDaysIso(today, 1));
+  const [moveError, setMoveError] = useState<string | null>(null);
 
   const runWindow: RunWindow = (profile?.run_window as RunWindow | undefined) ?? 'morning';
   const window = runWindowHours(runWindow);
@@ -127,6 +134,7 @@ export function WorkoutPage() {
   const planWeekLabel = plan && planWeek ? ` · ${t('workout:meta.week', { week: planWeek, weeks: plan.weeks })}` : '';
   const totalDuration = workoutDurationSec(workout);
   const canAct = workout.status === 'PLANNED' && workout.type !== 'REST';
+  const canMove = workout.status === 'PLANNED' && workout.type !== 'RACE';
   const fuelingTimeline = buildStepTimeline(
     {
       type: workout.type,
@@ -174,6 +182,33 @@ export function WorkoutPage() {
     }
   }
 
+  function openMove() {
+    setMoveError(null);
+    const next = addDaysIso(today, 1);
+    setMoveDate(plan && next > plan.race_date ? plan.race_date : next);
+    setMoveOpen(true);
+  }
+
+  function closeMove() {
+    setMoveOpen(false);
+    setMoveError(null);
+  }
+
+  async function handleMove() {
+    if (!workout || !moveDate) return;
+    try {
+      setMoveError(null);
+      const moved = await moveWorkout.mutateAsync({ workout, date: moveDate });
+      if (!moved) {
+        setMoveError(t('workout:move.missing'));
+        return;
+      }
+      setMoveOpen(false);
+    } catch {
+      setMoveError(t('workout:move.error'));
+    }
+  }
+
   return (
     <div className="mx-auto w-full max-w-[560px] space-y-5 px-4 py-6">
       <div className="flex items-center justify-between">
@@ -193,6 +228,19 @@ export function WorkoutPage() {
               <CalendarPlus className="h-4 w-4" aria-hidden />
               <span className="hidden sm:inline">{t('workout:actions.googleCalendar')}</span>
             </a>
+          ) : null}
+          {canMove ? (
+            <AppButton
+              variant="ghost"
+              size="sm"
+              className="w-auto"
+              aria-label={t('workout:move.action')}
+              data-testid="move-workout"
+              onClick={openMove}
+            >
+              <CalendarClock className="h-4 w-4" aria-hidden />
+              <span className="hidden sm:inline">{t('workout:move.action')}</span>
+            </AppButton>
           ) : null}
           {canAct ? (
             <AppButton variant="ghost" size="sm" className="-mr-2 w-auto" onClick={() => setSkipConfirmOpen(true)}>
@@ -246,7 +294,7 @@ export function WorkoutPage() {
                 <span className="num flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-elevated text-caption text-text-muted">
                   {index + 1}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-sm font-medium">{step.label}</span>
+                <span className="min-w-0 flex-1 truncate text-sm font-medium">{normalizeStepLabel(step.label)}</span>
                 <span className="num shrink-0 text-sm text-text-secondary">
                   {step.pace
                     ? `${step.pace} /km`
@@ -333,6 +381,33 @@ export function WorkoutPage() {
       ) : null}
 
       <LogWorkoutModal workout={workout} open={logOpen} onClose={() => setLogOpen(false)} />
+      <AppModal open={moveOpen} onClose={closeMove} title={t('workout:move.title')}>
+        <div className="space-y-4">
+          <p className="text-sm text-text-secondary">{t('workout:move.description')}</p>
+          <AppInput
+            label={t('workout:move.date')}
+            type="date"
+            min={today}
+            max={plan?.race_date}
+            value={moveDate}
+            onChange={(event) => setMoveDate(event.target.value)}
+          />
+          {moveError ? <p className="text-sm text-danger-ink">{moveError}</p> : null}
+          <div className="flex gap-3">
+            <AppButton variant="secondary" className="flex-1" onClick={closeMove}>
+              {t('common:actions.cancel')}
+            </AppButton>
+            <AppButton
+              className="flex-1"
+              loading={moveWorkout.isPending}
+              data-testid="move-confirm"
+              onClick={() => void handleMove()}
+            >
+              {t('workout:move.confirm')}
+            </AppButton>
+          </div>
+        </div>
+      </AppModal>
       <ConfirmDialog
         open={skipConfirmOpen}
         title={t('workout:skip.title')}

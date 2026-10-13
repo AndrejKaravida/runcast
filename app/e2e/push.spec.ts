@@ -32,7 +32,7 @@ async function stubPush(page: Page) {
 test.describe('push notifikacije', () => {
   test.use({ permissions: ['notifications'] });
 
-  test('uključivanje prikazuje status, prekidači se pamte posle reload-a', async ({ page }) => {
+  test('uključivanje prikazuje status, prekidači i sat se pamte posle reload-a', async ({ page }) => {
     await stubPush(page);
     const email = uniqueEmail('push');
     await register(page, email);
@@ -45,18 +45,22 @@ test.describe('push notifikacije', () => {
     await expect(page.getByTestId('push-status')).toBeVisible();
     await expect(page.getByTestId('push-status')).toContainText('Notifikacije su uključene');
 
-    await page.getByTestId('push-training').getByRole('button', { name: 'Isključi' }).click();
-    await expect(page.getByTestId('push-training').getByRole('button', { name: 'Isključi' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
+    const toggles = ['push-today', 'push-training', 'push-weather', 'push-missed', 'push-race-week', 'push-recap'];
+    for (const toggle of toggles) {
+      await expect(page.getByTestId(toggle)).toBeVisible();
+      await page.getByTestId(toggle).getByRole('button', { name: 'Isključi' }).click();
+    }
+    await page.getByTestId('push-hour').selectOption('7');
 
     await page.reload();
     await expect(page.getByTestId('push-status')).toBeVisible();
-    await expect(page.getByTestId('push-training').getByRole('button', { name: 'Isključi' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
+    for (const toggle of toggles) {
+      await expect(page.getByTestId(toggle).getByRole('button', { name: 'Isključi' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
+    }
+    await expect(page.getByTestId('push-hour')).toHaveValue('7');
   });
 
   test('bez servisnog radnika prikazuje graceful grešku', async ({ page }) => {

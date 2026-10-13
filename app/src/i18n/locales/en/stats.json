@@ -5,7 +5,7 @@
   },
   "empty": {
     "title": "Stats are waiting for your first workout",
-    "description": "Let's build a plan — the numbers fill in as you run.",
+    "description": "Let's build a plan. The numbers fill in as you run.",
     "action": "Open settings"
   },
   "row": {
@@ -18,15 +18,15 @@
     "tooltip": "{{done}} of {{planned}} km",
     "planned": "planned",
     "done": "done",
-    "noDone": "No completed workouts yet — the bars fill in as you log sessions.",
-    "description": "How much of the plan you've run — week by week."
+    "noDone": "No completed workouts yet. The bars fill in as you log sessions.",
+    "description": "How much of the plan you've run, week by week."
   },
   "load": {
     "title": "Training load",
     "acute": "Acute (7 days)",
     "acwr": "ACWR",
     "barTooltip": "{{load}} load points",
-    "note": "A rough heuristic from RPE and duration — not a diagnosis.",
+    "note": "A rough heuristic from RPE and duration, not a diagnosis.",
     "bands": {
       "insufficient": "Not enough data",
       "low": "Low",
@@ -35,11 +35,11 @@
       "high": "High"
     },
     "explanations": {
-      "insufficient": "At least 8 sessions in 4 weeks and 3 in the last 7 days are needed — keep logging.",
-      "low": "Acute load is below your usual — your body is resting.",
-      "sweet": "Acute load tracks chronic load — your rhythm is steady.",
-      "caution": "Acute load is rising faster than chronic — take care next week.",
-      "high": "The load jump is large — ease the intensity and give your body room to adapt."
+      "insufficient": "At least 8 sessions in 4 weeks and 3 in the last 7 days are needed. Keep logging.",
+      "low": "Acute load is below your usual. Your body is resting.",
+      "sweet": "Acute load tracks chronic load. Your rhythm is steady.",
+      "caution": "Acute load is rising faster than chronic. Take care next week.",
+      "high": "The load jump is large. Ease the intensity and give your body room to adapt."
     }
   },
   "recent": {
@@ -56,9 +56,9 @@
     "adherence": "Completed",
     "sessionsOne": "{{count}} session",
     "sessionsMany": "{{count}} sessions",
-    "underControl": "You've got everything under control — just keep going.",
+    "underControl": "You've got everything under control. Just keep going.",
     "weekAdjusted": "The week starting {{day}}.{{month}}. has been adjusted.",
-    "applyFailed": "It didn't work — try again.",
+    "applyFailed": "It didn't work. Try again.",
     "actions": {
       "missedRuns": "Ease next week by 20%",
       "highRpe": "Ease by 10%",
@@ -76,12 +76,12 @@
   },
   "predictor": {
     "title": "Race prediction",
-    "empty": "Add a recent race or a goal — I'll show your prediction.",
-    "outOfRange": "The result is below the VDOT model range — prediction is not reliable.",
+    "empty": "Add a recent race or a goal. I'll show your prediction.",
+    "outOfRange": "The result is below the VDOT model range. Prediction is not reliable.",
     "yourRace": "Your race",
-    "goalNote": "Based on your goal pace — it reflects the goal, not your current fitness.",
+    "goalNote": "Based on your goal pace. It reflects the goal, not your current fitness.",
     "anchorNote": "Based on a result: {{distance}} {{time}}.",
-    "method": "Estimate using the Daniels VDOT model — error grows with the distance difference (±2–4%).",
+    "method": "Estimate using the Daniels VDOT model. Error grows with the distance difference (±2–4%).",
     "benchmarkCta": "Run a benchmark"
   },
   "distance": {
@@ -91,15 +91,15 @@
   "pb": {
     "title": "Personal bests",
     "emptyTitle": "No records yet",
-    "emptyDescription": "Log a 5, 10 or 21 km run — the first record is always the sweetest.",
+    "emptyDescription": "Log a 5, 10 or 21 km run. The first record is always the sweetest.",
     "footer": "Automatic from your logged workouts (±0.4% tolerance)."
   },
   "leaderboard": {
     "title": "Leaderboard",
-    "description": "Week by week — who has run the most.",
+    "description": "Week by week: who has run the most.",
     "you": "You",
     "rank": "You're #{{rank}} this week.",
-    "noKm": "No kilometres this week yet — be the first to run.",
+    "noKm": "No kilometres this week yet. Be the first to run.",
     "notPublic": "Turn on your public profile in settings to see your rank.",
     "anonymous": "Runner",
     "emptyTitle": "The leaderboard is still empty",

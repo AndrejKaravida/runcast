@@ -2,11 +2,16 @@ import type { WeeklyChallenge } from '@runcast/shared';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppCard } from '@/components/ui/AppCard';
+import { CountUp } from '@/components/ui/CountUp';
 import { ProgressRing } from '@/components/ui/ProgressRing';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { WeekStrip } from '@/components/workouts/WeekStrip';
 import type { WeekProgress } from '@/features/plans/progress';
 import type { WorkoutsRow } from '@/types';
+
+function formatKm(value: number): string {
+  return String(Math.round(value * 10) / 10);
+}
 
 interface WeekBoardProps {
   week: WeekProgress;
@@ -35,7 +40,8 @@ export function WeekBoard({ week, challenge, workouts, today }: WeekBoardProps) 
         </ProgressRing>
         <div className="min-w-0">
           <p data-testid="weekly-km" className="num text-stat font-semibold">
-            {week.doneKm} <span className="text-base font-medium text-text-secondary">/ {week.plannedKm} km</span>
+            <CountUp value={week.doneKm} format={formatKm} duration={0.35} />{' '}
+            <span className="text-base font-medium text-text-secondary">/ {week.plannedKm} km</span>
           </p>
           <p className="text-caption text-text-muted">
             {t('week.summary', { done: week.doneSessions, planned: week.plannedSessions })}

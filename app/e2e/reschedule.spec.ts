@@ -11,7 +11,7 @@ test('kiša: predlog pomeranja → primena → ostaje posle reload-a', async ({ 
 
   const prompt = page.getByTestId('reschedule-prompt');
   await expect(prompt).toBeVisible();
-  await expect(prompt).toContainText('Izgleda da te danas čeka kiša — da pomerim trening?');
+  await expect(prompt).toContainText('Izgleda da te danas čeka kiša. Da pomerim trening?');
   await expect(prompt).toContainText('Ostavi kako je');
 
   const bestOption = page.getByTestId('reschedule-option-0');

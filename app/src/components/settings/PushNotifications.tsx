@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppCard } from '@/components/ui/AppCard';
+import { AppSelect } from '@/components/ui/AppSelect';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import {
   fetchPushPublicKey,
@@ -17,11 +18,29 @@ import {
   urlBase64ToUint8Array,
   type PushPermission,
 } from '@/features/push/push';
+import type { PushSubscriptionsUpdate } from '@/types';
 
 const TOGGLE_OPTIONS = [
   { value: 'on', labelKey: 'push.on' },
   { value: 'off', labelKey: 'push.off' },
 ] as const;
+
+const REMINDERS = [
+  { key: 'remind_today', labelKey: 'push.today', testId: 'push-today' },
+  { key: 'remind_training', labelKey: 'push.training', testId: 'push-training' },
+  { key: 'remind_weather', labelKey: 'push.weather', testId: 'push-weather' },
+  { key: 'remind_missed', labelKey: 'push.missed', testId: 'push-missed' },
+  { key: 'remind_race_week', labelKey: 'push.raceWeek', testId: 'push-race-week' },
+  { key: 'remind_recap', labelKey: 'push.recap', testId: 'push-recap' },
+] as const;
+
+type ReminderKey = (typeof REMINDERS)[number]['key'];
+
+const HOURS = Array.from({ length: 18 }, (_, index) => index + 5);
+
+function deviceTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Belgrade';
+}
 
 export function PushNotifications() {
   const { t, i18n } = useTranslation('settings');
@@ -77,7 +96,13 @@ export function PushNotifications() {
         p256dh: json.keys?.p256dh ?? '',
         auth: json.keys?.auth ?? '',
         language,
+        timezone: deviceTimeZone(),
+        remind_hour: subscription?.remind_hour ?? 18,
+        remind_today: subscription?.remind_today ?? true,
         remind_training: subscription?.remind_training ?? true,
+        remind_weather: subscription?.remind_weather ?? true,
+        remind_missed: subscription?.remind_missed ?? true,
+        remind_recap: subscription?.remind_recap ?? true,
         remind_race_week: subscription?.remind_race_week ?? true,
       });
       setNotice(t('push.enabled'));
@@ -112,14 +137,21 @@ export function PushNotifications() {
     }
   }
 
-  function handlePreference(key: 'remind_training' | 'remind_race_week', value: boolean) {
+  function handlePreference(key: ReminderKey, value: boolean) {
     if (!subscription) return;
     setError(null);
-    const patch =
-      key === 'remind_training'
-        ? { id: subscription.id, remind_training: value }
-        : { id: subscription.id, remind_race_week: value };
+    const patch: { id: string } & PushSubscriptionsUpdate = { id: subscription.id };
+    patch[key] = value;
     updatePreferences.mutate(patch, { onError: () => setError(t('push.saveFailed')) });
+  }
+
+  function handleHour(hour: number) {
+    if (!subscription) return;
+    setError(null);
+    updatePreferences.mutate(
+      { id: subscription.id, remind_hour: hour },
+      { onError: () => setError(t('push.saveFailed')) },
+    );
   }
 
   async function handleTest() {
@@ -162,22 +194,28 @@ export function PushNotifications() {
           <p data-testid="push-status" className="text-sm text-success-ink">
             {t('push.enabled')}
           </p>
-          <div data-testid="push-training">
-            <p className="section-label mb-1.5">{t('push.training')}</p>
-            <SegmentedControl
-              value={subscription.remind_training ? 'on' : 'off'}
-              onChange={(value) => handlePreference('remind_training', value === 'on')}
-              options={options}
-            />
-          </div>
-          <div data-testid="push-race-week">
-            <p className="section-label mb-1.5">{t('push.raceWeek')}</p>
-            <SegmentedControl
-              value={subscription.remind_race_week ? 'on' : 'off'}
-              onChange={(value) => handlePreference('remind_race_week', value === 'on')}
-              options={options}
-            />
-          </div>
+          <AppSelect
+            data-testid="push-hour"
+            label={t('push.hour')}
+            value={String(subscription.remind_hour)}
+            onChange={(event) => handleHour(Number(event.target.value))}
+          >
+            {HOURS.map((hour) => (
+              <option key={hour} value={hour}>
+                {t('push.hourOption', { hour })}
+              </option>
+            ))}
+          </AppSelect>
+          {REMINDERS.map((reminder) => (
+            <div key={reminder.key} data-testid={reminder.testId}>
+              <p className="section-label mb-1.5">{t(reminder.labelKey)}</p>
+              <SegmentedControl
+                value={subscription[reminder.key] ? 'on' : 'off'}
+                onChange={(value) => handlePreference(reminder.key, value === 'on')}
+                options={options}
+              />
+            </div>
+          ))}
           <AppButton
             type="button"
             variant="secondary"

@@ -15,22 +15,22 @@
     "done": "Urađeno",
     "guided": "Vođeno",
     "view": "Pogledaj trening",
-    "completeError": "Čuvanje nije uspelo — pokušaj ponovo"
+    "completeError": "Čuvanje nije uspelo. Pokušaj ponovo"
   },
   "empty": {
     "title": "Još nemamo plan",
-    "description": "Hajde da napravimo tvoj plan — trka, tempo i dani koje imaš.",
+    "description": "Hajde da napravimo tvoj plan: trka, tempo i dani koje imaš.",
     "action": "Otvori podešavanja"
   },
   "rest": {
     "title": "Danas je slobodan dan",
-    "description": "Baci pogled na kalendar — sledeći trening te čeka."
+    "description": "Baci pogled na kalendar. Sledeći trening te čeka."
   },
   "race": {
     "goal": "Ciljna trka",
     "untitled": "Trka bez naziva",
     "daysTo": "dana do trke",
-    "passed": "Trka je prošla — napravi novi plan",
+    "passed": "Trka je prošla. Napravi novi plan",
     "day": "Dan trke"
   },
   "plan": {
@@ -41,7 +41,7 @@
     "nearest": "Najbliži slobodan termin: {{date}}.",
     "swap": "Prebaci na {{date}}",
     "stay": "Ostajem po planu",
-    "swapError": "Zamena nije uspela — pokušaj ponovo"
+    "swapError": "Zamena nije uspela. Pokušaj ponovo"
   },
   "week": {
     "title": "Tvoja nedelja",
@@ -49,5 +49,10 @@
     "summary": "{{done}} od {{planned}} treninga ove nedelje"
   },
   "tomorrow": "sutra",
+  "weather": {
+    "best": "Najbolji termin danas: {{from}}–{{to}}h · skor {{score}}",
+    "earlier": "Predlog: trči pre {{hour}}h",
+    "conditions": "{{pct}}% kiše · vetar {{wind}} km/h"
+  },
   "rangeError": "Deo plana nije učitan."
 }

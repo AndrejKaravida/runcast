@@ -5,8 +5,8 @@
     "steps": "{{count}} steps",
     "noSpeechSuffix": " · no voice guidance",
     "stepsHeader": "Steps",
-    "speechUnavailable": "Voice guidance isn't available on this device — sound and visuals are used instead.",
-    "wakeLock": "Keep the screen on — locking it stops the sound.",
+    "speechUnavailable": "Voice guidance isn't available on this device. Sound and visuals are used instead.",
+    "wakeLock": "Keep the screen on. Locking it stops the sound.",
     "start": "Start guided run",
     "gpsOn": "GPS on",
     "gpsOff": "GPS off"
@@ -60,9 +60,9 @@
     "sourcePlan": "Plan",
     "logged": "This workout is already logged.",
     "view": "View workout",
-    "noFixHint": "GPS didn't get a fix — enter the distance manually.",
+    "noFixHint": "GPS didn't get a fix. Enter the distance manually.",
     "confirmTitle": "Finish early?",
-    "confirmDescription": "We'll log the time you've run so far — nothing is lost.",
+    "confirmDescription": "We'll log the time you've run so far. Nothing is lost.",
     "confirm": "Finish"
   }
 }

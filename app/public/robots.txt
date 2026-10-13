@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://runcast-2ju.pages.dev/sitemap.xml

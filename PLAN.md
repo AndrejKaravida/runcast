@@ -21,7 +21,7 @@ i predlaže zamenu treninga unutar iste nedelje kada uslovi nisu dobri.
 | 21   | v1.3/R: arhitekturalni review (6 agenata → `docs/review/*`) + sve P0/P1 popravke                                      | ✅     |
 | 22   | v1.3/F: gamifikacija + profil/avatar/rang lista + benchmark recalibracija tempa                                       | ✅     |
 
-Testovi: **237 unit** (shared) + **39 E2E** (Playwright kroz pravi UI) + typecheck/lint/build.
+Testovi: **253 unit** (shared) + **44 E2E** (Playwright kroz pravi UI) + typecheck/lint/build.
 
 ## Struktura
 
@@ -123,6 +123,23 @@ je zatvoren.
 2. **Napomene:** Supabase free projekat se pauzira posle 7 dana bez aktivnosti (keepalive ping je već
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
+
+## v1.5 — humanizacija, notifikacije 2.0, weather fokus, manualni reschedule, animacije, launch polish
+
+- **Humanizacija**: 236 AI crtica (—) uklonjeno iz svih tekstova (sr/en, shared sadržaj, generator,
+  push poruke); render-time normalizacija starih labela; E2E asertacije ažurirane.
+- **Notifikacije 2.0**: 6 tipova (Danas ujutru, Trening sutra, Vremensko upozorenje, Propušten
+  trening, Trka nedelja, Nedeljni rezime), izbor sata (5–22) + timezone po korisniku, funkcija se
+  poziva svakog sata i šalje po lokalnom vremenu, cron `0 * * * *`.
+- **Weather fokus (RunCast!)**: WeatherHero na vrhu Danas sa „najbolji termin danas" (skorovan
+  prozor), 7-dnevni skor u kalendaru plana sa legendom.
+- **Manualni reschedule**: „Pomeri" na treningu (bilo koji dan iz plana, swap RPC) i „Adaptiraj
+  nedelju" (propušteni → SKIPPED + automatska preraspodela preostalih uz očuvanje long run-a i
+  razmaka kvaliteta, `apply_week_plan` RPC).
+- **Animacije**: count-up brojevi, chart/bar entrance, badge pop + toast spring, completion moment,
+  list stagger (Motion, reduced-motion gate).
+- **Launch polish**: favicon set + OG slika, SEO/OG/Twitter meta, robots + sitemap, per-route title
+  hook, brendirani mejl šabloni (`supabase/templates/*`, RunCast brend), `docs/LAUNCH-CHECKLIST.md`.
 
 ## v1.4 — notifikacije, smart reschedule, sRPE, P1 sweep
 

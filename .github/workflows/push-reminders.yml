@@ -2,7 +2,7 @@ name: Push reminders
 
 on:
   schedule:
-    - cron: '0 16 * * *'
+    - cron: '0 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
     env:
       PUSH_CRON_SECRET: ${{ secrets.PUSH_CRON_SECRET }}
     steps:
-      - name: Send daily reminders
+      - name: Send hourly reminders
         if: env.PUSH_CRON_SECRET != ''
         run: |
           curl -sS --fail-with-body -X POST "https://zhwqqcewxccwjhtdkvck.supabase.co/functions/v1/send-reminders" \

@@ -8,7 +8,7 @@
       "title": "What race are you training for?",
       "hasRace": "I have a race",
       "noRace": "Not yet",
-      "noRaceText": "Without a race you get a base plan for the next 8 weeks — easy running with no target paces. You can add a race later in settings."
+      "noRaceText": "Without a race you get a base plan for the next 8 weeks: easy running with no target paces. You can add a race later in settings."
     },
     "goal": {
       "title": "What are you aiming for?",
@@ -25,7 +25,7 @@
     "schedule": {
       "title": "When do you run?",
       "daysLabel": "How many days per week",
-      "longRunNote": "The long run anchors your week — the other days are arranged around it.",
+      "longRunNote": "The long run anchors your week: the other days are arranged around it.",
       "windowNote": "For mornings we check the forecast for 06–09 h, for evenings 17–21 h."
     },
     "location": {
@@ -38,7 +38,7 @@
       "basePlan": "Base plan · 8 weeks",
       "summaryWeeks": "{{weeks}} weeks",
       "summaryDays": "{{days}} days per week · long run {{day}}",
-      "baseWarning": "Without a goal or a result (or with less than 12 weeks to the race) you get a base plan — easy workouts only."
+      "baseWarning": "Without a goal or a result (or with less than 12 weeks to the race) you get a base plan: easy workouts only."
     }
   },
   "fields": {
@@ -118,6 +118,6 @@
     "recentTimeFormat": "Enter the race time as mm:ss (e.g. 25:30)",
     "recentDistanceRequired": "Pick your recent race distance",
     "cityRequired": "Pick a city from the search results",
-    "generateFailed": "Plan generation failed — please try again"
+    "generateFailed": "Plan generation failed. Please try again"
   }
 }

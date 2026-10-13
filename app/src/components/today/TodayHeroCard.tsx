@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { formatDuration, isGuidedRunType, type RescheduleSuggestion, type RescheduleSwapOption } from '@runcast/shared';
 import { clsx } from 'clsx';
 import { CheckCircle2 } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
@@ -69,6 +71,9 @@ export function TodayHeroCard({
   onOpenLog,
 }: TodayHeroCardProps) {
   const { t } = useTranslation('today');
+  const reduceMotion = useReducedMotion();
+  const [initialStatus] = useState(workout.status);
+  const completionMoment = initialStatus !== 'DONE' && workout.status === 'DONE';
   const showWeatherBanner = Boolean(verdict || reschedule || rescheduleApplied);
 
   return (
@@ -85,9 +90,30 @@ export function TodayHeroCard({
           </span>
         </p>
         {workout.status !== 'PLANNED' ? (
-          <AppBadge tone={statusTone(workout.status)}>
-            {workout.status === 'DONE' ? t('status.done') : t('status.skipped')}
-          </AppBadge>
+          <motion.div
+            key={workout.status}
+            initial={completionMoment && !reduceMotion ? { opacity: 0, y: 4 } : false}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
+          >
+            <AppBadge tone={statusTone(workout.status)}>
+              {workout.status === 'DONE' ? (
+                <>
+                  <motion.span
+                    className="mr-1 inline-flex"
+                    initial={completionMoment && !reduceMotion ? { scale: 0.8, opacity: 0 } : false}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', bounce: 0.25, duration: 0.3 }}
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                  </motion.span>
+                  {t('status.done')}
+                </>
+              ) : (
+                t('status.skipped')
+              )}
+            </AppBadge>
+          </motion.div>
         ) : null}
       </div>
 

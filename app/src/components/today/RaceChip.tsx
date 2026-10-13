@@ -2,6 +2,7 @@ import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppCard } from '@/components/ui/AppCard';
+import { CountUp } from '@/components/ui/CountUp';
 import type { ActivePlan } from '@/features/plans/queries';
 import { formatDateShort } from '@/lib/dates';
 
@@ -21,7 +22,7 @@ export function RaceChip({ plan, daysToRace, planWeek }: RaceChipProps) {
       <p className="text-sm font-medium">{raceInfo.name ?? t('race.untitled')}</p>
       {daysToRace !== null && daysToRace >= 0 ? (
         <p className="flex items-baseline gap-2">
-          <span className="num value-swap text-hero font-bold text-primary-ink">{daysToRace}</span>
+          <CountUp value={daysToRace} className="num text-hero font-bold text-primary-ink" />
           <span className="text-sm text-text-secondary">{t('race.daysTo')}</span>
         </p>
       ) : (

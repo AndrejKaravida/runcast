@@ -24,9 +24,9 @@ interface Exercise {
 }
 
 const TEMPLATE_TITLES: Record<TemplateId, string> = {
-  A: 'Snaga A — noge i core',
-  B: 'Snaga B — glute i core',
-  MAINTENANCE: 'Snaga — održavanje',
+  A: 'Snaga A: noge i core',
+  B: 'Snaga B: glute i core',
+  MAINTENANCE: 'Snaga: održavanje',
   MOBILITY: 'Mobilnost 20 min',
 };
 
@@ -75,23 +75,23 @@ function setsFor(input: StrengthWeekInput): { sets: number; reps: string } {
 function exercisesFor(template: TemplateId, input: StrengthWeekInput): Exercise[] {
   if (template === 'MOBILITY') {
     return [
-      { label: 'Zagrevanje — 3 min', sets: null, reps: null, durationSec: 180 },
-      { label: 'Kukovi i skočni zglobovi — 4 min', sets: null, reps: null, durationSec: 240 },
-      { label: 'Zadnja loža i listovi — 3 min', sets: null, reps: null, durationSec: 180 },
-      { label: 'Kuk fleksori i glutei — 3 min', sets: null, reps: null, durationSec: 180 },
-      { label: 'Torakalna rotacija — 3 min', sets: null, reps: null, durationSec: 180 },
-      { label: 'Disanje i opuštanje — 4 min', sets: null, reps: null, durationSec: 240 },
+      { label: 'Zagrevanje 3 min', sets: null, reps: null, durationSec: 180 },
+      { label: 'Kukovi i skočni zglobovi 4 min', sets: null, reps: null, durationSec: 240 },
+      { label: 'Zadnja loža i listovi 3 min', sets: null, reps: null, durationSec: 180 },
+      { label: 'Kuk fleksori i glutei 3 min', sets: null, reps: null, durationSec: 180 },
+      { label: 'Torakalna rotacija 3 min', sets: null, reps: null, durationSec: 180 },
+      { label: 'Disanje i opuštanje 4 min', sets: null, reps: null, durationSec: 240 },
     ];
   }
   if (template === 'MAINTENANCE') {
     return [
-      { label: 'Zagrevanje — 5 min', sets: null, reps: null, durationSec: WARMUP_SEC },
+      { label: 'Zagrevanje 5 min', sets: null, reps: null, durationSec: WARMUP_SEC },
       { label: 'Čučnjevi', sets: 2, reps: '12', durationSec: STRENGTH_STEP_SEC },
       { label: 'Mrtvo dizanje na jednoj nozi', sets: 2, reps: '12 (svaka noga)', durationSec: STRENGTH_STEP_SEC },
       { label: 'Glute most', sets: 2, reps: '12', durationSec: STRENGTH_STEP_SEC },
       { label: 'Plank', sets: 2, reps: '45 s', durationSec: CORE_STEP_SEC },
       { label: 'Bird dog', sets: 2, reps: '10', durationSec: CORE_STEP_SEC },
-      { label: 'Hlađenje i mobilnost — 5 min', sets: null, reps: null, durationSec: COOLDOWN_SEC },
+      { label: 'Hlađenje i mobilnost 5 min', sets: null, reps: null, durationSec: COOLDOWN_SEC },
     ];
   }
   const { sets, reps } = setsFor(input);
@@ -101,25 +101,25 @@ function exercisesFor(template: TemplateId, input: StrengthWeekInput): Exercise[
         ? [{ label: 'Poskoci', sets: 3, reps: '10', durationSec: PLYO_STEP_SEC }]
         : [];
     return [
-      { label: 'Zagrevanje — 5 min', sets: null, reps: null, durationSec: WARMUP_SEC },
+      { label: 'Zagrevanje 5 min', sets: null, reps: null, durationSec: WARMUP_SEC },
       { label: 'Čučnjevi', sets, reps, durationSec: STRENGTH_STEP_SEC },
       { label: 'Iskorak', sets, reps: `${reps} (svaka noga)`, durationSec: STRENGTH_STEP_SEC },
       { label: 'Glute most', sets, reps, durationSec: STRENGTH_STEP_SEC },
       { label: 'Plank', sets: 3, reps: '45 s', durationSec: CORE_STEP_SEC },
       { label: 'Dead bug', sets: 3, reps: '10', durationSec: CORE_STEP_SEC },
       ...plyo,
-      { label: 'Hlađenje i mobilnost — 5 min', sets: null, reps: null, durationSec: COOLDOWN_SEC },
+      { label: 'Hlađenje i mobilnost 5 min', sets: null, reps: null, durationSec: COOLDOWN_SEC },
     ];
   }
   return [
-    { label: 'Zagrevanje — 5 min', sets: null, reps: null, durationSec: WARMUP_SEC },
+    { label: 'Zagrevanje 5 min', sets: null, reps: null, durationSec: WARMUP_SEC },
     { label: 'Mrtvo dizanje na jednoj nozi', sets, reps: `${reps} (svaka noga)`, durationSec: STRENGTH_STEP_SEC },
     { label: 'Bugarski čučanj', sets, reps: `${reps} (svaka noga)`, durationSec: STRENGTH_STEP_SEC },
     { label: 'Podizanje na prste', sets: 3, reps: '15', durationSec: STRENGTH_STEP_SEC },
     { label: 'Glute most', sets, reps, durationSec: STRENGTH_STEP_SEC },
     { label: 'Plank', sets: 3, reps: '45 s', durationSec: CORE_STEP_SEC },
     { label: 'Bird dog', sets: 3, reps: '10', durationSec: CORE_STEP_SEC },
-    { label: 'Hlađenje i mobilnost — 5 min', sets: null, reps: null, durationSec: COOLDOWN_SEC },
+    { label: 'Hlađenje i mobilnost 5 min', sets: null, reps: null, durationSec: COOLDOWN_SEC },
   ];
 }
 
@@ -127,7 +127,7 @@ function toStep(exercise: Exercise): WorkoutStep {
   if (exercise.sets === null || exercise.reps === null) {
     return { label: exercise.label, durationSec: exercise.durationSec };
   }
-  return { label: `${exercise.label} — ${exercise.sets}×${exercise.reps}`, durationSec: exercise.durationSec };
+  return { label: `${exercise.label} ${exercise.sets}×${exercise.reps}`, durationSec: exercise.durationSec };
 }
 
 function templatesFor(input: StrengthWeekInput): TemplateId[] {

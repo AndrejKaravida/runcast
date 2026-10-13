@@ -2,11 +2,11 @@
   "explain": {
     "paceSuffix": "({{zone}} tempo ~{{pace}} /km)",
     "phase": {
-      "BASE": "You're building your base and habit now — volume rises, intensity stays low.",
+      "BASE": "You're building your base and habit now. Volume rises, intensity stays low.",
       "BUILD": "Build phase: we add quality on top of the base and keep growth under control.",
       "PEAK": "Peak of preparation: the hardest work, fatigue is expected and allowed.",
       "TAPER": "Taper: volume drops so you arrive at the start fresh.",
-      "RACE": "Everything this week serves the race — the day that paid for all the work."
+      "RACE": "Everything this week serves the race: the day that paid for all the work."
     },
     "effortSuffix": {
       "TAPER": "Stay at the lower end of the range.",
@@ -14,35 +14,35 @@
     },
     "types": {
       "EASY": {
-        "why": "Easy running builds your aerobic base and helps you recover between hard sessions — slow is deliberate.",
+        "why": "Easy running builds your aerobic base and helps you recover between hard sessions. Slow is deliberate.",
         "how": [
           "Keep a conversational pace for the whole run.",
           "If you speed up, ease back: the ceiling is a speed, not a target."
         ],
-        "mistake": "An \"easy\" day at a moderate pace (RPE 6) — then no day is truly easy or hard.",
+        "mistake": "An \"easy\" day at a moderate pace (RPE 6). Then no day is truly easy or hard.",
         "effortLabel": "RPE 3–4",
         "effortCue": "you can talk in full sentences without losing your breath."
       },
       "LONG": {
         "why": "It builds endurance, efficiency and mental toughness for the closing stages of a race.",
-        "whyWithDistance": "Long run {{km, number(maximumFractionDigits: 1)}} km — builds endurance, efficiency and mental toughness for the closing stages of a race.",
+        "whyWithDistance": "Long run {{km, number(maximumFractionDigits: 1)}} km: builds endurance, efficiency and mental toughness for the closing stages of a race.",
         "how": ["Start calmly, the first 5 km the slowest.", "Hydrate and test your kit the way you will on race day."],
-        "mistake": "Starting too fast drains you before the end — the long run should give you confidence, not break you.",
+        "mistake": "Starting too fast drains you before the end. The long run should give you confidence, not break you.",
         "effortLabel": "RPE 4–5 (up to 6 at the end)",
         "effortCue": "you talk in sentences and breathe under control."
       },
       "TEMPO": {
-        "why": "Tempo work raises your lactate threshold — a pace you can hold for ~1 h becomes easier over time.",
+        "why": "Tempo work raises your lactate threshold. A pace you can hold for ~1 h becomes easier over time.",
         "how": [
           "Warm up 2 km, then hold the tempo block evenly, without surges.",
           "If you can only speak in single words, you've gone too far."
         ],
-        "mistake": "Tempo at 5 km pace isn't tempo — it becomes a VO2max session and demands too much recovery.",
+        "mistake": "Tempo at 5 km pace isn't tempo: it becomes a VO2max session and demands too much recovery.",
         "effortLabel": "RPE 6–7",
         "effortCue": "comfortably hard, you speak in short phrases."
       },
       "INTERVALS": {
-        "why": "Intervals raise your VO2max — the ceiling of aerobic power and the speed you can sustain.",
+        "why": "Intervals raise your VO2max: the ceiling of aerobic power and the speed you can sustain.",
         "how": [
           "Keep the first 1–2 reps calmer, make the last as strong as the first.",
           "Recovery: easy jog or walk, bring your breathing down."
@@ -52,7 +52,7 @@
         "effortCue": "hard but controlled, technique holds together."
       },
       "REPETITIONS": {
-        "why": "Reps don't build endurance — they sharpen mechanics, stride and running economy.",
+        "why": "Reps don't build endurance. They sharpen mechanics, stride and running economy.",
         "how": [
           "Every repetition fast and relaxed, without tension.",
           "Full recovery before the next one (walk or easy jog)."
@@ -62,29 +62,29 @@
         "effortCue": "short and clean; when technique drops, stop the set."
       },
       "REST": {
-        "why": "Rest isn't a break from training — adaptation happens while your body recovers.",
+        "why": "Rest isn't a break from training. Adaptation happens while your body recovers.",
         "how": ["A walk, mobility or light stretching for 15–20 min.", "Priority: 7–9 h of sleep and normal eating."],
-        "mistake": "Filling the day with junk kilometres or feeling guilty — rest is part of the plan.",
+        "mistake": "Filling the day with junk kilometres or feeling guilty. Rest is part of the plan.",
         "effortLabel": "RPE 0–2",
         "effortCue": "today you don't train, today you're building."
       },
       "RACE": {
-        "why": "The day the whole plan was made for — a check of form, tactics and head.",
+        "why": "The day the whole plan was made for: a check of form, tactics and head.",
         "how": [
           "Run the first half under control, don't chase anyone else's pace.",
           "Stick to your pace plan to the end."
         ],
-        "mistake": "A fast start burns your energy — the most common reason for fading in the second half.",
+        "mistake": "A fast start burns your energy. It's the most common reason for fading in the second half.",
         "effortLabel": "RPE 8–10",
         "effortCue": "hard, but to plan; the last third is allowed to hurt."
       },
       "STRENGTH": {
-        "why": "Strength stabilises joints and corrects imbalances — fewer injuries and a more efficient stride (+8–12% for 1–2 sessions a week).",
+        "why": "Strength stabilises joints and corrects imbalances: fewer injuries and a more efficient stride (+8–12% for 1–2 sessions a week).",
         "how": [
           "Controlled form above weight; the last 1–2 reps challenging but clean.",
           "Don't leave heavy leg work for the day before a key run session."
         ],
-        "mistake": "Too heavy and too close to quality running — strength then steals recovery instead of supporting it.",
+        "mistake": "Too heavy and too close to quality running: strength then steals recovery instead of supporting it.",
         "effortLabel": "RPE 6–8",
         "effortCue": "you feel the muscles working, form stays clean."
       }
@@ -92,12 +92,12 @@
   },
   "coach": {
     "missedRuns": {
-      "title": "{{missed, number}} workouts were missed — it happens",
-      "description": "Next week is easier — we'll ease you back into rhythm without pressure."
+      "title": "{{missed, number}} workouts were missed. It happens",
+      "description": "Next week is easier. We'll ease you back into rhythm without pressure."
     },
     "highRpe": {
       "title": "Your body needs a breather (average RPE {{rpe, number}})",
-      "description": "Five workouts were tough. We're taking a step back — recovery is training."
+      "description": "Five workouts were tough. We're taking a step back: recovery is training."
     },
     "rpeDrift": {
       "title": "Fatigue is slowly building (average {{rpe, number}})",
@@ -105,21 +105,21 @@
     },
     "longRunMissed": {
       "title": "The long run was missed",
-      "description": "Kilometres can't be made up — next week stays exactly on plan."
+      "description": "Kilometres can't be made up. Next week stays exactly on plan."
     },
     "readyToBuild": {
-      "title": "Everything is going to plan — we can push a little",
+      "title": "Everything is going to plan, we can push a little",
       "description": "{{adherence, number}}% completion and low RPE (average {{rpe, number}}). Next week goes +10%."
     }
   },
   "srpe": {
     "caution": {
       "title": "Your load ratio is creeping up (ACWR {{acwr, number}})",
-      "description": "Acute load is above your usual — next week goes 10% easier."
+      "description": "Acute load is above your usual. Next week goes 10% easier."
     },
     "high": {
       "title": "Your load jumped sharply (ACWR {{acwr, number}})",
-      "description": "Injury risk rises with spikes — next week eases by 20%."
+      "description": "Injury risk rises with spikes. Next week eases by 20%."
     }
   },
   "fueling": {
@@ -137,10 +137,10 @@
       "snackMedium": "Snack 60–90 min before: 50+ g carbs + some protein.",
       "snackShort": "Snack before heading out: 25+ g carbs (banana, toast with honey).",
       "water": "Drink ~500 ml of water 2 h before the start.",
-      "race": "Test your gels and timing in training — nothing new on race day."
+      "race": "Test your gels and timing in training. Nothing new on race day."
     },
     "during": {
-      "gel": "Gel {{index, number}} — drink ~200 ml of water."
+      "gel": "Gel {{index, number}}: drink ~200 ml of water."
     },
     "post": {
       "recovery": "Within 1–2 h: protein + carbs (chocolate milk, yoghurt + fruit, a sandwich).",
@@ -166,7 +166,7 @@
       "toilet": "Toilet 30–45 min before the start",
       "warmupLong": "Short 10 min warm-up + a few strides",
       "warmupShort": "Warm-up 10–15 min + 2–4 strides",
-      "firstKmLong": "First km disciplined — 5–10 s/km slower than goal",
+      "firstKmLong": "First km disciplined: 5–10 s/km slower than goal",
       "firstKmShort": "Controlled and strong from the start, no sprinting",
       "gelPlan": "A gel every 30–35 min + water at every station",
       "effort": "Run by effort through wind and hills, not by the watch",
@@ -174,12 +174,12 @@
       "finishShort": "Let it rip in the last km"
     },
     "weather": {
-      "storm": "Thunderstorm — check the race rules and stick to your fuelling plan.",
-      "rain": "Rain — anti-chafe, a cap and dry socks; pace stays the same.",
-      "heat": "Hot — start more conservatively and drink at every station.",
-      "cold": "Cold — layers for the start wait and a longer warm-up.",
-      "wind": "Wind — run by effort, don't chase the watch.",
-      "air": "Poor air — lower the intensity and monitor how you feel."
+      "storm": "Thunderstorm: check the race rules and stick to your fuelling plan.",
+      "rain": "Rain: anti-chafe, a cap and dry socks; pace stays the same.",
+      "heat": "Hot: start more conservatively and drink at every station.",
+      "cold": "Cold: layers for the start wait and a longer warm-up.",
+      "wind": "Wind: run by effort, don't chase the watch.",
+      "air": "Poor air: lower the intensity and monitor how you feel."
     }
   },
   "guided": {
@@ -190,8 +190,8 @@
       "repeat": "Repetition {{index}} of {{total}}.",
       "pace": "Pace {{pace}} per kilometre.",
       "segmentEnd": "Step complete.",
-      "halfway": "Halfway — hold the rhythm.",
-      "pause": "Pause — breathe.",
+      "halfway": "Halfway. Hold the rhythm.",
+      "pause": "Pause. Breathe.",
       "resume": "Let's keep going.",
       "skip": "Moving on to: {{label}}.",
       "skipFallback": "Moving on to: the next step.",
@@ -202,12 +202,12 @@
   "achievements": {
     "title": "Achievements",
     "emptyTitle": "The first badge is the sweetest",
-    "emptyDescription": "Just log a workout — achievements unlock on their own.",
+    "emptyDescription": "Just log a workout. Achievements unlock on their own.",
     "progress": "{{remaining}} more until {{title}}",
     "toastTitle": "New achievement",
     "first": {
       "title": "First workout",
-      "description": "Your first completed workout — every story starts with one step."
+      "description": "Your first completed workout. Every story starts with one step."
     },
     "sessions": {
       "title": "{{count}} workouts",
@@ -219,11 +219,11 @@
     },
     "long": {
       "title": "First {{km}} km long run",
-      "description": "A {{km}} km long run — endurance is built kilometre by kilometre."
+      "description": "A {{km}} km long run. Endurance is built kilometre by kilometre."
     },
     "tempo": {
       "title": "First tempo",
-      "description": "First tempo session done — your lactate threshold is moving."
+      "description": "First tempo session done. Your lactate threshold is moving."
     },
     "km": {
       "title": "{{km}} km total",
@@ -231,11 +231,11 @@
     },
     "race": {
       "title": "Race completed",
-      "description": "Race done — the day the whole plan was built for."
+      "description": "Race done: the day the whole plan was built for."
     },
     "strength": {
       "title": "Strength 10×",
-      "description": "Ten strength sessions done — a more stable body."
+      "description": "Ten strength sessions done. A more stable body."
     },
     "pb": {
       "title": "New personal best",
@@ -249,14 +249,14 @@
     }
   },
   "reschedule": {
-    "prompt": "Looks like rain is coming — should I move your workout?",
+    "prompt": "Looks like rain is coming. Should I move your workout?",
     "reason": "{{pct}}% rain, {{temp}}°C",
     "shift": {
-      "morning": "Or move it to the morning — {{pct}}% rain, {{temp}}°C.",
-      "evening": "Or move it to the evening — {{pct}}% rain, {{temp}}°C."
+      "morning": "Or move it to the morning: {{pct}}% rain, {{temp}}°C.",
+      "evening": "Or move it to the evening: {{pct}}% rain, {{temp}}°C."
     },
     "indoor": "If it stays like this, do the workout indoors.",
     "dismiss": "Leave it as is",
-    "applied": "Workout moved — the week is recalculated."
+    "applied": "Workout moved. The week is recalculated."
   }
 }

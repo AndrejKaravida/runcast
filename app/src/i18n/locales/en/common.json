@@ -50,8 +50,8 @@
     "placeholder": "Novi Sad",
     "search": "Search",
     "tooShort": "Type at least 2 characters of the city name",
-    "noResults": "No results — try another name",
-    "searchFailed": "Search isn't working right now — try later"
+    "noResults": "No results. Try another name",
+    "searchFailed": "Search isn't working right now. Try later"
   },
   "notFound": {
     "text": "This page doesn't exist.",

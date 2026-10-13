@@ -146,6 +146,60 @@ export function useSwapWorkouts() {
   });
 }
 
+export function useMoveWorkout() {
+  const { session } = useAuth();
+  const userId = session?.user.id;
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ workout, date }: { workout: WorkoutsRow; date: string }): Promise<boolean> => {
+      if (!userId) return false;
+      const { data: target, error } = await supabase
+        .from('workouts')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('plan_id', workout.plan_id)
+        .eq('workout_date', date)
+        .maybeSingle();
+      if (error) throw error;
+      if (!target) return false;
+      const { error: swapError } = await supabase.rpc('swap_workouts', {
+        p_first: workout.id,
+        p_second: target.id,
+      });
+      if (swapError) throw swapError;
+      return true;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workouts'] });
+      queryClient.invalidateQueries({ queryKey: ['workout'] });
+    },
+  });
+}
+
+export interface WeekPlanAssignment {
+  id: string;
+  date?: string;
+  status?: 'SKIPPED';
+}
+
+export function useApplyWeekPlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (assignments: WeekPlanAssignment[]): Promise<number> => {
+      const { data, error } = await supabase.rpc('apply_week_plan', {
+        p_assignments: assignments as unknown as Json,
+      });
+      if (error) throw error;
+      return data ?? 0;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plan'] });
+      queryClient.invalidateQueries({ queryKey: ['workouts'] });
+      queryClient.invalidateQueries({ queryKey: ['workout'] });
+    },
+  });
+}
+
 export interface RecalibratePlanInput {
   anchor: PlanAnchor;
   paces: PlanPaces;

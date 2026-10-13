@@ -50,8 +50,8 @@
     "placeholder": "Novi Sad",
     "search": "Traži",
     "tooShort": "Ukucaj bar 2 znaka naziva grada",
-    "noResults": "Nema rezultata — probaj drugi naziv",
-    "searchFailed": "Pretraga trenutno ne radi — probaj kasnije"
+    "noResults": "Nema rezultata. Probaj drugi naziv",
+    "searchFailed": "Pretraga trenutno ne radi. Probaj kasnije"
   },
   "notFound": {
     "text": "Ova stranica ne postoji.",

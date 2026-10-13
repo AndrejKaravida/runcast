@@ -1,12 +1,14 @@
 import { useMemo } from 'react';
 import { formatDuration, formatPace } from '@runcast/shared';
 import { BarChart3, History } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AchievementToast } from '@/components/achievements/AchievementToast';
 import { AchievementsGrid } from '@/components/achievements/AchievementsGrid';
 import { AppCard } from '@/components/ui/AppCard';
 import { AppLinkButton } from '@/components/ui/AppLinkButton';
+import { CountUp } from '@/components/ui/CountUp';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ListRow } from '@/components/ui/ListRow';
 import { QueryError } from '@/components/ui/QueryError';
@@ -28,8 +30,13 @@ function weekLabel(week: string): string {
   return `${week.slice(8, 10)}.${week.slice(5, 7)}.`;
 }
 
+function formatKm(value: number): string {
+  return String(Math.round(value * 10) / 10);
+}
+
 export function StatsPage() {
   const { t } = useTranslation('stats');
+  const reduceMotion = useReducedMotion();
   const today = todayIso();
   const { data: plan, isLoading: planLoading, isError: planError, refetch } = useActivePlan();
   const { data: workouts = [], isLoading: workoutsLoading } = useWorkoutsRange(
@@ -37,7 +44,7 @@ export function StatsPage() {
     plan?.race_date ?? today,
   );
   const { data: logs = [] } = useRunLogs();
-  const { achievements, achievement, dismiss } = useAchievementCelebration(workouts, logs, undefined);
+  const { achievements, achievement, dismiss, fresh } = useAchievementCelebration(workouts, logs, undefined);
 
   const stats = useMemo(() => {
     const series = weeklyKmSeries(workouts, today, 8);
@@ -86,7 +93,7 @@ export function StatsPage() {
       <div className="space-y-2">
         <p className="section-label">{t('summary.label')}</p>
         <p className="flex items-baseline gap-2">
-          <span className="num value-swap text-hero font-bold">{stats.doneKm}</span>
+          <CountUp value={stats.doneKm} format={formatKm} className="num text-hero font-bold" />
           <span className="text-base font-medium text-text-secondary">km</span>
         </p>
         <p className="num text-caption text-text-muted">{t('summary.planned', { km: stats.plannedToDate })}</p>
@@ -116,7 +123,7 @@ export function StatsPage() {
           }
         />
         <div className="flex gap-1.5">
-          {stats.series.map((entry) => {
+          {stats.series.map((entry, index) => {
             const isCurrent = entry.week === startOfWeekIso(today);
             return (
               <div key={entry.week} className="flex min-w-0 flex-1 flex-col items-center gap-1">
@@ -131,9 +138,16 @@ export function StatsPage() {
                     className="absolute inset-x-0 bottom-0 rounded-t-md border border-border bg-surface-elevated"
                     style={{ height: `${Math.max((entry.planned / stats.maxWeek) * 100, entry.planned > 0 ? 4 : 0)}%` }}
                   />
-                  <div
+                  <motion.div
                     className="absolute inset-x-0 bottom-0 rounded-t-md bg-chart-bar"
-                    style={{ height: `${(entry.done / stats.maxWeek) * 100}%` }}
+                    style={{ height: `${(entry.done / stats.maxWeek) * 100}%`, transformOrigin: 'bottom' }}
+                    initial={reduceMotion ? false : { scaleY: 0 }}
+                    animate={{ scaleY: 1 }}
+                    transition={
+                      reduceMotion
+                        ? { duration: 0 }
+                        : { type: 'spring', bounce: 0, duration: 0.35, delay: Math.min(index, 6) * 0.035 }
+                    }
                   />
                 </div>
                 <span
@@ -168,7 +182,7 @@ export function StatsPage() {
 
       <LoadCard logs={logs} today={today} />
 
-      <AchievementsGrid achievements={achievements} />
+      <AchievementsGrid achievements={achievements} fresh={fresh} />
 
       <PredictorCard paces={paces} anchor={anchor} raceDistanceKm={plan.races?.distance_km ?? null} />
       <AppLinkButton to="/benchmark" variant="secondary" className="w-full">

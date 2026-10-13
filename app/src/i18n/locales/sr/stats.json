@@ -5,7 +5,7 @@
   },
   "empty": {
     "title": "Statistika još čeka prvi trening",
-    "description": "Napravimo plan — brojevi se pune sami dok trčiš.",
+    "description": "Napravimo plan. Brojevi se pune sami dok trčiš.",
     "action": "Otvori podešavanja"
   },
   "row": {
@@ -18,15 +18,15 @@
     "tooltip": "{{done}} od {{planned}} km",
     "planned": "planirano",
     "done": "urađeno",
-    "noDone": "Još nema urađenih treninga — kolone se pune kako beležiš treninge.",
-    "description": "Koliko si istrčao od planiranog — nedelja po nedelju."
+    "noDone": "Još nema urađenih treninga. Kolone se pune kako beležiš treninge.",
+    "description": "Koliko si istrčao od planiranog, nedelja po nedelju."
   },
   "load": {
     "title": "Opterećenje treninga",
     "acute": "Akutno (7 dana)",
     "acwr": "ACWR",
     "barTooltip": "{{load}} poena opterećenja",
-    "note": "Gruba heuristika iz RPE-a i trajanja — ne dijagnoza.",
+    "note": "Gruba heuristika iz RPE-a i trajanja, ne dijagnoza.",
     "bands": {
       "insufficient": "Nedovoljno podataka",
       "low": "Nisko",
@@ -35,11 +35,11 @@
       "high": "Visoko"
     },
     "explanations": {
-      "insufficient": "Treba bar 8 treninga u 4 nedelje i 3 u poslednjih 7 dana — nastavi da beležiš.",
-      "low": "Akutno opterećenje je ispod uobičajenog — telo se odmara.",
-      "sweet": "Akutno opterećenje prati hronično — ritam je stabilan.",
-      "caution": "Akutno opterećenje raste brže od hroničnog — pripazi na sledeću nedelju.",
-      "high": "Skok opterećenja je velik — smanji intenzitet i daj telu prostor da se prilagodi."
+      "insufficient": "Treba bar 8 treninga u 4 nedelje i 3 u poslednjih 7 dana. Nastavi da beležiš.",
+      "low": "Akutno opterećenje je ispod uobičajenog. Telo se odmara.",
+      "sweet": "Akutno opterećenje prati hronično. Ritam je stabilan.",
+      "caution": "Akutno opterećenje raste brže od hroničnog. Pripazi na sledeću nedelju.",
+      "high": "Skok opterećenja je velik. Smanji intenzitet i daj telu prostor da se prilagodi."
     }
   },
   "recent": {
@@ -56,9 +56,9 @@
     "adherence": "Ispunjeno",
     "sessionsOne": "{{count}} trening",
     "sessionsMany": "{{count}} treninga",
-    "underControl": "Sve držiš pod kontrolom — samo nastavi.",
+    "underControl": "Sve držiš pod kontrolom. Samo nastavi.",
     "weekAdjusted": "Nedelja od {{day}}.{{month}}. je prilagođena.",
-    "applyFailed": "Nije uspelo — pokušaj ponovo.",
+    "applyFailed": "Nije uspelo. Pokušaj ponovo.",
     "actions": {
       "missedRuns": "Olakšaj sledeću nedelju 20%",
       "highRpe": "Olakšaj 10%",
@@ -76,12 +76,12 @@
   },
   "predictor": {
     "title": "Predikcija trke",
-    "empty": "Ubaci poslednju trku ili cilj — pokazaću ti predikciju.",
-    "outOfRange": "Rezultat je ispod opsega VDOT modela — predikcija nije pouzdana.",
+    "empty": "Ubaci poslednju trku ili cilj. Pokazaću ti predikciju.",
+    "outOfRange": "Rezultat je ispod opsega VDOT modela. Predikcija nije pouzdana.",
     "yourRace": "Tvoja trka",
-    "goalNote": "Bazirano na ciljnom tempu — odražava cilj, ne garantuje trenutnu formu.",
+    "goalNote": "Bazirano na ciljnom tempu. Odražava cilj, ne garantuje trenutnu formu.",
     "anchorNote": "Bazirano na rezultatu: {{distance}} {{time}}.",
-    "method": "Procena po Daniels VDOT modelu — greška raste sa razlikom distanci (±2–4%).",
+    "method": "Procena po Daniels VDOT modelu. Greška raste sa razlikom distanci (±2–4%).",
     "benchmarkCta": "Uradi test trku"
   },
   "distance": {
@@ -91,15 +91,15 @@
   "pb": {
     "title": "Lični rekordi",
     "emptyTitle": "Rekorda još nema",
-    "emptyDescription": "Zabeleži trku na 5, 10 ili 21 km — prvi rekord je uvek najslađi.",
+    "emptyDescription": "Zabeleži trku na 5, 10 ili 21 km. Prvi rekord je uvek najslađi.",
     "footer": "Automatski iz zabeleženih treninga (±0,4% tolerancije)."
   },
   "leaderboard": {
     "title": "Rang lista",
-    "description": "Nedelja po nedelju — ko je istrčao najviše.",
+    "description": "Nedelja po nedelju: ko je istrčao najviše.",
     "you": "Ti",
     "rank": "Ti si #{{rank}} ove nedelje.",
-    "noKm": "Ove nedelje još nemaš kilometara — istrči prvi.",
+    "noKm": "Ove nedelje još nemaš kilometara. Istrči prvi.",
     "notPublic": "Uključi javni profil u podešavanjima da vidiš svoj rang.",
     "anonymous": "Trkač",
     "emptyTitle": "Rang lista je još prazna",

@@ -19,8 +19,8 @@
     "preEvening": "Pre · obrok do {{time}}:00",
     "during": "Tokom",
     "water": "Voda:",
-    "short": "Kratko je — voda je dovoljna, gel nije neophodan.",
-    "hot": "Vruće je — gel na ~30 min i više vode.",
+    "short": "Kratko je. Voda je dovoljna, gel nije neophodan.",
+    "hot": "Vruće je. Gel na ~30 min i više vode.",
     "after": "Posle"
   },
   "log": {
@@ -33,11 +33,11 @@
     "notesPlaceholder": "Kako je bilo?",
     "errorDuration": "Trajanje unesi kao mm:ss ili h:mm:ss",
     "errorInvalid": "Proveri distancu (km), trajanje i RPE",
-    "errorSave": "Čuvanje nije uspelo — pokušaj ponovo"
+    "errorSave": "Čuvanje nije uspelo. Pokušaj ponovo"
   },
   "missing": {
     "title": "Ne nalazim ovaj trening",
-    "description": "Plan je verovatno osvežen — pogledaj kalendar.",
+    "description": "Plan je verovatno osvežen. Pogledaj kalendar.",
     "action": "Nazad na plan"
   },
   "meta": {
@@ -57,12 +57,21 @@
     "guided": "Vođeno trčanje",
     "raceDay": "Strategija za dan trke",
     "googleCalendar": "Dodaj u Google kalendar",
-    "error": "Akcija nije uspela — pokušaj ponovo"
+    "error": "Akcija nije uspela. Pokušaj ponovo"
   },
   "skip": {
     "title": "Preskoči trening?",
     "description": "Označićemo ga kao preskočen. Ne utiče na realizaciju plana.",
-    "error": "Preskakanje nije uspelo — pokušaj ponovo"
+    "error": "Preskakanje nije uspelo. Pokušaj ponovo"
+  },
+  "move": {
+    "action": "Pomeri",
+    "title": "Pomeri trening",
+    "description": "Izaberi dan sa kojim menjaš mesto. Treninzi razmenjuju dane.",
+    "date": "Novi datum",
+    "confirm": "Pomeri",
+    "missing": "Izaberi dan koji postoji u planu",
+    "error": "Pomeranje nije uspelo. Pokušaj ponovo"
   },
   "next": {
     "eyebrow": "Sledeći trening",
@@ -99,23 +108,23 @@
       "description": "Predlog: prebaci trening ili odradi indoor varijantu."
     },
     "rain": {
-      "title": "Kiša — {{pct}}% šanse",
+      "title": "Kiša, {{pct}}% šanse",
       "description": "Očekuje se do {{mm}} mm u tvom terminu."
     },
     "heat": {
-      "title": "Vruće — osećaj {{temp}}°C",
+      "title": "Vruće, osećaj {{temp}}°C",
       "description": "Predlog: pomeri trening ranije ili na veče."
     },
     "cold": {
-      "title": "Hladno — osećaj {{temp}}°C",
+      "title": "Hladno, osećaj {{temp}}°C",
       "description": "Predlog: indoor trening ili dodatni sloj."
     },
     "wind": {
-      "title": "Jak vetar — udari do {{gust}} km/h",
+      "title": "Jak vetar, udari do {{gust}} km/h",
       "description": "Na otvorenom biće teže nego obično."
     },
     "air": {
-      "title": "Loš vazduh — PM2.5 {{pm25}}",
+      "title": "Loš vazduh, PM2.5 {{pm25}}",
       "description": "Predlog: indoor ili drugi termin."
     }
   }

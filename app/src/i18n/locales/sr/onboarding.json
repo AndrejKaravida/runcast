@@ -8,7 +8,7 @@
       "title": "Za koju trku se spremaš?",
       "hasRace": "Imam trku",
       "noRace": "Još nemam",
-      "noRaceText": "Bez trke dobijaš bazni plan za narednih 8 nedelja — lagano trčanje bez ciljnih tempa. Trku možeš dodati kasnije u podešavanjima."
+      "noRaceText": "Bez trke dobijaš bazni plan za narednih 8 nedelja: lagano trčanje bez ciljnih tempa. Trku možeš dodati kasnije u podešavanjima."
     },
     "goal": {
       "title": "Čemu težiš?",
@@ -25,7 +25,7 @@
     "schedule": {
       "title": "Kada trčiš?",
       "daysLabel": "Koliko dana nedeljno",
-      "longRunNote": "Dugi trk nosi nedelju — ostale dane raspoređujemo oko njega.",
+      "longRunNote": "Dugi trk nosi nedelju: ostale dane raspoređujemo oko njega.",
       "windowNote": "Za jutro gledamo prognozu 06–09 h, za veče 17–21 h."
     },
     "location": {
@@ -38,7 +38,7 @@
       "basePlan": "Bazni plan · 8 nedelja",
       "summaryWeeks": "{{weeks}} nedelja",
       "summaryDays": "{{days}} dana nedeljno · dugi trk {{day}}",
-      "baseWarning": "Bez cilja ili rezultata (ili manje od 12 nedelja do trke) dobijaš bazni plan — samo lagani treninzi."
+      "baseWarning": "Bez cilja ili rezultata (ili manje od 12 nedelja do trke) dobijaš bazni plan: samo lagani treninzi."
     }
   },
   "fields": {
@@ -118,6 +118,6 @@
     "recentTimeFormat": "Vreme trke unesi kao mm:ss (npr. 25:30)",
     "recentDistanceRequired": "Izaberi distancu poslednje trke",
     "cityRequired": "Izaberi grad iz rezultata pretrage",
-    "generateFailed": "Generisanje plana nije uspelo — pokušaj ponovo"
+    "generateFailed": "Generisanje plana nije uspelo. Pokušaj ponovo"
   }
 }

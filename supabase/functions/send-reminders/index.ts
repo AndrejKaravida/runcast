@@ -8,7 +8,8 @@ const CORS_HEADERS = {
 };
 
 const VAPID_SUBJECT = 'https://github.com/AndrejKaravida/runcast';
-const TIME_ZONE = 'Europe/Belgrade';
+const DEFAULT_TIME_ZONE = 'Europe/Belgrade';
+const TODAY_HOUR = 7;
 
 const RUN_TYPES = new Set(['EASY', 'LONG', 'TEMPO', 'INTERVALS', 'REPETITIONS']);
 
@@ -32,7 +33,8 @@ const RUN_WINDOW_LABELS: Record<string, string> = {
   flexible: '06–21 h',
 };
 
-// Pragovi su namerno duplirani iz packages/shared/src/weather-rules.ts — Deno funkcija ne uvozi workspace paket.
+const WEEKDAY_ACCUSATIVE = ['ponedeljak', 'utorak', 'sredu', 'četvrtak', 'petak', 'subotu', 'nedelju'];
+
 const WEATHER_RULES = {
   rainProbabilityPct: 60,
   rainMm: 2,
@@ -42,10 +44,14 @@ const WEATHER_RULES = {
 } as const;
 
 const TEST_PAYLOAD = {
-  title: 'RunCast test',
-  body: 'Notifikacije rade — vidimo se na treningu!',
+  title: 'Danas: Lako trčanje 8 km',
+  body: 'Najbolji termin: 18h.',
   url: '/today',
 };
+
+type ReminderType = 'today' | 'training' | 'weather' | 'missed' | 'recap' | 'raceWeek';
+
+type WeatherCode = 'STORM' | 'RAIN' | 'HEAT' | 'COLD' | 'WIND';
 
 interface PushConfigRow {
   id: number;
@@ -61,7 +67,13 @@ interface SubscriptionRow {
   p256dh: string;
   auth: string;
   language: string;
+  timezone: string;
+  remind_hour: number;
+  remind_today: boolean;
   remind_training: boolean;
+  remind_weather: boolean;
+  remind_missed: boolean;
+  remind_recap: boolean;
   remind_race_week: boolean;
 }
 
@@ -77,6 +89,8 @@ interface WorkoutRow {
   type: string;
   distance_km: number;
   title: string;
+  status: string;
+  workout_date: string;
 }
 
 interface RaceRow {
@@ -89,6 +103,21 @@ interface RaceRow {
 interface WeatherNote {
   text: string;
   bad: boolean;
+  code: WeatherCode | null;
+  detail: number | null;
+}
+
+interface SubscriptionSchedule {
+  subscription: SubscriptionRow;
+  timeZone: string;
+  hour: number;
+  today: string;
+  tomorrow: string;
+  dayAfter: string;
+  weekStart: string;
+  weekEnd: string;
+  isSunday: boolean;
+  raceDay: string;
 }
 
 interface Summary {
@@ -99,6 +128,7 @@ interface Summary {
   failed: number;
   removed: number;
   skipped: number;
+  types: Record<ReminderType, number>;
 }
 
 type AdminClient = ReturnType<typeof createClient>;
@@ -110,10 +140,44 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-function localDate(offsetDays: number): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: TIME_ZONE }).format(
-    new Date(Date.now() + offsetDays * 86_400_000),
+function localDate(offsetDays: number, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date());
+  const values: Record<string, number> = {};
+  for (const part of parts) {
+    if (part.type !== 'literal') values[part.type] = Number(part.value);
+  }
+  return new Date(Date.UTC(values.year, values.month - 1, values.day + offsetDays)).toISOString().slice(0, 10);
+}
+
+function safeTimeZone(timeZone: string): string {
+  try {
+    new Intl.DateTimeFormat('en-GB', { timeZone }).format(new Date());
+    return timeZone;
+  } catch {
+    return DEFAULT_TIME_ZONE;
+  }
+}
+
+function localHour(timeZone: string): number {
+  const formatted = new Intl.DateTimeFormat('en-GB', { timeZone, hour: '2-digit', hourCycle: 'h23' }).format(
+    new Date(),
   );
+  return Number(formatted);
+}
+
+function localWeekday(timeZone: string): number {
+  const formatted = new Intl.DateTimeFormat('en-GB', { timeZone, weekday: 'short' }).format(new Date());
+  return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].indexOf(formatted);
+}
+
+function dayName(date: string): string {
+  const index = (new Date(`${date}T12:00:00Z`).getUTCDay() + 6) % 7;
+  return WEEKDAY_ACCUSATIVE[index];
 }
 
 function formatKm(distance: number): string {
@@ -144,29 +208,54 @@ async function ensureConfig(admin: AdminClient): Promise<PushConfigRow> {
   return created as PushConfigRow;
 }
 
-async function weatherFor(profile: ProfileRow | null): Promise<WeatherNote | null> {
+async function hourlyForecast(
+  profile: ProfileRow | null,
+  timeZone: string,
+  fields: string,
+  forecastDays: number,
+): Promise<Record<string, unknown> | null> {
   if (!profile || profile.lat === null || profile.lon === null) return null;
   const params = new URLSearchParams({
     latitude: String(profile.lat),
     longitude: String(profile.lon),
-    hourly:
-      'temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m',
-    timezone: 'auto',
-    forecast_days: '3',
+    hourly: fields,
+    timezone: timeZone,
+    forecast_days: String(forecastDays),
   });
   const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
   if (!response.ok) return null;
   const payload = (await response.json()) as { hourly?: Record<string, unknown> };
-  const hourly = payload.hourly;
-  if (!hourly || !Array.isArray(hourly.time)) return null;
+  return payload.hourly ?? null;
+}
 
-  const window = RUN_WINDOW_HOURS[profile.run_window] ?? RUN_WINDOW_HOURS.flexible;
-  const tomorrow = localDate(1);
+function windowIndices(
+  hourly: Record<string, unknown>,
+  date: string,
+  window: { start: number; end: number },
+): number[] {
+  const times = hourly.time;
+  if (!Array.isArray(times)) return [];
   const indices: number[] = [];
-  (hourly.time as string[]).forEach((time, index) => {
+  (times as string[]).forEach((time, index) => {
     const hour = Number(time.slice(11, 13));
-    if (time.startsWith(tomorrow) && hour >= window.start && hour < window.end) indices.push(index);
+    if (time.startsWith(date) && hour >= window.start && hour < window.end) indices.push(index);
   });
+  return indices;
+}
+
+function windowFor(profile: ProfileRow | null): { start: number; end: number } {
+  return RUN_WINDOW_HOURS[profile?.run_window ?? 'flexible'] ?? RUN_WINDOW_HOURS.flexible;
+}
+
+async function weatherFor(profile: ProfileRow | null, timeZone: string, date: string): Promise<WeatherNote | null> {
+  const hourly = await hourlyForecast(
+    profile,
+    timeZone,
+    'temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m',
+    3,
+  );
+  if (!hourly) return null;
+  const indices = windowIndices(hourly, date, windowFor(profile));
   if (indices.length === 0) return null;
 
   const series = (key: string): number[] =>
@@ -178,20 +267,67 @@ async function weatherFor(profile: ProfileRow | null): Promise<WeatherNote | nul
   const maxGust = Math.round(Math.max(...series('wind_gusts_10m')));
   const storm = series('weather_code').some((code) => code >= 95);
 
-  if (storm) return { text: 'Grmljavina — preporuka je da prebaciš trening.', bad: true };
+  if (storm) return { text: 'Grmljavina: preporuka je da prebaciš trening.', bad: true, code: 'STORM', detail: null };
   if (maxRainPct >= WEATHER_RULES.rainProbabilityPct || rainMm >= WEATHER_RULES.rainMm) {
-    return { text: `Kiša ${maxRainPct}% — razmisli o zameni ili traci.`, bad: true };
+    return { text: `Kiša ${maxRainPct}%, razmisli o zameni ili traci.`, bad: true, code: 'RAIN', detail: maxRainPct };
   }
   if (maxApparent >= WEATHER_RULES.heatApparentC) {
-    return { text: `Vruće (${maxApparent}°) — kreni ranije i pij vodu.`, bad: true };
+    return { text: `Vruće (${maxApparent}°). Kreni ranije i pij vodu.`, bad: true, code: 'HEAT', detail: maxApparent };
   }
   if (minApparent <= WEATHER_RULES.coldApparentC) {
-    return { text: `Hladno (${minApparent}°) — obuci se slojevito.`, bad: true };
+    return { text: `Hladno (${minApparent}°). Obuci se slojevito.`, bad: true, code: 'COLD', detail: minApparent };
   }
   if (maxGust >= WEATHER_RULES.windKmh) {
-    return { text: `Jak vetar (${maxGust} km/h) — biraj zaklon.`, bad: true };
+    return { text: `Jak vetar (${maxGust} km/h). Biraj zaklon.`, bad: true, code: 'WIND', detail: maxGust };
   }
-  return { text: `Vreme za trening: ${maxApparent}°.`, bad: false };
+  return { text: `Vreme za trening: ${maxApparent}°.`, bad: false, code: null, detail: null };
+}
+
+async function bestHourFor(profile: ProfileRow | null, timeZone: string, date: string): Promise<number | null> {
+  const hourly = await hourlyForecast(profile, timeZone, 'apparent_temperature,precipitation_probability', 2);
+  if (!hourly) return null;
+  const indices = windowIndices(hourly, date, windowFor(profile));
+  if (indices.length === 0) return null;
+  const times = hourly.time as string[];
+  const scored = indices.map((index) => ({
+    hour: Number(times[index].slice(11, 13)),
+    rain: Number((hourly.precipitation_probability as number[] | undefined)?.[index] ?? 0),
+    apparent: Number((hourly.apparent_temperature as number[] | undefined)?.[index] ?? 15),
+  }));
+  scored.sort((a, b) => a.rain - b.rain || Math.abs(a.apparent - 15) - Math.abs(b.apparent - 15) || a.hour - b.hour);
+  return scored[0].hour;
+}
+
+async function cachedWeatherNote(
+  profile: ProfileRow | null,
+  timeZone: string,
+  date: string,
+  cache: Map<string, WeatherNote | null>,
+): Promise<WeatherNote | null> {
+  const key = `${profile?.lat ?? ''},${profile?.lon ?? ''},${profile?.run_window ?? ''},${timeZone},${date}`;
+  if (!cache.has(key)) cache.set(key, await weatherFor(profile, timeZone, date));
+  return cache.get(key) ?? null;
+}
+
+async function cachedBestHour(
+  profile: ProfileRow | null,
+  timeZone: string,
+  date: string,
+  cache: Map<string, number | null>,
+): Promise<number | null> {
+  const key = `${profile?.lat ?? ''},${profile?.lon ?? ''},${profile?.run_window ?? ''},${timeZone},${date}`;
+  if (!cache.has(key)) cache.set(key, await bestHourFor(profile, timeZone, date));
+  return cache.get(key) ?? null;
+}
+
+function weatherSuggestion(note: WeatherNote, nextDay: string): string {
+  const day = dayName(nextDay);
+  if (note.code === 'STORM') return `Sutra grmljavina, predlog: prebaci na ${day}.`;
+  if (note.code === 'RAIN') return `Sutra kiša (${note.detail ?? 0}%), predlog: prebaci na ${day}.`;
+  if (note.code === 'HEAT') return `Sutra vruće (${note.detail ?? 0}°), predlog: kreni ranije ili prebaci na ${day}.`;
+  if (note.code === 'COLD') return `Sutra hladno (${note.detail ?? 0}°), predlog: obuci se slojevito.`;
+  if (note.code === 'WIND') return `Sutra jak vetar (${note.detail ?? 0} km/h), predlog: biraj zaklon.`;
+  return note.text;
 }
 
 function bodyFor(profile: ProfileRow | null, note: WeatherNote | null): string {
@@ -206,6 +342,7 @@ async function sendTo(
   subscription: SubscriptionRow,
   payload: { title: string; body: string; url: string },
   summary: Summary,
+  type: ReminderType,
 ): Promise<void> {
   try {
     await webpush.sendNotification(
@@ -216,6 +353,7 @@ async function sendTo(
       JSON.stringify(payload),
     );
     summary.sent += 1;
+    summary.types[type] += 1;
   } catch (error) {
     const statusCode = Number((error as { statusCode?: number }).statusCode ?? 0);
     if (statusCode === 404 || statusCode === 410) {
@@ -273,48 +411,99 @@ Deno.serve(async (request) => {
       failed: 0,
       removed: 0,
       skipped: 0,
+      types: { today: 0, training: 0, weather: 0, missed: 0, recap: 0, raceWeek: 0 },
     };
     if (subscriptions.length === 0) return json(summary);
 
     if (summary.test) {
       for (const subscription of subscriptions) {
-        await sendTo(admin, subscription, TEST_PAYLOAD, summary);
+        await sendTo(admin, subscription, TEST_PAYLOAD, summary, 'today');
       }
       return json(summary);
     }
 
-    const tomorrow = localDate(1);
-    const raceDay = localDate(7);
     const userIds = [...new Set(subscriptions.map((subscription) => subscription.user_id))];
+    const schedules: SubscriptionSchedule[] = [];
+    const workoutDates = new Set<string>();
+    const raceDates = new Set<string>();
+    for (const subscription of subscriptions) {
+      const timeZone = safeTimeZone(subscription.timezone || DEFAULT_TIME_ZONE);
+      const weekday = localWeekday(timeZone);
+      const today = localDate(0, timeZone);
+      const tomorrow = localDate(1, timeZone);
+      const raceDay = localDate(7, timeZone);
+      workoutDates.add(today);
+      workoutDates.add(tomorrow);
+      for (let offset = -weekday; offset <= 6 - weekday; offset += 1) workoutDates.add(localDate(offset, timeZone));
+      raceDates.add(raceDay);
+      schedules.push({
+        subscription,
+        timeZone,
+        hour: localHour(timeZone),
+        today,
+        tomorrow,
+        dayAfter: localDate(2, timeZone),
+        weekStart: localDate(-weekday, timeZone),
+        weekEnd: localDate(6 - weekday, timeZone),
+        isSunday: weekday === 6,
+        raceDay,
+      });
+    }
+    const sortedDates = [...workoutDates].sort();
+
     const [profilesResult, workoutsResult, racesResult] = await Promise.all([
       admin.from('profiles').select('id, lat, lon, run_window').in('id', userIds),
       admin
         .from('workouts')
-        .select('user_id, type, distance_km, title')
-        .eq('workout_date', tomorrow)
-        .eq('status', 'PLANNED')
+        .select('user_id, type, distance_km, title, status, workout_date')
+        .gte('workout_date', sortedDates[0])
+        .lte('workout_date', sortedDates[sortedDates.length - 1])
         .in('user_id', userIds),
       admin
         .from('races')
         .select('user_id, name, race_date, distance_km')
-        .eq('race_date', raceDay)
+        .in('race_date', [...raceDates])
         .in('user_id', userIds),
     ]);
     const profileById = new Map(((profilesResult.data ?? []) as ProfileRow[]).map((profile) => [profile.id, profile]));
     const workouts = (workoutsResult.data ?? []) as WorkoutRow[];
     const races = (racesResult.data ?? []) as RaceRow[];
     const weatherCache = new Map<string, WeatherNote | null>();
+    const bestHourCache = new Map<string, number | null>();
 
-    for (const subscription of subscriptions) {
+    for (const schedule of schedules) {
+      const subscription = schedule.subscription;
       let sentForSubscription = 0;
       const profile = profileById.get(subscription.user_id) ?? null;
+      const userWorkouts = workouts.filter((row) => row.user_id === subscription.user_id);
+      const plannedRun = (date: string): WorkoutRow | undefined =>
+        userWorkouts.find((row) => row.workout_date === date && row.status === 'PLANNED' && RUN_TYPES.has(row.type));
 
-      if (subscription.remind_training) {
-        const workout = workouts.find((row) => row.user_id === subscription.user_id && RUN_TYPES.has(row.type));
+      if (subscription.remind_today && schedule.hour === TODAY_HOUR) {
+        const workout = plannedRun(schedule.today);
         if (workout) {
-          const cacheKey = `${profile?.lat ?? ''},${profile?.lon ?? ''},${profile?.run_window ?? ''}`;
-          if (!weatherCache.has(cacheKey)) weatherCache.set(cacheKey, await weatherFor(profile));
-          const note = weatherCache.get(cacheKey) ?? null;
+          const bestHour = await cachedBestHour(profile, schedule.timeZone, schedule.today, bestHourCache);
+          const window = windowFor(profile);
+          await sendTo(
+            admin,
+            subscription,
+            {
+              title: `Danas: ${TYPE_LABELS[workout.type] ?? workout.title} ${formatKm(workout.distance_km)} km`,
+              body: `Najbolji termin: ${bestHour ?? window.start}h.`,
+              url: '/today',
+            },
+            summary,
+            'today',
+          );
+          sentForSubscription += 1;
+        }
+      }
+
+      if (schedule.hour === subscription.remind_hour) {
+        const workout = plannedRun(schedule.tomorrow);
+
+        if (subscription.remind_training && workout) {
+          const note = await cachedWeatherNote(profile, schedule.timeZone, schedule.tomorrow, weatherCache);
           await sendTo(
             admin,
             subscription,
@@ -324,23 +513,86 @@ Deno.serve(async (request) => {
               url: '/today',
             },
             summary,
+            'training',
           );
           sentForSubscription += 1;
         }
+
+        if (subscription.remind_weather && workout) {
+          const note = await cachedWeatherNote(profile, schedule.timeZone, schedule.tomorrow, weatherCache);
+          if (note?.bad) {
+            await sendTo(
+              admin,
+              subscription,
+              {
+                title: 'Vremensko upozorenje',
+                body: weatherSuggestion(note, schedule.dayAfter),
+                url: '/today',
+              },
+              summary,
+              'weather',
+            );
+            sentForSubscription += 1;
+          }
+        }
+
+        if (subscription.remind_recap && schedule.isSunday) {
+          const weekWorkouts = userWorkouts.filter(
+            (row) =>
+              row.workout_date >= schedule.weekStart && row.workout_date <= schedule.weekEnd && RUN_TYPES.has(row.type),
+          );
+          const planned = weekWorkouts.reduce((sum, row) => sum + row.distance_km, 0);
+          if (planned > 0) {
+            const done = weekWorkouts
+              .filter((row) => row.status === 'DONE')
+              .reduce((sum, row) => sum + row.distance_km, 0);
+            await sendTo(
+              admin,
+              subscription,
+              {
+                title: 'Nedeljni rezime',
+                body: `Istrčano ${formatKm(done)} od ${formatKm(planned)} km ove nedelje.`,
+                url: '/today',
+              },
+              summary,
+              'recap',
+            );
+            sentForSubscription += 1;
+          }
+        }
+
+        if (subscription.remind_race_week) {
+          const race = races.find((row) => row.user_id === subscription.user_id && row.race_date === schedule.raceDay);
+          if (race) {
+            await sendTo(
+              admin,
+              subscription,
+              {
+                title: 'Trka za 7 dana',
+                body: `${race.name ?? 'Trka'} je za nedelju dana. Drži se plana i odmori pred start.`,
+                url: '/today',
+              },
+              summary,
+              'raceWeek',
+            );
+            sentForSubscription += 1;
+          }
+        }
       }
 
-      if (subscription.remind_race_week) {
-        const race = races.find((row) => row.user_id === subscription.user_id);
-        if (race) {
+      if (subscription.remind_missed && schedule.hour === subscription.remind_hour + 2) {
+        const workout = plannedRun(schedule.today);
+        if (workout) {
           await sendTo(
             admin,
             subscription,
             {
-              title: 'Trka za 7 dana',
-              body: `${race.name ?? 'Trka'} je za nedelju dana — drži se plana i odmori pred start.`,
+              title: `Današnji trening: ${TYPE_LABELS[workout.type] ?? workout.title} ${formatKm(workout.distance_km)} km`,
+              body: 'Još nije upisan. Ako ne stigneš danas, prebaci ga na drugi dan.',
               url: '/today',
             },
             summary,
+            'missed',
           );
           sentForSubscription += 1;
         }

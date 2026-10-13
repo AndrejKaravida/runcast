@@ -20,9 +20,11 @@ import { TodayHeroCard } from '@/components/today/TodayHeroCard';
 import { WeekBoard } from '@/components/today/WeekBoard';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppLinkButton } from '@/components/ui/AppLinkButton';
+import { CountUp } from '@/components/ui/CountUp';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { QueryError } from '@/components/ui/QueryError';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { WeatherHero } from '@/components/weather/WeatherHero';
 import { WeatherSummaryCard } from '@/components/weather/WeatherSummaryCard';
 import { assessmentText } from '@/components/weather/weather-utils';
 import { LogWorkoutModal } from '@/components/workouts/LogWorkoutModal';
@@ -258,6 +260,8 @@ export function TodayPage() {
 
   return (
     <div className="space-y-4">
+      <WeatherHero data={weather.data} isError={weather.isError} date={today} runWindow={runWindow} />
+
       <div className="flex items-center justify-between gap-3">
         <p className="min-w-0 truncate text-lg font-semibold">
           {t(greetingKey())}
@@ -270,7 +274,7 @@ export function TodayPage() {
           )}
         >
           <Flame className="h-4 w-4" aria-hidden />
-          <span className="num font-semibold">{streak}</span>
+          <CountUp value={streak} duration={0.35} className="num font-semibold" />
           <span className="whitespace-nowrap">{t('streak')}</span>
         </span>
       </div>

@@ -135,13 +135,13 @@ describe('buildPlanEvents', () => {
     const events = buildPlanEvents(
       [
         workout({ id: 'rest', type: 'REST', title: 'Odmor', distanceKm: 0, steps: [] }),
-        workout({ id: 'strength', type: 'STRENGTH', title: 'Snaga A — noge i core', distanceKm: 0, steps: [] }),
+        workout({ id: 'strength', type: 'STRENGTH', title: 'Snaga A: noge i core', distanceKm: 0, steps: [] }),
       ],
       { runWindow: 'evening' },
     );
     expect(events).toHaveLength(1);
     expect(events[0].uid).toBe('workout-strength@runcast.app');
-    expect(events[0].summary).toBe('Snaga A — noge i core');
+    expect(events[0].summary).toBe('Snaga A: noge i core');
   });
 
   it('računa trajanje: durationSec → zbir koraka → distanca × easySlow → 6:00/km', () => {
@@ -182,12 +182,12 @@ describe('buildPlanEvents', () => {
           title: 'Mobilnost 20 min',
           distanceKm: 0,
           durationSec: 1200,
-          steps: [{ label: 'Čučnjevi — 2×12', durationSec: 150 }],
+          steps: [{ label: 'Čučnjevi 2×12', durationSec: 150 }],
         }),
       ],
       { runWindow: 'flexible' },
     );
-    expect(event.description).toBe('Mobilnost 20 min\n\n1. Čučnjevi — 2×12 · 2:30\n\nRunCast plan');
+    expect(event.description).toBe('Mobilnost 20 min\n\n1. Čučnjevi 2×12 · 2:30\n\nRunCast plan');
   });
 });
 

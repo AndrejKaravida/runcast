@@ -14,6 +14,8 @@ export * from './strength';
 export * from './weather';
 export * from './weather-rules';
 export * from './weather-reschedule';
+export * from './weather-focus';
+export * from './rebalance-week';
 export * from './raceday';
 export * from './fueling';
 export * from './ics';

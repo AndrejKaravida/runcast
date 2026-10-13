@@ -9,9 +9,9 @@
     "time": "Vreme",
     "total": "Ukupno",
     "firstKm": "Prvi kilometar",
-    "noteLong": "Prvih 5 km 5–10 s/km sporije od cilja — čuvaj energiju za kraj.",
+    "noteLong": "Prvih 5 km 5–10 s/km sporije od cilja. Čuvaj energiju za kraj.",
     "noteMid": "Prva 3 km ~5 s sporije, od 4. km ciljni tempo, zadnji km sve.",
-    "noteShort": "Kontrolisano jako od starta, bez sprinta — zadnji km sve."
+    "noteShort": "Kontrolisano jako od starta, bez sprinta. Zadnji km sve."
   },
   "label": "Dan trke",
   "untitled": "Trka bez naziva",
@@ -23,7 +23,7 @@
     "time": "Ciljno vreme",
     "pace": "Ciljni tempo",
     "missing": "Postavi ciljno vreme da dobiješ plan tempa.",
-    "missingDistance": "Distanca trke nije uneta — proveri plan."
+    "missingDistance": "Distanca trke nije uneta. Proveri plan."
   },
   "forecast": "Prognoza za trku",
   "checklist": {
@@ -35,10 +35,10 @@
   "finalWeek": {
     "title": "Poslednja nedelja",
     "tip1": "Taper: smanji volumen, ali zadrži kratka ubrzanja da ostaneš šarp.",
-    "tip2": "Probaj doručak i kompletnu opremu pre trke — ništa novo na dan trke.",
+    "tip2": "Probaj doručak i kompletnu opremu pre trke. Ništa novo na dan trke.",
     "tip3": "Ugljene hidrate raspodeli kroz obroke umesto jednog velikog obroka.",
     "tip4": "Reši logistiku: ruta do starta, preuzimanje broja i drop-bag.",
-    "tip5": "Spavaj dobro dve noći pre — noć pred trku je često nervozna i to je u redu.",
+    "tip5": "Spavaj dobro dve noći pre. Noć pred trku je često nervozna i to je u redu.",
     "tip6": "Šejkaut dan pre po želji: 15–20 min lagano i par ubrzanja."
   },
   "empty": {

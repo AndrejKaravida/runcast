@@ -10,6 +10,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { WeatherAssessment } from '@runcast/shared';
+import { RESCHEDULE_GOOD_SCORE } from '@runcast/shared';
 import i18n from '@/i18n';
 
 export function weatherIcon(code: number): LucideIcon {
@@ -22,6 +23,12 @@ export function weatherIcon(code: number): LucideIcon {
   if ((code >= 71 && code <= 77) || code === 85 || code === 86) return CloudSnow;
   if (code >= 95) return CloudLightning;
   return Cloud;
+}
+
+export function scoreDotClass(score: number): string {
+  if (score >= 80) return 'bg-success-ink';
+  if (score >= RESCHEDULE_GOOD_SCORE) return 'bg-warning-ink';
+  return 'bg-danger-ink';
 }
 
 export interface AssessmentText {

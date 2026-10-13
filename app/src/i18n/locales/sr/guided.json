@@ -5,8 +5,8 @@
     "steps": "{{count}} koraka",
     "noSpeechSuffix": " · bez glasovnog navođenja",
     "stepsHeader": "Koraci",
-    "speechUnavailable": "Glasovno navođenje nije dostupno na ovom uređaju — koriste se zvuk i vizuelni prikaz.",
-    "wakeLock": "Drži ekran uključenim — zaključavanje prekida zvuk.",
+    "speechUnavailable": "Glasovno navođenje nije dostupno na ovom uređaju. Koriste se zvuk i vizuelni prikaz.",
+    "wakeLock": "Drži ekran uključenim. Zaključavanje prekida zvuk.",
     "start": "Počni vođeno trčanje",
     "gpsOn": "GPS uključen",
     "gpsOff": "GPS isključen"
@@ -60,9 +60,9 @@
     "sourcePlan": "Plan",
     "logged": "Trening je već zabeležen.",
     "view": "Pogledaj trening",
-    "noFixHint": "GPS nije uhvatio signal — upiši distancu ručno.",
+    "noFixHint": "GPS nije uhvatio signal. Upiši distancu ručno.",
     "confirmTitle": "Završiti pre kraja?",
-    "confirmDescription": "Zabeležićemo vreme koje si do sada istrčao — ništa se ne gubi.",
+    "confirmDescription": "Zabeležićemo vreme koje si do sada istrčao. Ništa se ne gubi.",
     "confirm": "Završi"
   }
 }

@@ -1,7 +1,7 @@
 {
   "empty": {
     "title": "No plan yet",
-    "description": "Let's build your plan — race, pace and the days you have.",
+    "description": "Let's build your plan: race, pace and the days you have.",
     "action": "Open settings"
   },
   "days": {
@@ -39,5 +39,15 @@
     "free": "Free day",
     "recovery": "Recovery day",
     "none": "No workout"
+  },
+  "weather": {
+    "legend": "Day colour: green = good conditions"
+  },
+  "adapt": {
+    "action": "Adapt week",
+    "title": "Adapt the week?",
+    "confirm": "You have {{count}} missed workouts this week. Reshuffle what's left?",
+    "success": "The week has been adjusted.",
+    "error": "Adaptation failed. Try again"
   }
 }

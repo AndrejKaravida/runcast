@@ -1,16 +1,29 @@
 import { useState } from 'react';
-import { formatDuration } from '@runcast/shared';
+import {
+  formatDuration,
+  planWeekAdjustments,
+  runWindowHours,
+  scoreWindow,
+  type RunWindow,
+  type WorkoutStatus,
+  type WorkoutType,
+} from '@runcast/shared';
 import { clsx } from 'clsx';
 import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, XCircle } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppButton } from '@/components/ui/AppButton';
 import { AppLinkButton } from '@/components/ui/AppLinkButton';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { QueryError } from '@/components/ui/QueryError';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { useActivePlan, useWorkoutsRange } from '@/features/plans/queries';
+import { scoreDotClass } from '@/components/weather/weather-utils';
+import { useActivePlan, useApplyWeekPlan, useWorkoutsRange } from '@/features/plans/queries';
+import { useProfile } from '@/features/profile/queries';
+import { useWeather } from '@/features/weather/queries';
 import { TONE_DOT_CLASSES, typeTone, workoutDurationSec } from '@/features/workouts/utils';
 import {
   addDaysIso,
@@ -23,6 +36,7 @@ import {
   startOfWeekIso,
   todayIso,
 } from '@/lib/dates';
+import { staggerProps } from '@/lib/motion';
 import { workoutTitle } from '@/lib/workout-title';
 import type { WorkoutsRow } from '@/types';
 
@@ -65,6 +79,8 @@ function WeekRow({
       to={workout ? `/workout/${workout.id}` : '/plan'}
       data-testid="week-row"
       data-date={date}
+      data-type={workout?.type ?? ''}
+      data-status={workout?.status ?? ''}
       className={clsx(
         'flex items-center gap-3 rounded-xl border px-3.5 py-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-[0.99]',
         isToday
@@ -102,6 +118,7 @@ function WeekRow({
 
 export function PlanPage() {
   const { t } = useTranslation('plan');
+  const reduceMotion = useReducedMotion();
   const today = todayIso();
   const [monthAnchor, setMonthAnchor] = useState(() => firstDayOfMonth(today));
   const gridStart = startOfWeekIso(monthAnchor);
@@ -113,6 +130,25 @@ export function PlanPage() {
     isError: monthError,
     refetch: refetchMonth,
   } = useWorkoutsRange(gridStart, gridEnd);
+  const { data: profile } = useProfile();
+  const { data: weather } = useWeather();
+  const { data: currentWeekWorkouts = [] } = useWorkoutsRange(startOfWeekIso(today), endOfWeekIso(today));
+  const applyWeekPlan = useApplyWeekPlan();
+  const [adaptOpen, setAdaptOpen] = useState(false);
+  const [adaptError, setAdaptError] = useState<string | null>(null);
+  const [adaptDone, setAdaptDone] = useState(false);
+  const runWindow: RunWindow = (profile?.run_window as RunWindow | undefined) ?? 'morning';
+  const runHours = runWindowHours(runWindow);
+  const weatherScores = new Map<string, number>();
+  if (weather) {
+    for (const date of new Set(weather.hours.map((hour) => hour.time.slice(0, 10)))) {
+      const hasWindowHours = weather.hours.some((hour) => {
+        const hourNumber = Number(hour.time.slice(11, 13));
+        return hour.time.startsWith(date) && hourNumber >= runHours.startHour && hourNumber < runHours.endHour;
+      });
+      if (hasWindowHours) weatherScores.set(date, scoreWindow(weather.hours, weather.air, runHours, date).score);
+    }
+  }
 
   const weeks: string[][] = [];
   for (let cursor = gridStart; cursor <= gridEnd; cursor = addDaysIso(cursor, 7)) {
@@ -133,6 +169,9 @@ export function PlanPage() {
       runs.filter((workout) => workout.status === 'DONE').reduce((sum, workout) => sum + workout.distance_km, 0) * 10,
     ) / 10;
   const currentPhase = weekWorkouts[0]?.phase ?? null;
+  const missedWorkouts = currentWeekWorkouts.filter(
+    (workout) => workout.status === 'PLANNED' && workout.type !== 'REST' && workout.workout_date < today,
+  );
 
   if (planLoading || monthLoading) return <Skeleton className="h-96" />;
   if (planError) return <QueryError onRetry={() => void refetch()} />;
@@ -155,6 +194,33 @@ export function PlanPage() {
   const daysToRace = dayDiff(today, plan.race_date);
   const planWeek = Math.min(Math.max(Math.floor(dayDiff(plan.start_date, today) / 7) + 1, 1), plan.weeks);
   const progressPct = Math.min(100, (planWeek / plan.weeks) * 100);
+  const showAdapt = missedWorkouts.length > 0;
+
+  async function handleAdapt() {
+    if (!plan) return;
+    try {
+      setAdaptError(null);
+      const { skips, moves } = planWeekAdjustments({
+        workouts: currentWeekWorkouts.map((workout) => ({
+          id: workout.id,
+          date: workout.workout_date,
+          type: workout.type as WorkoutType,
+          status: workout.status as WorkoutStatus,
+        })),
+        today,
+        longRunDay: plan.long_run_day,
+        raceDate: plan.race_date,
+      });
+      await applyWeekPlan.mutateAsync([
+        ...moves.map((move) => ({ id: move.id, date: move.newDate })),
+        ...skips.map((id) => ({ id, status: 'SKIPPED' as const })),
+      ]);
+      setAdaptOpen(false);
+      setAdaptDone(true);
+    } catch {
+      setAdaptError(t('adapt.error'));
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -162,7 +228,20 @@ export function PlanPage() {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="section-label">{t('header.label')}</p>
-            <p className="num text-xl font-semibold">{t('header.week', { week: planWeek, weeks: plan.weeks })}</p>
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <p className="num text-xl font-semibold">{t('header.week', { week: planWeek, weeks: plan.weeks })}</p>
+              {showAdapt ? (
+                <AppButton
+                  size="sm"
+                  variant="ghost"
+                  className="w-auto"
+                  data-testid="adapt-week"
+                  onClick={() => setAdaptOpen(true)}
+                >
+                  {t('adapt.action')}
+                </AppButton>
+              ) : null}
+            </div>
           </div>
           <p className="num shrink-0 text-right text-caption text-text-muted">
             {daysToRace >= 0 ? t('header.daysToRace', { days: daysToRace }) : t('header.racePassed')}
@@ -183,6 +262,11 @@ export function PlanPage() {
             </span>
           ))}
         </div>
+        {adaptDone ? (
+          <p data-testid="adapt-success" className="text-caption text-success-ink">
+            {t('adapt.success')}
+          </p>
+        ) : null}
       </div>
 
       <div className="space-y-3">
@@ -234,17 +318,20 @@ export function PlanPage() {
               <div key={week[0]} className="grid grid-cols-7 gap-1">
                 {week.map((date) => {
                   const workout = monthWorkouts.find((item) => item.workout_date === date);
+                  const score = weatherScores.get(date);
                   const inMonth = date.slice(0, 7) === month;
                   const isToday = date === today;
                   const cellAttrs = {
                     'data-testid': 'cal-cell',
                     'data-date': date,
                     'data-type': workout?.type ?? '',
+                    'data-status': workout?.status ?? '',
+                    ...(score !== undefined ? { 'data-score': String(score) } : {}),
                   };
                   const cell = (
                     <div
                       className={clsx(
-                        'flex h-10 flex-col items-center justify-center gap-0.5 rounded-lg',
+                        'relative flex h-10 flex-col items-center justify-center gap-0.5 rounded-lg',
                         isToday
                           ? 'bg-primary-soft ring-1 ring-inset ring-primary/60'
                           : workout
@@ -264,6 +351,12 @@ export function PlanPage() {
                       <span
                         className={clsx('h-1.5 w-1.5 rounded-full', workout ? dotClass(workout) : 'bg-transparent')}
                       />
+                      {score !== undefined ? (
+                        <span
+                          aria-hidden
+                          className={clsx('absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full', scoreDotClass(score))}
+                        />
+                      ) : null}
                     </div>
                   );
                   return workout ? (
@@ -285,6 +378,12 @@ export function PlanPage() {
             ))
           )}
         </div>
+        {weatherScores.size > 0 ? (
+          <p data-testid="plan-weather-legend" className="flex items-center gap-1.5 text-caption text-text-muted">
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-success-ink" />
+            {t('weather.legend')}
+          </p>
+        ) : null}
       </div>
 
       <div className="space-y-2">
@@ -304,16 +403,31 @@ export function PlanPage() {
         </div>
         <div className="space-y-1.5">
           {weekDates.map((date, index) => (
-            <WeekRow
-              key={date}
-              workout={weekWorkouts.find((workout) => workout.workout_date === date) ?? null}
-              date={date}
-              dayLabel={t(DAY_KEYS[index])}
-              isToday={date === today}
-            />
+            <motion.div key={date} {...staggerProps(index, reduceMotion)}>
+              <WeekRow
+                workout={weekWorkouts.find((workout) => workout.workout_date === date) ?? null}
+                date={date}
+                dayLabel={t(DAY_KEYS[index])}
+                isToday={date === today}
+              />
+            </motion.div>
           ))}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={adaptOpen}
+        title={t('adapt.title')}
+        description={t('adapt.confirm', { count: missedWorkouts.length })}
+        confirmLabel={t('adapt.action')}
+        loading={applyWeekPlan.isPending}
+        error={adaptError ?? undefined}
+        onConfirm={() => void handleAdapt()}
+        onClose={() => {
+          setAdaptOpen(false);
+          setAdaptError(null);
+        }}
+      />
     </div>
   );
 }

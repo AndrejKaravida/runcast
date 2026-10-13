@@ -255,6 +255,23 @@ otp_expiry = 3600
 # subject = "Your password has been changed"
 # content_path = "./supabase/templates/password_changed_notification.html"
 
+# RunCast email templates (sr, brendirano)
+[auth.email.template.confirmation]
+subject = "Potvrdi svoj RunCast nalog"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Postavi novu lozinku za RunCast"
+content_path = "./supabase/templates/recovery.html"
+
+[auth.email.template.magic_link]
+subject = "Prijava na RunCast"
+content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.email_change]
+subject = "Potvrdi novu email adresu na RunCast"
+content_path = "./supabase/templates/email_change.html"
+
 [auth.sms]
 # Allow/disallow new user signups via SMS to your project.
 enable_signup = false

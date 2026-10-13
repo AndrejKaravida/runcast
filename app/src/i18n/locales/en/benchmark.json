@@ -1,7 +1,7 @@
 {
   "label": "Benchmark",
   "title": "Measure your real form",
-  "description": "Run 5 or 10 km at full effort and refresh your paces — the plan follows your progress.",
+  "description": "Run 5 or 10 km at full effort and refresh your paces. The plan follows your progress.",
   "distance": {
     "label": "Distance",
     "km5": "5 km",
@@ -10,7 +10,7 @@
   "instructions": {
     "title": "How it works",
     "warmup": "Warm up with 10 minutes easy.",
-    "effort": "Then go at full effort — like a real race.",
+    "effort": "Then go at full effort, like a real race.",
     "cooldown": "Cool down with 5 to 10 minutes easy.",
     "hint": "A flat stretch or a track gives the most accurate result."
   },
@@ -27,7 +27,7 @@
     "save": "Save result",
     "errorTime": "Enter the time as mm:ss or h:mm:ss.",
     "errorDistance": "Enter a valid distance.",
-    "errorSave": "Saving failed — please try again."
+    "errorSave": "Saving failed. Please try again."
   },
   "suggestion": {
     "title": "Suggested new paces",
@@ -35,13 +35,13 @@
     "faster": "{{delta}} s/km faster",
     "slower": "{{delta}} s/km slower",
     "same": "same pace",
-    "raceWarning": "The race is {{days}} days away — we suggest applying the new paces after the race.",
+    "raceWarning": "The race is {{days}} days away. We suggest applying the new paces after the race.",
     "accept": "Accept new paces",
     "reject": "Reject",
     "rejected": "Paces stay unchanged.",
     "updated": "Paces updated",
     "updatedHint": "The plan and future workouts now use the new paces.",
-    "error": "It didn't work — try again."
+    "error": "It didn't work. Try again."
   },
   "zones": {
     "E": "Easy",

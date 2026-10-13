@@ -37,6 +37,7 @@ function winner(fresh: Achievement[]): Achievement | null {
 
 export interface AchievementCelebration {
   achievements: Achievement[];
+  fresh: Achievement[];
   achievement: Achievement | null;
   dismiss: () => void;
 }
@@ -99,5 +100,5 @@ export function useAchievementCelebration(
     });
   }, [fresh]);
 
-  return { achievements, achievement: winner(visible), dismiss };
+  return { achievements, fresh, achievement: winner(visible), dismiss };
 }

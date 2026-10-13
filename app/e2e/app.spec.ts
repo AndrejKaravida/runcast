@@ -49,7 +49,7 @@ test('kiša u terminu → predlog zamene → swap menja dane', async ({ page }) 
   await register(page, email);
   await completeOnboarding(page);
 
-  await expect(page.getByText(/Kiša — 90% šanse/)).toBeVisible();
+  await expect(page.getByText(/Kiša, 90% šanse/)).toBeVisible();
   await expect(
     page
       .locator('p')

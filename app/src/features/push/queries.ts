@@ -38,7 +38,13 @@ export interface SavePushSubscriptionInput {
   p256dh: string;
   auth: string;
   language: string;
+  timezone: string;
+  remind_hour: number;
+  remind_today: boolean;
   remind_training: boolean;
+  remind_weather: boolean;
+  remind_missed: boolean;
+  remind_recap: boolean;
   remind_race_week: boolean;
 }
 

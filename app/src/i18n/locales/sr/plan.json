@@ -1,7 +1,7 @@
 {
   "empty": {
     "title": "Još nemamo plan",
-    "description": "Hajde da napravimo tvoj plan — trka, tempo i dani koje imaš.",
+    "description": "Hajde da napravimo tvoj plan: trka, tempo i dani koje imaš.",
     "action": "Otvori podešavanja"
   },
   "days": {
@@ -39,5 +39,15 @@
     "free": "Slobodan dan",
     "recovery": "Dan za oporavak",
     "none": "Bez treninga"
+  },
+  "weather": {
+    "legend": "Boja dana: zeleno = dobri uslovi"
+  },
+  "adapt": {
+    "action": "Adaptiraj nedelju",
+    "title": "Adaptiraj nedelju?",
+    "confirm": "Imaš {{count}} propuštenih treninga ove nedelje. Prerasporedi ostatak?",
+    "success": "Nedelja je prilagođena.",
+    "error": "Adaptacija nije uspela. Pokušaj ponovo"
   }
 }
