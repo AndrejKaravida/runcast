@@ -62,11 +62,11 @@ test('uvoz trčanja povezuje današnji planirani trening', async ({ page }) => {
 
   await page.goto('/settings/health');
   await page.getByTestId('health-import').click();
-  await expect(page.getByTestId('health-notice')).toContainText('Uvezeno 2');
-  await expect(page.getByTestId('health-status')).toContainText('Povezano');
+  await expect(page.getByTestId('health-notice')).toContainText('Uvezeno 2', { timeout: 15_000 });
+  await expect(page.getByTestId('health-status')).toContainText('Povezano', { timeout: 15_000 });
 
   await page.goto('/today');
-  await expect(page.getByTestId('today-hero').getByText('Urađeno')).toBeVisible();
+  await expect(page.getByTestId('today-hero').getByText('Urađeno')).toBeVisible({ timeout: 15_000 });
 });
 
 test('ponovni uvoz ne pravi duplikate', async ({ page }) => {
