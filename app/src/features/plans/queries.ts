@@ -1,5 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { generatePlan, type PlanAnchor, type PlanConfig, type PlanPaces, type VolumeBand } from '@runcast/shared';
+import {
+  buildRecoveryPlan,
+  generatePlan,
+  type PlanAnchor,
+  type PlanConfig,
+  type PlanPaces,
+  type VolumeBand,
+} from '@runcast/shared';
 import { useAuth } from '@/auth/AuthProvider';
 import { addDaysIso, todayIso } from '@/lib/dates';
 import { supabase } from '@/lib/supabase';
@@ -129,6 +136,42 @@ export function useGeneratePlan() {
         p_anchor: draft.anchor as unknown as Json,
         p_paces: draft.paces as unknown as Json,
         p_workouts: draft.workouts as unknown as Json,
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plan'] });
+      queryClient.invalidateQueries({ queryKey: ['workouts'] });
+      queryClient.invalidateQueries({ queryKey: ['races'] });
+    },
+  });
+}
+
+export interface RecoveryPlanInput {
+  startDate: string;
+  runDays: number[];
+}
+
+export function useGenerateRecoveryPlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ startDate, runDays }: RecoveryPlanInput): Promise<string> => {
+      const raceDate = addDaysIso(startDate, 13);
+      const workouts = buildRecoveryPlan({ startDate, runDays });
+
+      const { data, error } = await supabase.rpc('create_plan_with_workouts', {
+        p_race: null as unknown as Json,
+        p_start_date: startDate,
+        p_race_date: raceDate,
+        p_weeks: 2,
+        p_days_per_week: Math.max(3, runDays.length),
+        p_long_run_day: 0,
+        p_experience: null as unknown as string,
+        p_volume_band: null as unknown as string,
+        p_anchor: null as unknown as Json,
+        p_paces: null as unknown as Json,
+        p_workouts: workouts as unknown as Json,
       });
       if (error) throw error;
       return data;

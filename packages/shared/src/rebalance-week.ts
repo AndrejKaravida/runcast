@@ -44,29 +44,28 @@ function pickDay(pool: string[], anchors: string[]): string {
   return pool[0];
 }
 
-export function planWeekAdjustments({
-  workouts,
-  today,
-  longRunDay,
-  raceDate,
-}: RebalanceWeekParams): WeekPlanAdjustments {
-  const skips = workouts
+export function missedPlannedWorkouts(workouts: RebalanceWorkout[], today: string): RebalanceWorkout[] {
+  return workouts
     .filter((workout) => workout.status === 'PLANNED' && workout.type !== 'REST' && workout.date < today)
-    .sort(byDateThenId)
-    .map((workout) => workout.id);
+    .sort(byDateThenId);
+}
 
-  const weekStart = startOfWeek(today);
-  const weekEnd = addDays(weekStart, 6);
-  const windowEnd = weekEnd < raceDate ? weekEnd : raceDate;
+export function placeWeekWorkouts(
+  workouts: RebalanceWorkout[],
+  windowStart: string,
+  weekStart: string,
+  windowEnd: string,
+  longRunDay: number,
+): WeekPlanAdjustments['moves'] {
   const windowDays: string[] = [];
-  for (let day = today; day <= windowEnd; day = addDays(day, 1)) windowDays.push(day);
+  for (let day = windowStart; day <= windowEnd; day = addDays(day, 1)) windowDays.push(day);
 
   const blocked = new Set(
     workouts
       .filter(
         (workout) =>
           (workout.status !== 'PLANNED' || workout.type === 'RACE') &&
-          workout.date >= today &&
+          workout.date >= windowStart &&
           workout.date <= windowEnd,
       )
       .map((workout) => workout.date),
@@ -75,7 +74,10 @@ export function planWeekAdjustments({
   const movable = workouts
     .filter(
       (workout) =>
-        workout.status === 'PLANNED' && workout.type !== 'RACE' && workout.date >= today && workout.date <= windowEnd,
+        workout.status === 'PLANNED' &&
+        workout.type !== 'RACE' &&
+        workout.date >= windowStart &&
+        workout.date <= windowEnd,
     )
     .sort(byDateThenId);
 
@@ -86,7 +88,7 @@ export function planWeekAdjustments({
   if (longRun && free.length > 0) {
     const designated = addDays(weekStart, longRunDay);
     const target =
-      designated >= today && designated <= windowEnd && !blocked.has(designated)
+      designated >= windowStart && designated <= windowEnd && !blocked.has(designated)
         ? designated
         : nearestDay(free, designated);
     assignment.set(longRun.id, target);
@@ -130,5 +132,20 @@ export function planWeekAdjustments({
     })
     .map((workout) => ({ id: workout.id, newDate: assignment.get(workout.id) as string }));
 
-  return { skips, moves };
+  return moves;
+}
+
+export function planWeekAdjustments({
+  workouts,
+  today,
+  longRunDay,
+  raceDate,
+}: RebalanceWeekParams): WeekPlanAdjustments {
+  const skips = missedPlannedWorkouts(workouts, today).map((workout) => workout.id);
+
+  const weekStart = startOfWeek(today);
+  const weekEnd = addDays(weekStart, 6);
+  const windowEnd = weekEnd < raceDate ? weekEnd : raceDate;
+
+  return { skips, moves: placeWeekWorkouts(workouts, today, weekStart, windowEnd, longRunDay) };
 }

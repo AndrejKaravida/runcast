@@ -124,6 +124,17 @@ je zatvoren.
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
 
+## v1.8 — watch export, poravnanje plana, plan oporavka
+
+- **TCX izvoz za sat** (F18): svaki trening se izvozi kao TCX sa strukturiranim koracima i pace
+  targetima (Speed zone) za Garmin Connect / COROS / Polar / Strava; akcija na stranici treninga
+  i u vođenom pregledu; bez novih zavisnosti.
+- **Poravnanje ostatka plana** (F19): kad se propusti 3+ treninga u 14 dana, jedna kartica
+  poravna ceo ostatak plana (propušteni → SKIPPED, PLANNED po slobodnim danima uz dugi trk na
+  izabranom danu i razmak quality dana); reuse `apply_week_plan` RPC.
+- **Plan oporavka posle trke** (F20): posle dana trke ponuda „2 nedelje oporavka" (EASY +
+  mobilnost, bez quality rada); `create_plan_with_workouts` već podržava plan bez trke.
+
 ## v1.7 — konkurentska analiza, live tracker, custom dani, edit trke, prijatelji
 
 - **Konkurentska analiza** (`docs/features/13-competitive/report.md`): matrica 15 aplikacija,

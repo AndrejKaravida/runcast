@@ -50,6 +50,23 @@
     "success": "Nedelja je prilagođena.",
     "error": "Adaptacija nije uspela. Pokušaj ponovo"
   },
+  "realign": {
+    "title": "Poravnaj ostatak plana",
+    "summary": "Propustio si {{missed}} treninga. Predlog: {{moves}} pomeranja u narednim nedeljama.",
+    "confirm": "Poravnaj",
+    "keep": "Ostavi kako je",
+    "success": "Plan je poravnat.",
+    "already": "Plan je već poravnat.",
+    "error": "Poravnanje nije uspelo. Pokušaj ponovo"
+  },
+  "recovery": {
+    "title": "Čestitamo na trci!",
+    "description": "Želiš plan oporavka (2 nedelje)?",
+    "warning": "Trenutni plan se zamenjuje planom oporavka.",
+    "action": "Napravi plan oporavka",
+    "success": "Plan oporavka je spreman.",
+    "error": "Plan oporavka nije napravljen. Pokušaj ponovo"
+  },
   "errors": {
     "daysCount": "Izaberi tačno {{count}} dana za trening.",
     "longRunDayMissing": "Dan dugog trčanja mora biti među izabranim danima."

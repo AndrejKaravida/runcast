@@ -59,6 +59,7 @@
     "guided": "Vođeno trčanje",
     "raceDay": "Strategija za dan trke",
     "googleCalendar": "Dodaj u Google kalendar",
+    "exportTcx": "Izvezi za sat (.tcx)",
     "error": "Akcija nije uspela. Pokušaj ponovo"
   },
   "skip": {

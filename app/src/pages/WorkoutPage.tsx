@@ -14,7 +14,7 @@ import {
   type WorkoutType,
 } from '@runcast/shared';
 import { clsx } from 'clsx';
-import { ArrowLeft, CalendarClock, CalendarPlus, CheckCircle2, SkipForward } from 'lucide-react';
+import { ArrowLeft, CalendarClock, CalendarPlus, CheckCircle2, SkipForward, Watch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
@@ -38,6 +38,7 @@ import { WhyCard } from '@/components/workouts/WhyCard';
 import { WorkoutTypeIcon } from '@/components/workouts/WorkoutTypeIcon';
 import { useCompleteWorkout, useRunLogs, useSkipWorkout } from '@/features/logs/queries';
 import { buildGoogleCalendarUrlForWorkout } from '@/features/plans/export';
+import { useExportWorkoutTcx } from '@/features/plans/export-tcx';
 import { planPaces } from '@/features/plans/plan-data';
 import { useActivePlan, useMoveWorkout, useWorkout } from '@/features/plans/queries';
 import { useProfile } from '@/features/profile/queries';
@@ -124,6 +125,7 @@ export function WorkoutPage() {
   const skipWorkout = useSkipWorkout();
   const completeWorkout = useCompleteWorkout();
   const moveWorkout = useMoveWorkout();
+  const exportTcx = useExportWorkoutTcx();
   const [logOpen, setLogOpen] = useState(false);
   const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
   const [skipError, setSkipError] = useState<string | null>(null);
@@ -271,7 +273,7 @@ export function WorkoutPage() {
         <AppButton variant="ghost" size="sm" className="-ml-2 w-auto" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" aria-hidden /> {t('common:actions.back')}
         </AppButton>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center justify-end gap-1">
           {googleCalendarUrl ? (
             <a
               href={googleCalendarUrl}
@@ -284,6 +286,20 @@ export function WorkoutPage() {
               <CalendarPlus className="h-4 w-4" aria-hidden />
               <span className="hidden sm:inline">{t('workout:actions.googleCalendar')}</span>
             </a>
+          ) : null}
+          {workout.type !== 'REST' ? (
+            <AppButton
+              variant="ghost"
+              size="sm"
+              className="w-auto"
+              aria-label={t('workout:actions.exportTcx')}
+              data-testid="export-tcx"
+              loading={exportTcx.isPending}
+              onClick={() => exportTcx.mutate({ workout, plan })}
+            >
+              <Watch className="h-4 w-4" aria-hidden />
+              <span className="hidden sm:inline">{t('workout:actions.exportTcx')}</span>
+            </AppButton>
           ) : null}
           {canMove ? (
             <AppButton

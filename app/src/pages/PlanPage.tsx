@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import {
+  defaultRecoveryRunDays,
   formatDuration,
+  planRealignment,
   planWeekAdjustments,
+  recentMissedCount,
   runWindowHours,
   scoreWindow,
   type RunWindow,
@@ -14,6 +17,7 @@ import { motion, useReducedMotion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppButton } from '@/components/ui/AppButton';
+import { AppCard } from '@/components/ui/AppCard';
 import { AppLinkButton } from '@/components/ui/AppLinkButton';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -21,7 +25,7 @@ import { QueryError } from '@/components/ui/QueryError';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { scoreDotClass } from '@/components/weather/weather-utils';
-import { useActivePlan, useApplyWeekPlan, useWorkoutsRange } from '@/features/plans/queries';
+import { useActivePlan, useApplyWeekPlan, useGenerateRecoveryPlan, useWorkoutsRange } from '@/features/plans/queries';
 import { useProfile } from '@/features/profile/queries';
 import { useWeather } from '@/features/weather/queries';
 import { TONE_DOT_CLASSES, typeTone, workoutDurationSec } from '@/features/workouts/utils';
@@ -193,10 +197,16 @@ export function PlanPage() {
   const { data: profile } = useProfile();
   const { data: weather, isLoading: weatherLoading } = useWeather();
   const { data: currentWeekWorkouts = [] } = useWorkoutsRange(startOfWeekIso(today), endOfWeekIso(today));
+  const { data: planWorkouts = [] } = useWorkoutsRange(plan?.start_date ?? today, plan?.race_date ?? today);
   const applyWeekPlan = useApplyWeekPlan();
+  const generateRecovery = useGenerateRecoveryPlan();
   const [adaptOpen, setAdaptOpen] = useState(false);
   const [adaptError, setAdaptError] = useState<string | null>(null);
   const [adaptDone, setAdaptDone] = useState(false);
+  const [realignDismissed, setRealignDismissed] = useState(false);
+  const [realignNotice, setRealignNotice] = useState<'success' | 'already' | 'error' | null>(null);
+  const [recoveryError, setRecoveryError] = useState(false);
+  const [recoveryDone, setRecoveryDone] = useState(false);
   const runWindow: RunWindow = (profile?.run_window as RunWindow | undefined) ?? 'morning';
   const runHours = runWindowHours(runWindow);
   const weatherScores = new Map<string, number>();
@@ -254,7 +264,54 @@ export function PlanPage() {
   const daysToRace = dayDiff(today, plan.race_date);
   const planWeek = Math.min(Math.max(Math.floor(dayDiff(plan.start_date, today) / 7) + 1, 1), plan.weeks);
   const progressPct = Math.min(100, (planWeek / plan.weeks) * 100);
-  const showAdapt = missedWorkouts.length > 0;
+  const realignmentWorkouts = planWorkouts.map((workout) => ({
+    id: workout.id,
+    date: workout.workout_date,
+    type: workout.type as WorkoutType,
+    status: workout.status as WorkoutStatus,
+  }));
+  const realignment = planRealignment({
+    workouts: realignmentWorkouts,
+    today,
+    longRunDay: plan.long_run_day,
+    raceDate: plan.race_date,
+  });
+  const recentMissed = recentMissedCount(realignmentWorkouts, today);
+  const racePassed = Boolean(plan.races && dayDiff(today, plan.races.race_date) < 0);
+  const showRecovery = racePassed;
+  const showRealign = recentMissed >= 3 && !realignDismissed && !showRecovery;
+  const showAdapt = missedWorkouts.length > 0 && !showRealign;
+
+  async function handleRealign() {
+    const assignments = [
+      ...realignment.moves.map((move) => ({ id: move.id, date: move.newDate })),
+      ...realignment.skips.map((id) => ({ id, status: 'SKIPPED' as const })),
+    ];
+    if (assignments.length === 0) {
+      setRealignNotice('already');
+      setRealignDismissed(true);
+      return;
+    }
+    try {
+      setRealignNotice(null);
+      await applyWeekPlan.mutateAsync(assignments);
+      setRealignNotice('success');
+      setRealignDismissed(true);
+    } catch {
+      setRealignNotice('error');
+    }
+  }
+
+  async function handleRecovery() {
+    if (!plan) return;
+    try {
+      setRecoveryError(false);
+      await generateRecovery.mutateAsync({ startDate: today, runDays: defaultRecoveryRunDays(plan.days_per_week) });
+      setRecoveryDone(true);
+    } catch {
+      setRecoveryError(true);
+    }
+  }
 
   async function handleAdapt() {
     if (!plan) return;
@@ -327,7 +384,76 @@ export function PlanPage() {
             {t('adapt.success')}
           </p>
         ) : null}
+        {realignNotice ? (
+          <p
+            data-testid="realign-notice"
+            className={clsx('text-caption', realignNotice === 'error' ? 'text-danger-ink' : 'text-success-ink')}
+          >
+            {t(`realign.${realignNotice}`)}
+          </p>
+        ) : null}
+        {recoveryDone ? (
+          <p data-testid="recovery-notice" className="text-caption text-success-ink">
+            {t('recovery.success')}
+          </p>
+        ) : null}
       </div>
+
+      {showRealign ? (
+        <AppCard
+          data-testid="realign-card"
+          className="space-y-3 border-primary/40 bg-gradient-to-b from-primary-soft to-transparent"
+        >
+          <div className="space-y-1">
+            <p className="text-sm font-medium">{t('realign.title')}</p>
+            <p className="text-sm text-text-secondary">
+              {t('realign.summary', { missed: recentMissed, moves: realignment.moves.length })}
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <AppButton
+              className="flex-1"
+              loading={applyWeekPlan.isPending}
+              data-testid="realign-apply"
+              onClick={() => void handleRealign()}
+            >
+              {t('realign.confirm')}
+            </AppButton>
+            <AppButton
+              className="flex-1"
+              variant="secondary"
+              data-testid="realign-dismiss"
+              onClick={() => setRealignDismissed(true)}
+            >
+              {t('realign.keep')}
+            </AppButton>
+          </div>
+        </AppCard>
+      ) : null}
+
+      {showRecovery ? (
+        <AppCard
+          data-testid="recovery-card"
+          className="space-y-3 border-primary/40 bg-gradient-to-b from-primary-soft to-transparent"
+        >
+          <div className="space-y-1">
+            <p className="text-sm font-medium">{t('recovery.title')}</p>
+            <p className="text-sm text-text-secondary">{t('recovery.description')}</p>
+            <p className="text-caption text-text-muted">{t('recovery.warning')}</p>
+          </div>
+          <div className="flex gap-3">
+            <AppButton
+              className="flex-1"
+              loading={generateRecovery.isPending}
+              data-testid="recovery-generate"
+              onClick={() => void handleRecovery()}
+            >
+              {t('recovery.action')}
+            </AppButton>
+          </div>
+          {recoveryError ? <p className="text-caption text-danger-ink">{t('recovery.error')}</p> : null}
+        </AppCard>
+      ) : null}
 
       <div className="space-y-3">
         <SectionHeader

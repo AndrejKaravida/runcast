@@ -63,6 +63,8 @@ ili weather+adherence wedge pre naplate.
 
 ## 4. Plan implementacije (ovaj talas vs backlog)
 
-Ovaj talas: F14 live tracker, F15 custom dani, F16 edit trke, scroll-to-top fix, F17 social
-MVP. Backlog po prioritetu: watch export (TCX), adaptivno poravnanje, S&C sadržaj, TTS audio
-sesije, readiness, širina distanci, više trka.
+Isporučeno: F14 live tracker, F15 custom dani, F16 edit trke, scroll-to-top, F17 social MVP,
+F18 TCX export za sat, F19 poravnanje ostatka plana, F20 plan oporavka. Utvrđeno tokom rada:
+S&C (snaga/mobilnost) već postoji (`strength.ts`), a 5K/10K su već u izboru distanci. Backlog
+po prioritetu: FIT/WorkoutKit export, TTS audio vođene sesije, readiness (HRV), više trka
+odjednom, adherence-based rang lista (diferencijator).

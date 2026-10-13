@@ -9,7 +9,8 @@
     "wakeLock": "Drži ekran uključenim. Zaključavanje prekida zvuk.",
     "start": "Počni vođeno trčanje",
     "gpsOn": "GPS uključen",
-    "gpsOff": "GPS isključen"
+    "gpsOff": "GPS isključen",
+    "exportTcx": "Izvezi za sat (.tcx)"
   },
   "session": {
     "step": "Korak {{index}}/{{total}}",

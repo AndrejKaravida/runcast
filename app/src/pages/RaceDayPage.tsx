@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   assessWorkoutWeather,
+  defaultRecoveryRunDays,
   formatDuration,
   formatPace,
   predictRaceTimes,
@@ -25,7 +26,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { StatRow } from '@/components/ui/StatRow';
 import { RaceDayCard } from '@/components/workouts/RaceDayCard';
 import { planAnchor, planPaces } from '@/features/plans/plan-data';
-import { useActivePlan } from '@/features/plans/queries';
+import { useActivePlan, useGenerateRecoveryPlan } from '@/features/plans/queries';
 import { useProfile } from '@/features/profile/queries';
 import { useWeather } from '@/features/weather/queries';
 import { dayDiff, formatDateLong, todayIso } from '@/lib/dates';
@@ -209,11 +210,14 @@ function RaceDaySkeleton() {
 
 export function RaceDayPage() {
   const { t } = useTranslation('race');
+  const { t: tPlan } = useTranslation('plan');
   const navigate = useNavigate();
   const today = todayIso();
   const { data: plan, isLoading, isError, refetch } = useActivePlan();
   const { data: profile } = useProfile();
   const weather = useWeather();
+  const generateRecovery = useGenerateRecoveryPlan();
+  const [recoveryError, setRecoveryError] = useState(false);
   const raceInfo = plan?.races ?? null;
   const distanceKm = raceInfo?.distance_km ?? 0;
   const hasDistance = distanceKm > 0;
@@ -283,6 +287,21 @@ export function RaceDayPage() {
     );
   }
 
+  const racePassed = daysToRace !== null && daysToRace < 0;
+
+  async function handleRecovery() {
+    try {
+      setRecoveryError(false);
+      await generateRecovery.mutateAsync({
+        startDate: today,
+        runDays: defaultRecoveryRunDays(plan?.days_per_week ?? 4),
+      });
+      navigate('/plan');
+    } catch {
+      setRecoveryError(true);
+    }
+  }
+
   return (
     <div className="mx-auto w-full max-w-[560px] space-y-5 px-4 py-6">
       <div className="flex items-center justify-between">
@@ -340,6 +359,30 @@ export function RaceDayPage() {
           </div>
         ) : null}
       </AppCard>
+
+      {racePassed ? (
+        <AppCard
+          data-testid="recovery-card"
+          className="space-y-3 border-primary/40 bg-gradient-to-b from-primary-soft to-transparent"
+        >
+          <div className="space-y-1">
+            <p className="text-sm font-medium">{tPlan('recovery.title')}</p>
+            <p className="text-sm text-text-secondary">{tPlan('recovery.description')}</p>
+            <p className="text-caption text-text-muted">{tPlan('recovery.warning')}</p>
+          </div>
+          <div className="flex gap-3">
+            <AppButton
+              className="flex-1"
+              loading={generateRecovery.isPending}
+              data-testid="recovery-generate"
+              onClick={() => void handleRecovery()}
+            >
+              {tPlan('recovery.action')}
+            </AppButton>
+          </div>
+          {recoveryError ? <p className="text-caption text-danger-ink">{tPlan('recovery.error')}</p> : null}
+        </AppCard>
+      ) : null}
 
       {goalTimeSec ? <RaceDayCard goalTimeSec={goalTimeSec} distanceKm={raceInfo.distance_km} /> : null}
 

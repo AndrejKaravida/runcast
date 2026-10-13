@@ -9,7 +9,8 @@
     "wakeLock": "Keep the screen on. Locking it stops the sound.",
     "start": "Start guided run",
     "gpsOn": "GPS on",
-    "gpsOff": "GPS off"
+    "gpsOff": "GPS off",
+    "exportTcx": "Export for watch (.tcx)"
   },
   "session": {
     "step": "Step {{index}}/{{total}}",

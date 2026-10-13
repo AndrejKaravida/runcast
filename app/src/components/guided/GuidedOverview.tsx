@@ -1,5 +1,5 @@
 import { formatDuration, type GuidedTimeline } from '@runcast/shared';
-import { ArrowLeft, MapPin, Play } from 'lucide-react';
+import { ArrowLeft, MapPin, Play, Watch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
@@ -13,9 +13,11 @@ interface GuidedOverviewProps {
   speechAvailable: boolean;
   wakeLockSupported: boolean;
   gpsEnabled: boolean;
+  exporting: boolean;
   onBack: () => void;
   onStart: () => void;
   onToggleGps: () => void;
+  onExport: () => void;
 }
 
 export function GuidedOverview({
@@ -24,9 +26,11 @@ export function GuidedOverview({
   speechAvailable,
   wakeLockSupported,
   gpsEnabled,
+  exporting,
   onBack,
   onStart,
   onToggleGps,
+  onExport,
 }: GuidedOverviewProps) {
   const { t } = useTranslation('guided');
   const paceSegment = timeline.segments.find((segment) => segment.paceLabel);
@@ -103,6 +107,15 @@ export function GuidedOverview({
           onClick={onToggleGps}
         >
           <MapPin className="h-4 w-4" aria-hidden /> {t(gpsEnabled ? 'overview.gpsOn' : 'overview.gpsOff')}
+        </AppButton>
+        <AppButton
+          data-testid="guided-export-tcx"
+          variant="secondary"
+          className="w-full"
+          loading={exporting}
+          onClick={onExport}
+        >
+          <Watch className="h-4 w-4" aria-hidden /> {t('overview.exportTcx')}
         </AppButton>
       </div>
     </div>

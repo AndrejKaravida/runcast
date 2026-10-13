@@ -50,6 +50,23 @@
     "success": "The week has been adjusted.",
     "error": "Adaptation failed. Try again"
   },
+  "realign": {
+    "title": "Realign the rest of the plan",
+    "summary": "You missed {{missed}} workouts. Suggestion: {{moves}} moves in the coming weeks.",
+    "confirm": "Realign",
+    "keep": "Leave as is",
+    "success": "The plan has been realigned.",
+    "already": "The plan is already aligned.",
+    "error": "Realignment failed. Try again"
+  },
+  "recovery": {
+    "title": "Congratulations on the race!",
+    "description": "Would you like a recovery plan (2 weeks)?",
+    "warning": "The current plan will be replaced by the recovery plan.",
+    "action": "Create recovery plan",
+    "success": "Your recovery plan is ready.",
+    "error": "Recovery plan failed. Try again"
+  },
   "errors": {
     "daysCount": "Pick exactly {{count}} training days.",
     "longRunDayMissing": "The long run day must be one of the selected days."
