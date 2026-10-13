@@ -42,9 +42,7 @@
   "theme": {
     "system": "System",
     "light": "Light",
-    "dark": "Dark",
-    "toLight": "Switch to light theme",
-    "toDark": "Switch to dark theme"
+    "dark": "Dark"
   },
   "city": {
     "label": "City",

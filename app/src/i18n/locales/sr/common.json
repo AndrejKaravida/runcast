@@ -42,9 +42,7 @@
   "theme": {
     "system": "Sistem",
     "light": "Svetla",
-    "dark": "Tamna",
-    "toLight": "Uključi svetlu temu",
-    "toDark": "Uključi tamnu temu"
+    "dark": "Tamna"
   },
   "city": {
     "label": "Grad",

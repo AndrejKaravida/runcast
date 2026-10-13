@@ -46,21 +46,16 @@ test('toggle u podešavanjima menja temu, čuva izbor i preživljava reload', as
   expect(await page.evaluate((key) => localStorage.getItem(key), THEME_KEY)).toBe('dark');
 });
 
-test('Sistem prati OS uživo, brzi toggle postavlja eksplicitan izbor', async ({ page }) => {
+test('Sistem prati OS uživo', async ({ page }) => {
   const email = uniqueEmail('theme-live');
   await register(page, email);
   await completeOnboarding(page);
 
-  await page.getByRole('button', { name: 'Uključi svetlu temu' }).click();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  expect(await page.evaluate((key) => localStorage.getItem(key), THEME_KEY)).toBe('light');
-  await expect(page.getByRole('button', { name: 'Uključi tamnu temu' })).toBeVisible();
-
-  await page.getByRole('button', { name: 'Uključi tamnu temu' }).click();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-
   await page.getByRole('link', { name: 'Podešavanja', exact: true }).click();
   await expect(page).toHaveURL(/\/settings$/);
+  await page.getByRole('button', { name: 'Tamna', exact: true }).click();
+  expect(await page.evaluate((key) => localStorage.getItem(key), THEME_KEY)).toBe('dark');
+
   await page.getByRole('button', { name: 'Sistem', exact: true }).click();
   expect(await page.evaluate((key) => localStorage.getItem(key), THEME_KEY)).toBeNull();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');

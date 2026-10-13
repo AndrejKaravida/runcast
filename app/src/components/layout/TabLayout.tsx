@@ -4,7 +4,6 @@ import { AnimatePresence, motion, useReducedMotion, type Transition } from 'moti
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation, useOutlet } from 'react-router';
-import { ThemeQuickToggle } from '@/components/ui/ThemeToggle';
 import { useHealthAutoImport } from '@/features/health/queries';
 
 const tabs = [
@@ -39,7 +38,6 @@ export function TabLayout() {
           <span className="text-base font-bold tracking-tight">
             Run<span className="text-primary-ink">Cast</span>
           </span>
-          <ThemeQuickToggle />
         </div>
         <div
           className={clsx(
