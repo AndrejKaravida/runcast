@@ -12,11 +12,11 @@
   "add": {
     "title": "Add a friend",
     "label": "Profile name",
-    "hint": "Search is by exact profile name, case-insensitive.",
+    "hint": "Search by username (@name) or exact profile name",
     "action": "Send request",
     "sent": "The request has been sent.",
     "errors": {
-      "notFound": "No runner has that profile name.",
+      "notFound": "No results. No runner has that profile name.",
       "self": "That is your own profile name.",
       "already": "A request already exists or you are already friends.",
       "blocked": "The request is not possible.",

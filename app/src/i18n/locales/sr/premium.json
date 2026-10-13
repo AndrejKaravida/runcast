@@ -1,0 +1,13 @@
+{
+  "features": {
+    "multipleRaces": "Više trka"
+  },
+  "badge": "Premium",
+  "lockedTitle": "Zaključano",
+  "lockedText": "Dodaj više trka, biraj koja je cilj plana i promeni ga kad želiš.",
+  "dialogTitle": "Premium stiže uskoro",
+  "dialogText": "Radimo na Premium paketu. Ostani sa nama, uskoro otključavaš više trka i druge pogodnosti.",
+  "dialogCta": "Saznaj više",
+  "goalSwitched": "Cilj plana je promenjen.",
+  "regenerateOffer": "Regeneriši plan za ovu trku"
+}

@@ -1,0 +1,13 @@
+{
+  "features": {
+    "multipleRaces": "Multiple races"
+  },
+  "badge": "Premium",
+  "lockedTitle": "Locked",
+  "lockedText": "Add more races, choose which one is your plan goal and change the goal whenever you want.",
+  "dialogTitle": "Premium is coming soon",
+  "dialogText": "We are working on Premium. Stay with us and soon you will unlock multiple races and other perks.",
+  "dialogCta": "Learn more",
+  "goalSwitched": "The plan goal has been changed.",
+  "regenerateOffer": "Regenerate the plan for this race"
+}

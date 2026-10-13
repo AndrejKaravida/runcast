@@ -1,10 +1,30 @@
 import { expect, test } from '@playwright/test';
+import { createClient } from '@supabase/supabase-js';
 import { completeOnboarding, isoFromNow, register, uniqueEmail } from './helpers';
+
+const SUPABASE_URL = 'http://127.0.0.1:54321';
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
+
+async function premiumClientFor(email: string) {
+  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const { error } = await client.auth.signInWithPassword({ email, password: 'testtest123' });
+  expect(error).toBeNull();
+  const { data: user } = await client.auth.getUser();
+  const { error: premiumError } = await client
+    .from('profiles')
+    .update({ premium: true })
+    .eq('id', user?.user?.id ?? '');
+  expect(premiumError).toBeNull();
+}
 
 test('trke: dodavanje, izmena, brisanje i izbor ciljne trke za plan', async ({ page }) => {
   const email = uniqueEmail('races');
   await register(page, email);
   await completeOnboarding(page);
+  await premiumClientFor(email);
 
   await page.goto('/settings/plan');
   const rows = page.getByTestId('race-row');

@@ -284,6 +284,7 @@ export function OnboardingPage() {
                   <span className="num value-swap text-hero font-bold text-primary-ink">{preview.vdot}</span>
                 </p>
                 <StatRow
+                  compact
                   items={[
                     {
                       label: 'Easy',

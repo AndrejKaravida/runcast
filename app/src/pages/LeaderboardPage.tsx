@@ -7,7 +7,6 @@ import { FriendsLeaderboardCard } from '@/components/social/FriendsLeaderboardCa
 import { LeaderboardCard } from '@/components/social/LeaderboardCard';
 import { AppButton } from '@/components/ui/AppButton';
 import { QueryError } from '@/components/ui/QueryError';
-import { SectionHeader } from '@/components/ui/SectionHeader';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/auth/AuthProvider';
@@ -64,14 +63,12 @@ export function LeaderboardPage() {
       </AppButton>
 
       <div className="space-y-1">
-        <SectionHeader
-          label={t('leaderboard.title')}
-          action={
-            <Link to="/friends" className="text-caption font-semibold text-primary-ink">
-              {tSocial('title')}
-            </Link>
-          }
-        />
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-2xl font-semibold tracking-display">{t('leaderboard.title')}</h1>
+          <Link to="/friends" className="text-caption font-semibold text-primary-ink">
+            {tSocial('title')}
+          </Link>
+        </div>
         <p className="text-sm text-text-secondary">{t('leaderboard.description')}</p>
       </div>
 

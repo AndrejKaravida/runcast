@@ -150,11 +150,14 @@ export type Database = {
           lat: number | null;
           lon: number | null;
           onboarding_completed: boolean;
+          premium: boolean;
+          premium_since: string | null;
           public_profile: boolean;
           run_window: string;
           sex: string | null;
           units: string;
           updated_at: string;
+          username: string | null;
           volume_band: string | null;
           weather_refresh_minutes: number | null;
           weight_kg: number | null;
@@ -172,11 +175,14 @@ export type Database = {
           lat?: number | null;
           lon?: number | null;
           onboarding_completed?: boolean;
+          premium?: boolean;
+          premium_since?: string | null;
           public_profile?: boolean;
           run_window?: string;
           sex?: string | null;
           units?: string;
           updated_at?: string;
+          username?: string | null;
           volume_band?: string | null;
           weather_refresh_minutes?: number | null;
           weight_kg?: number | null;
@@ -193,11 +199,14 @@ export type Database = {
           lat?: number | null;
           lon?: number | null;
           onboarding_completed?: boolean;
+          premium?: boolean;
+          premium_since?: string | null;
           public_profile?: boolean;
           run_window?: string;
           sex?: string | null;
           units?: string;
           updated_at?: string;
+          username?: string | null;
           volume_band?: string | null;
           weather_refresh_minutes?: number | null;
           weight_kg?: number | null;
@@ -513,8 +522,8 @@ export type Database = {
         Returns: string;
       };
       delete_my_account: { Args: Record<PropertyKey, never>; Returns: undefined };
-      find_profile_by_name: {
-        Args: { p_name: string };
+      find_profile_by_handle: {
+        Args: { p_query: string };
         Returns: {
           avatar_url: string;
           display_name: string;

@@ -20,6 +20,12 @@
   "profile": {
     "label": "Profile",
     "name": "Name",
+    "username": "Username",
+    "usernameHint": "@name · 3-20 characters: lowercase letters, numbers and underscore",
+    "usernameLength": "The username must be 3 to 20 characters long.",
+    "usernameFormat": "A username can contain only lowercase letters, numbers and underscores.",
+    "usernameReserved": "That username is reserved.",
+    "usernameTaken": "That username is taken.",
     "height": "Height (cm)",
     "weight": "Weight (kg)",
     "birthYear": "Birth year",

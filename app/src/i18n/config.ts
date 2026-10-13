@@ -9,6 +9,7 @@ import legalEn from './locales/en/legal.json';
 import licensesEn from './locales/en/licenses.json';
 import onboardingEn from './locales/en/onboarding.json';
 import planEn from './locales/en/plan.json';
+import premiumEn from './locales/en/premium.json';
 import raceEn from './locales/en/race.json';
 import settingsEn from './locales/en/settings.json';
 import socialEn from './locales/en/social.json';
@@ -24,6 +25,7 @@ import legalSr from './locales/sr/legal.json';
 import licensesSr from './locales/sr/licenses.json';
 import onboardingSr from './locales/sr/onboarding.json';
 import planSr from './locales/sr/plan.json';
+import premiumSr from './locales/sr/premium.json';
 import raceSr from './locales/sr/race.json';
 import settingsSr from './locales/sr/settings.json';
 import socialSr from './locales/sr/social.json';
@@ -51,6 +53,7 @@ export const NAMESPACES = [
   'content',
   'licenses',
   'legal',
+  'premium',
   'social',
 ] as const;
 
@@ -89,6 +92,7 @@ const resources = {
     licenses: licensesEn,
     onboarding: onboardingEn,
     plan: planEn,
+    premium: premiumEn,
     race: raceEn,
     settings: settingsEn,
     social: socialEn,
@@ -106,6 +110,7 @@ const resources = {
     licenses: licensesSr,
     onboarding: onboardingSr,
     plan: planSr,
+    premium: premiumSr,
     race: raceSr,
     settings: settingsSr,
     social: socialSr,

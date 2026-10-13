@@ -23,8 +23,12 @@ const REFRESH_OPTIONS = [
   { value: 720, label: '12 h' },
 ];
 
+const USERNAME_PATTERN = /^[a-z0-9_]{3,20}$/;
+const RESERVED_USERNAMES = ['runcast', 'admin', 'support', 'system'];
+
 interface ProfileForm {
   displayName: string;
+  username: string;
   city: string;
   lat: number | null;
   lon: number | null;
@@ -40,6 +44,7 @@ interface ProfileForm {
 function profileFormFrom(profile: ProfilesRow): ProfileForm {
   return {
     displayName: profile.display_name ?? '',
+    username: profile.username ?? '',
     city: profile.city ?? '',
     lat: profile.lat,
     lon: profile.lon,
@@ -94,9 +99,23 @@ export function SettingsProfilePage() {
     if (!form) return;
     setError(null);
     setNotice(null);
+    const username = form.username.trim().toLowerCase();
+    if (username.length > 0 && (username.length < 3 || username.length > 20)) {
+      setError(t('profile.usernameLength'));
+      return;
+    }
+    if (username.length > 0 && !USERNAME_PATTERN.test(username)) {
+      setError(t('profile.usernameFormat'));
+      return;
+    }
+    if (RESERVED_USERNAMES.includes(username)) {
+      setError(t('profile.usernameReserved'));
+      return;
+    }
     try {
       await updateProfile.mutateAsync({
         display_name: form.displayName.trim() || null,
+        username: username || null,
         city: form.city || null,
         lat: form.lat,
         lon: form.lon,
@@ -111,6 +130,10 @@ export function SettingsProfilePage() {
       setProfileForm(null);
       setNotice(t('profile.saved'));
     } catch (caught) {
+      if ((caught as { code?: string } | null)?.code === '23505') {
+        setError(t('profile.usernameTaken'));
+        return;
+      }
       setError(caught instanceof Error ? t(authErrorMessage(caught.message)) : t('errors.saveFailed'));
     }
   }
@@ -127,6 +150,13 @@ export function SettingsProfilePage() {
             label={t('profile.name')}
             value={form.displayName}
             onChange={(event) => setProfileForm({ ...form, displayName: event.target.value })}
+          />
+          <AppInput
+            label={t('profile.username')}
+            value={form.username}
+            autoComplete="off"
+            hint={t('profile.usernameHint')}
+            onChange={(event) => setProfileForm({ ...form, username: event.target.value })}
           />
           <div data-testid="public-profile">
             <p className="section-label mb-1.5">{t('profile.publicProfile')}</p>

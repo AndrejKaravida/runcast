@@ -27,6 +27,13 @@ test('posle oporavka: kartica sledećeg cilja vodi u plan za buduću trku', asyn
   await completeOnboarding(page);
 
   const supabase = await clientFor(email);
+  const { data: user } = await supabase.auth.getUser();
+  const { error: premiumError } = await supabase
+    .from('profiles')
+    .update({ premium: true })
+    .eq('id', user?.user?.id ?? '');
+  expect(premiumError).toBeNull();
+
   const { data: onboardingRace, error: raceError } = await supabase
     .from('races')
     .select('id')

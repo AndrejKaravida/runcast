@@ -57,3 +57,7 @@ Testovi: 269 unit + 59 E2E (consent, account deletion/export, licenses).
 10. **Cloudflare Web Analytics**: proveri da je isključen (ako se uključi, dodati u Politiku).
 11. **Apple nalog za test korisnika**: `test@test.com` je blokiran na Supabase signup validaciji
     (specijalan domen); koristi dashboard „Add user" ili dodaj `SUPABASE_DB_URL` secret.
+12. **Premium dodela (F28)**: dok nema naplate, premium se dodeljuje ručno:
+    `update public.profiles set premium = true, premium_since = now() where id = '<user-id>';`
+    (Supabase dashboard → SQL editor). Server-side enforcement stiže sa naplatom
+    (`docs/features/backlog/pricing.md`).

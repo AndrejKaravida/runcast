@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { defaultRunDays, formatDuration, isRunType, type RunWindow, type VolumeBand } from '@runcast/shared';
-import { Download, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { Download, Pencil, Plus, RefreshCw, Target, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
@@ -13,6 +13,8 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { SettingsSubpage } from '@/components/settings/SettingsSubpage';
 import { PlanFields } from '@/components/forms/PlanFields';
 import { RaceForm } from '@/components/forms/RaceForm';
+import { PremiumBadge } from '@/components/premium/PremiumBadge';
+import { PremiumLock } from '@/components/premium/PremiumLock';
 import { useExportPlanIcs } from '@/features/plans/export';
 import { planPaces } from '@/features/plans/plan-data';
 import {
@@ -22,10 +24,12 @@ import {
   useDeleteRace,
   useGeneratePlan,
   useRaces,
+  useSetPlanRace,
   useUpdateRace,
   useWorkoutsRange,
   type GeneratePlanInput,
 } from '@/features/plans/queries';
+import { usePremium } from '@/features/premium/queries';
 import { useProfile } from '@/features/profile/queries';
 import { dayDiff, formatDateShort, startOfWeekIso, todayIso, weekdayIndex } from '@/lib/dates';
 import {
@@ -90,6 +94,8 @@ export function SettingsPlanPage() {
   const updateRace = useUpdateRace();
   const addRace = useAddRace();
   const deleteRace = useDeleteRace();
+  const setPlanRace = useSetPlanRace();
+  const { isPremium } = usePremium();
   const exportPlan = useExportPlanIcs();
 
   const [planFormDraft, setPlanFormDraft] = useState<PlanDraft | null>(null);
@@ -99,6 +105,7 @@ export function SettingsPlanPage() {
   const [raceAddForm, setRaceAddForm] = useState<PlanDraft | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<RacesRow | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [goalSwitchedRace, setGoalSwitchedRace] = useState<RacesRow | null>(null);
   const [pendingInput, setPendingInput] = useState<GeneratePlanInput | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -110,6 +117,8 @@ export function SettingsPlanPage() {
   }, [searchParams, navigate]);
 
   const futureRaces = races.filter((race) => dayDiff(todayIso(), race.race_date) > 0);
+  const planRaceId = plan?.races?.id;
+  const goalRace = planRaceId ? (races.find((race) => race.id === planRaceId) ?? null) : null;
   const paramRace =
     initialRaceParam && !raceParamDismissed ? (futureRaces.find((race) => race.id === initialRaceParam) ?? null) : null;
   const planForm = planFormDraft ?? (paramRace ? buildRaceDraft(paramRace) : null);
@@ -294,6 +303,28 @@ export function SettingsPlanPage() {
     setNotice(t('plan:races.deleted'));
   }
 
+  async function handleSetGoal(race: RacesRow) {
+    setError(null);
+    setNotice(null);
+    try {
+      await setPlanRace.mutateAsync(race.id);
+    } catch {
+      setError(t('plan:races.setGoalFailed'));
+      return;
+    }
+    setGoalSwitchedRace(race);
+    setNotice(t('premium:goalSwitched'));
+  }
+
+  function handleGoalSwitchedRegenerate() {
+    if (!goalSwitchedRace) return;
+    const input = collectPlanInput(buildRaceDraft(goalSwitchedRace));
+    if (!input) return;
+    const raceId = goalSwitchedRace.id;
+    setGoalSwitchedRace(null);
+    void runGenerate({ ...input, raceId });
+  }
+
   async function handleExportPlan() {
     if (!plan) return;
     setError(null);
@@ -311,6 +342,58 @@ export function SettingsPlanPage() {
   }
 
   const daysToRace = plan ? dayDiff(todayIso(), plan.race_date) : null;
+
+  function raceRow(race: RacesRow, withListActions: boolean) {
+    const daysUntil = dayDiff(todayIso(), race.race_date);
+    const isPlanTarget = plan?.races?.id === race.id;
+    return (
+      <li key={race.id} data-testid="race-row" className="rounded-xl bg-surface-elevated p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium">{race.name ?? t('plan.raceFallback')}</p>
+            <p className="num text-caption text-text-muted">
+              {t('plan:races.meta', { date: formatDateShort(race.race_date), distance: race.distance_km })}
+            </p>
+            <p className="text-caption text-text-muted">
+              {daysUntil < 0
+                ? t('plan:races.passed')
+                : t(daysUntil === 1 ? 'plan:races.inDaysOne' : 'plan:races.inDaysMany', { days: daysUntil })}
+            </p>
+          </div>
+          {isPlanTarget ? <AppBadge tone="primary">{t('plan:races.planTarget')}</AppBadge> : null}
+        </div>
+        <div className="mt-2 flex gap-2">
+          <AppButton size="sm" variant="secondary" className="w-auto" onClick={() => openRaceEdit(race)}>
+            <Pencil className="h-4 w-4" aria-hidden /> {t('plan.editRace')}
+          </AppButton>
+          {withListActions && plan && !isPlanTarget && daysUntil > 0 ? (
+            <AppButton
+              size="sm"
+              variant="ghost"
+              className="w-auto"
+              loading={setPlanRace.isPending}
+              onClick={() => void handleSetGoal(race)}
+            >
+              <Target className="h-4 w-4" aria-hidden /> {t('plan:races.setAsGoal')}
+            </AppButton>
+          ) : null}
+          {withListActions ? (
+            <AppButton
+              size="sm"
+              variant="ghost"
+              className="w-auto"
+              onClick={() => {
+                setDeleteError(null);
+                setDeleteTarget(race);
+              }}
+            >
+              <Trash2 className="h-4 w-4" aria-hidden /> {t('plan:races.delete')}
+            </AppButton>
+          ) : null}
+        </div>
+      </li>
+    );
+  }
 
   return (
     <SettingsSubpage
@@ -359,94 +442,64 @@ export function SettingsPlanPage() {
           )}
 
           <AppCard className="space-y-3">
-            <p className="section-label">{t('plan:races.title')}</p>
-            {races.length > 0 ? (
-              <ul className="space-y-2">
-                {races.map((race) => {
-                  const daysUntil = dayDiff(todayIso(), race.race_date);
-                  const isPlanTarget = plan?.races?.id === race.id;
-                  return (
-                    <li key={race.id} data-testid="race-row" className="rounded-xl bg-surface-elevated p-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">{race.name ?? t('plan.raceFallback')}</p>
-                          <p className="num text-caption text-text-muted">
-                            {t('plan:races.meta', {
-                              date: formatDateShort(race.race_date),
-                              distance: race.distance_km,
-                            })}
-                          </p>
-                          <p className="text-caption text-text-muted">
-                            {daysUntil < 0
-                              ? t('plan:races.passed')
-                              : t(daysUntil === 1 ? 'plan:races.inDaysOne' : 'plan:races.inDaysMany', {
-                                  days: daysUntil,
-                                })}
-                          </p>
-                        </div>
-                        {isPlanTarget ? <AppBadge tone="primary">{t('plan:races.planTarget')}</AppBadge> : null}
-                      </div>
-                      <div className="mt-2 flex gap-2">
-                        <AppButton size="sm" variant="secondary" className="w-auto" onClick={() => openRaceEdit(race)}>
-                          <Pencil className="h-4 w-4" aria-hidden /> {t('plan.editRace')}
-                        </AppButton>
-                        <AppButton
-                          size="sm"
-                          variant="ghost"
-                          className="w-auto"
-                          onClick={() => {
-                            setDeleteError(null);
-                            setDeleteTarget(race);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" aria-hidden /> {t('plan:races.delete')}
-                        </AppButton>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="text-sm text-text-muted">{t('plan:races.empty')}</p>
-            )}
-            {raceAddForm ? (
-              <div className="space-y-3 rounded-xl bg-surface-elevated p-3">
-                <p className="text-sm font-medium">{t('plan:races.addTitle')}</p>
-                <RaceForm value={raceAddForm} onChange={(patch) => setRaceAddForm({ ...raceAddForm, ...patch })} />
-                <div className="flex gap-3">
-                  <AppButton variant="secondary" className="flex-1" onClick={() => setRaceAddForm(null)}>
-                    {t('cancel')}
+            <div className="flex items-center justify-between gap-2">
+              <p className="section-label">{t('plan:races.title')}</p>
+              <PremiumBadge />
+            </div>
+            {isPremium ? (
+              <>
+                {races.length > 0 ? (
+                  <ul className="space-y-2">{races.map((race) => raceRow(race, true))}</ul>
+                ) : (
+                  <p className="text-sm text-text-muted">{t('plan:races.empty')}</p>
+                )}
+                {raceAddForm ? (
+                  <div className="space-y-3 rounded-xl bg-surface-elevated p-3">
+                    <p className="text-sm font-medium">{t('plan:races.addTitle')}</p>
+                    <RaceForm value={raceAddForm} onChange={(patch) => setRaceAddForm({ ...raceAddForm, ...patch })} />
+                    <div className="flex gap-3">
+                      <AppButton variant="secondary" className="flex-1" onClick={() => setRaceAddForm(null)}>
+                        {t('cancel')}
+                      </AppButton>
+                      <AppButton className="flex-1" loading={addRace.isPending} onClick={() => void handleRaceAdd()}>
+                        {t('plan.raceSave')}
+                      </AppButton>
+                    </div>
+                  </div>
+                ) : (
+                  <AppButton variant="secondary" className="w-full" onClick={() => setRaceAddForm(emptyRaceDraft())}>
+                    <Plus className="h-4 w-4" aria-hidden /> {t('plan:races.add')}
                   </AppButton>
-                  <AppButton className="flex-1" loading={addRace.isPending} onClick={() => void handleRaceAdd()}>
-                    {t('plan.raceSave')}
-                  </AppButton>
-                </div>
-              </div>
+                )}
+              </>
             ) : (
-              <AppButton variant="secondary" className="w-full" onClick={() => setRaceAddForm(emptyRaceDraft())}>
-                <Plus className="h-4 w-4" aria-hidden /> {t('plan:races.add')}
-              </AppButton>
+              <>
+                {goalRace ? <ul className="space-y-2">{raceRow(goalRace, false)}</ul> : null}
+                <PremiumLock feature="multiple_races" />
+              </>
             )}
           </AppCard>
 
           {planForm ? (
             <AppCard className="space-y-3">
               <p className="text-sm font-medium">{t('plan.newPlan')}</p>
-              <AppSelect
-                label={t('plan:races.targetLabel')}
-                value={raceTarget}
-                onChange={(event) => handleRaceTargetChange(event.target.value)}
-              >
-                <option value="">{t('plan:races.targetNew')}</option>
-                {futureRaces.map((race) => (
-                  <option key={race.id} value={race.id}>
-                    {t('plan:races.targetOption', {
-                      name: race.name ?? t('plan.raceFallback'),
-                      date: formatDateShort(race.race_date),
-                    })}
-                  </option>
-                ))}
-              </AppSelect>
+              {isPremium ? (
+                <AppSelect
+                  label={t('plan:races.targetLabel')}
+                  value={raceTarget}
+                  onChange={(event) => handleRaceTargetChange(event.target.value)}
+                >
+                  <option value="">{t('plan:races.targetNew')}</option>
+                  {futureRaces.map((race) => (
+                    <option key={race.id} value={race.id}>
+                      {t('plan:races.targetOption', {
+                        name: race.name ?? t('plan.raceFallback'),
+                        date: formatDateShort(race.race_date),
+                      })}
+                    </option>
+                  ))}
+                </AppSelect>
+              ) : null}
               <PlanFields
                 variant="settings"
                 groups={['race', 'goal', 'schedule', 'experience']}
@@ -483,6 +536,16 @@ export function SettingsPlanPage() {
           onClick={handleRaceRegenerate}
         >
           <RefreshCw className="h-4 w-4" aria-hidden /> {t('plan.raceRegenerate')}
+        </AppButton>
+      ) : null}
+      {goalSwitchedRace && plan ? (
+        <AppButton
+          variant="secondary"
+          className="w-full"
+          loading={generatePlan.isPending}
+          onClick={handleGoalSwitchedRegenerate}
+        >
+          <RefreshCw className="h-4 w-4" aria-hidden /> {t('premium:regenerateOffer')}
         </AppButton>
       ) : null}
       {error ? (

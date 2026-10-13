@@ -290,6 +290,27 @@ export class RaceDeleteBlockedError extends Error {
   }
 }
 
+export function useSetPlanRace() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (raceId: string) => {
+      const { data: plan, error: planError } = await supabase
+        .from('plans')
+        .select('id')
+        .eq('status', 'ACTIVE')
+        .maybeSingle();
+      if (planError) throw planError;
+      if (!plan) throw new Error('no active plan');
+      const { error } = await supabase.from('plans').update({ race_id: raceId }).eq('id', plan.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['plans'] });
+      queryClient.invalidateQueries({ queryKey: ['plan'] });
+    },
+  });
+}
+
 export function useDeleteRace() {
   const queryClient = useQueryClient();
   return useMutation({

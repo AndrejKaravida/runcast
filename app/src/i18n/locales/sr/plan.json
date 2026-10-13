@@ -98,6 +98,8 @@
     "deleteFailed": "Brisanje trke nije uspelo. Probaj ponovo.",
     "targetLabel": "Ciljna trka",
     "targetNew": "Nova trka",
-    "targetOption": "{{name}} · {{date}}"
+    "targetOption": "{{name}} · {{date}}",
+    "setAsGoal": "Postavi kao cilj",
+    "setGoalFailed": "Promena cilja plana nije uspela. Probaj ponovo."
   }
 }

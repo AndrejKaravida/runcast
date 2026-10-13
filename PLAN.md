@@ -124,6 +124,19 @@ je zatvoren.
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
 
+## v2.1 — premium arhitektura, korisnička imena, UI audit
+
+- **Premium arhitektura** (F28): registar premium feature-a + `usePremium` + `PremiumLock`/
+  `PremiumBadge`; prvi premium feature **više trka** (lista/dodavanje/brisanje + izbor ciljne
+  trke zaključani za free, ciljna trka i njena izmena ostaju besplatni); **promena aktivne trke**
+  („Postavi kao cilj") sa ponudom regeneracije; server-side enforcement dolazi uz naplatu
+  (backlog `pricing.md`).
+- **Korisnička imena** (F29): `profiles.username` (unique, `^[a-z0-9_]{3,20}$`) + polje u
+  profilu; pretraga prijatelja po `@username` ili tačnom imenu profila (`find_profile_by_handle`);
+  FriendsPage dobio margine (standalone omotač).
+- **UI audit** (F30): svih 20+ ruta na 390/320px; popravljeni ritam na Danas, naslov na rang
+  listi, pravni omotači i VDOT pregled na 320px; nalazi u `docs/UI-AUDIT.md`.
+
 ## v2.0 — FIT export, readiness u proceni, kontinuitet trka
 
 - **FIT export** (F25): pravi strukturirani workout fajl za Garmin (FileId/Workout/WorkoutStep

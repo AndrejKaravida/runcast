@@ -64,6 +64,7 @@ export interface FriendEntry {
   id: string;
   displayName: string | null;
   avatarUrl: string | null;
+  username: string | null;
   weeklyKm: number;
 }
 
@@ -79,7 +80,7 @@ export function useFriends() {
       const ids = friendIdsFrom(friendships, userId as string);
       if (ids.length === 0) return [];
       const [profiles, logs] = await Promise.all([
-        supabase.from('profiles').select('id, display_name, avatar_url').in('id', ids),
+        supabase.from('profiles').select('id, display_name, avatar_url, username').in('id', ids),
         supabase
           .from('run_logs')
           .select('user_id, distance_km')
@@ -103,6 +104,7 @@ export function useFriends() {
           id,
           displayName: profileById.get(id)?.display_name ?? null,
           avatarUrl: profileById.get(id)?.avatar_url ?? null,
+          username: profileById.get(id)?.username ?? null,
           weeklyKm: Math.round((kmByUser.get(id) ?? 0) * 10) / 10,
         }))
         .sort((first, second) => (first.displayName ?? '').localeCompare(second.displayName ?? ''));
@@ -115,6 +117,7 @@ export interface FriendRequestEntry {
   id: string;
   displayName: string | null;
   avatarUrl: string | null;
+  username: string | null;
 }
 
 export function useFriendRequests() {
@@ -134,7 +137,7 @@ export function useFriendRequests() {
       if (requests.length === 0) return [];
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, display_name, avatar_url')
+        .select('id, display_name, avatar_url, username')
         .in(
           'id',
           requests.map((request) => request.requester_id),
@@ -146,6 +149,7 @@ export function useFriendRequests() {
         id: request.requester_id,
         displayName: profileById.get(request.requester_id)?.display_name ?? null,
         avatarUrl: profileById.get(request.requester_id)?.avatar_url ?? null,
+        username: profileById.get(request.requester_id)?.username ?? null,
       }));
     },
   });
@@ -182,9 +186,9 @@ export function useSendFriendRequest() {
   const queryClient = useQueryClient();
   const userId = session?.user.id;
   return useMutation({
-    mutationFn: async (name: string) => {
+    mutationFn: async (query: string) => {
       if (!userId) throw new Error('not-authenticated');
-      const { data: matches, error: findError } = await supabase.rpc('find_profile_by_name', { p_name: name });
+      const { data: matches, error: findError } = await supabase.rpc('find_profile_by_handle', { p_query: query });
       if (findError) throw findError;
       const target = matches[0];
       if (!target) throw new Error('not-found');

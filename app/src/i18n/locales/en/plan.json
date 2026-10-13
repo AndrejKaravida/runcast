@@ -98,6 +98,8 @@
     "deleteFailed": "Deleting the race failed. Please try again.",
     "targetLabel": "Goal race",
     "targetNew": "New race",
-    "targetOption": "{{name}} · {{date}}"
+    "targetOption": "{{name}} · {{date}}",
+    "setAsGoal": "Set as goal",
+    "setGoalFailed": "Changing the plan goal failed. Please try again."
   }
 }

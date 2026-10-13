@@ -73,7 +73,7 @@ function pickWeekSwapCandidate(target: WorkoutsRow, weekWorkouts: WorkoutsRow[],
 
 function TodaySkeleton() {
   return (
-    <div data-testid="today-skeleton" className="space-y-4">
+    <div data-testid="today-skeleton" className="space-y-5">
       <div className="flex items-center justify-between gap-3">
         <Skeleton className="h-7 w-44" />
         <Skeleton className="h-6 w-24" />
@@ -288,7 +288,7 @@ export function TodayPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-center justify-between gap-3">
         <p className="min-w-0 truncate text-lg font-semibold">
           {t(greetingKey())}

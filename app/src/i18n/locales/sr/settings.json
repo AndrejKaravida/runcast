@@ -20,6 +20,12 @@
   "profile": {
     "label": "Profil",
     "name": "Ime",
+    "username": "Korisničko ime",
+    "usernameHint": "@ime · 3-20 znakova: mala slova, brojevi i donja crta",
+    "usernameLength": "Korisničko ime mora da ima 3 do 20 znakova.",
+    "usernameFormat": "Korisničko ime može da sadrži samo mala slova, brojeve i donju crtu.",
+    "usernameReserved": "To korisničko ime je rezervisano.",
+    "usernameTaken": "To korisničko ime je zauzeto.",
     "height": "Visina (cm)",
     "weight": "Težina (kg)",
     "birthYear": "Rođenje",

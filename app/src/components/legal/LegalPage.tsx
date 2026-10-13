@@ -20,7 +20,7 @@ export function LegalPage({ titleKey, sectionsKey }: LegalPageProps) {
   const sections = t(sectionsKey, { returnObjects: true }) as unknown as LegalSection[];
 
   return (
-    <div className="mx-auto w-full max-w-[560px] space-y-6 px-4 py-8">
+    <div className="mx-auto w-full max-w-[560px] space-y-6 px-4 py-6">
       <Link to={session ? '/today' : '/login'} className="inline-block text-sm text-text-secondary hover:text-text">
         {session ? t('backToApp') : t('backToLogin')}
       </Link>
