@@ -163,19 +163,19 @@
   --color-border: #dedbd4;
   --color-scrim: rgba(20, 24, 31, 0.35);
 
-  --color-primary-ink: #be3b0b;
+  --color-primary-ink: #b8380a;
   --color-primary-ink-hover: #9c3208;
 
   --color-rain-ink: #135e9e;
   --color-rain-soft: rgba(77, 166, 255, 0.16);
 
-  --color-success-ink: #0f7a50;
+  --color-success-ink: #0f784e;
   --color-success-soft: rgba(61, 220, 151, 0.18);
 
   --color-warning-ink: #8a5b00;
   --color-warning-soft: rgba(255, 194, 77, 0.22);
 
-  --color-danger-ink: #be2f4c;
+  --color-danger-ink: #bb2c49;
   --color-danger-soft: rgba(255, 84, 112, 0.14);
 
   --color-text: #15181e;
@@ -186,6 +186,10 @@
   --color-chart-bar: #be3b0b;
 
   --shadow-card: 0 1px 2px rgba(21, 24, 30, 0.05), 0 1px 3px rgba(21, 24, 30, 0.04);
+}
+
+[data-theme='dark'] {
+  --color-primary: #ff8066;
 }
 
 @layer base {
