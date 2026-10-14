@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PlanFields } from '@/components/forms/PlanFields';
 import { AppInput } from '@/components/ui/AppInput';
@@ -10,6 +11,8 @@ interface RaceFormProps {
 
 export function RaceForm({ value, onChange }: RaceFormProps) {
   const { t } = useTranslation('settings');
+  const [initial] = useState(() => ({ goalTime: value.goalTime, distanceKm: value.distanceKm }));
+  const pacesChange = value.goalTime !== initial.goalTime || value.distanceKm !== initial.distanceKm;
 
   return (
     <>
@@ -25,6 +28,11 @@ export function RaceForm({ value, onChange }: RaceFormProps) {
         value={value.goalTime}
         onChange={(event) => onChange({ goalTime: event.target.value })}
       />
+      {pacesChange ? (
+        <p data-testid="pace-hint" className="text-caption text-text-muted">
+          {t('plan:races.paceHint')}
+        </p>
+      ) : null}
     </>
   );
 }

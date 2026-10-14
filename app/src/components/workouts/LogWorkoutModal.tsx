@@ -7,8 +7,8 @@ import { AppModal } from '@/components/ui/AppModal';
 import { AppSelect } from '@/components/ui/AppSelect';
 import { AppTextarea } from '@/components/ui/AppTextarea';
 import { useShoes } from '@/features/gear/queries';
-import { useLogWorkout } from '@/features/logs/queries';
-import type { WorkoutsRow } from '@/types';
+import { useLogWorkout, useUpdateRunLog } from '@/features/logs/queries';
+import type { RunLogsRow, WorkoutsRow } from '@/types';
 
 interface LogWorkoutPrefill {
   distanceKm?: number;
@@ -21,14 +21,15 @@ interface LogWorkoutModalProps {
   open: boolean;
   onClose: () => void;
   prefill?: LogWorkoutPrefill;
+  log?: RunLogsRow | null;
 }
 
-export function LogWorkoutModal({ workout, open, onClose, prefill }: LogWorkoutModalProps) {
+export function LogWorkoutModal({ workout, open, onClose, prefill, log = null }: LogWorkoutModalProps) {
   const { t } = useTranslation('workout');
   if (!workout) return null;
   return (
-    <AppModal open={open} onClose={onClose} title={t('log.title')}>
-      <LogForm key={`${workout.id}-${open}`} workout={workout} prefill={prefill} onClose={onClose} />
+    <AppModal open={open} onClose={onClose} title={log ? t('log.editTitle') : t('log.title')}>
+      <LogForm key={`${workout.id}-${open}`} workout={workout} prefill={prefill} log={log} onClose={onClose} />
     </AppModal>
   );
 }
@@ -36,22 +37,37 @@ export function LogWorkoutModal({ workout, open, onClose, prefill }: LogWorkoutM
 function LogForm({
   workout,
   prefill,
+  log,
   onClose,
 }: {
   workout: WorkoutsRow;
   prefill?: LogWorkoutPrefill;
+  log: RunLogsRow | null;
   onClose: () => void;
 }) {
   const { t } = useTranslation('workout');
   const logWorkout = useLogWorkout();
+  const updateLog = useUpdateRunLog();
   const { data: shoes = [] } = useShoes();
-  const activeShoes = shoes.filter((shoe) => !shoe.retired);
-  const initialDistance = prefill ? (prefill.distanceKm ?? null) : workout.distance_km > 0 ? workout.distance_km : null;
+  const activeShoes = shoes.filter((shoe) => !shoe.retired || shoe.id === log?.shoe_id);
+  const initialDistance = log
+    ? log.distance_km
+    : prefill
+      ? (prefill.distanceKm ?? null)
+      : workout.distance_km > 0
+        ? workout.distance_km
+        : null;
   const [distance, setDistance] = useState(initialDistance ? String(initialDistance) : '');
-  const [duration, setDuration] = useState(prefill?.durationSec ? formatDuration(prefill.durationSec) : '');
-  const [rpe, setRpe] = useState(5);
-  const [notes, setNotes] = useState('');
-  const [shoeId, setShoeId] = useState('');
+  const [duration, setDuration] = useState(
+    log?.duration_sec
+      ? formatDuration(log.duration_sec)
+      : prefill?.durationSec
+        ? formatDuration(prefill.durationSec)
+        : '',
+  );
+  const [rpe, setRpe] = useState(log?.rpe ?? 5);
+  const [notes, setNotes] = useState(log?.notes ?? '');
+  const [shoeId, setShoeId] = useState(log?.shoe_id ?? '');
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit() {
@@ -73,12 +89,16 @@ function LogForm({
       return;
     }
     try {
-      await logWorkout.mutateAsync({
-        workout,
-        ...parsed.data,
-        shoeId: shoeId || null,
-        source: prefill?.source ?? 'manual',
-      });
+      if (log) {
+        await updateLog.mutateAsync({ id: log.id, ...parsed.data, shoeId: shoeId || null });
+      } else {
+        await logWorkout.mutateAsync({
+          workout,
+          ...parsed.data,
+          shoeId: shoeId || null,
+          source: prefill?.source ?? 'manual',
+        });
+      }
       onClose();
     } catch {
       setError(t('log.errorSave'));
@@ -150,7 +170,12 @@ function LogForm({
         <AppButton type="button" variant="secondary" className="flex-1" onClick={onClose}>
           {t('common:actions.cancel')}
         </AppButton>
-        <AppButton type="button" className="flex-1" loading={logWorkout.isPending} onClick={() => void handleSubmit()}>
+        <AppButton
+          type="button"
+          className="flex-1"
+          loading={logWorkout.isPending || updateLog.isPending}
+          onClick={() => void handleSubmit()}
+        >
           {t('common:actions.save')}
         </AppButton>
       </div>

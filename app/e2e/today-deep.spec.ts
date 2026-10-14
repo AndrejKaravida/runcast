@@ -73,6 +73,65 @@ test('dnevnik sa RPE i beleškom ostaje na treningu i u izveštaju', async ({ pa
   });
 });
 
+test('izmena zapisa: distanca, trajanje i RPE se ažuriraju na kartici i u bazi', async ({ page }) => {
+  await mockSunny(page);
+  const email = uniqueEmail('izmena');
+  await register(page, email);
+  await completeOnboarding(page);
+
+  const detailsHref = await page.getByTestId('today-hero').locator('a[href^="/workout/"]').first().getAttribute('href');
+  expect(detailsHref).toMatch(/^\/workout\//);
+
+  await page.getByTestId('log-done').click();
+  await expect(page.getByRole('heading', { name: 'Zabeleži trening' })).toBeVisible();
+  await page.getByLabel('Distanca (km)').fill('6');
+  await page.getByLabel(/Trajanje/).fill('36:00');
+  await page.getByLabel(/Beleška/).fill('Prvi zapis');
+  await page.getByRole('button', { name: 'Sačuvaj' }).click();
+  await expect(page.getByRole('heading', { name: 'Zabeleži trening' })).toBeHidden();
+
+  await page.goto(detailsHref ?? '');
+  const card = page.getByTestId('run-log-card');
+  await expect(card.getByText('Zabeleženo')).toBeVisible();
+  await expect(card.getByText('6 km', { exact: true })).toBeVisible();
+  await expect(card.getByText('RPE 5', { exact: true })).toBeVisible();
+
+  await page.getByTestId('edit-log').click();
+  await expect(page.getByRole('heading', { name: 'Uredi zapis' })).toBeVisible();
+  await expect(page.getByLabel('Distanca (km)')).toHaveValue('6');
+  await expect(page.getByLabel(/Trajanje/)).toHaveValue('36:00');
+  await expect(page.getByLabel(/Beleška/)).toHaveValue('Prvi zapis');
+
+  await page.getByLabel('Distanca (km)').fill('10');
+  await page.getByLabel(/Trajanje/).fill('50:00');
+  const rpe = page.locator('#log-rpe');
+  await rpe.focus();
+  for (let step = 0; step < 4; step++) await page.keyboard.press('ArrowRight');
+  await expect(rpe).toHaveValue('9');
+  await page.getByRole('button', { name: 'Sačuvaj' }).click();
+  await expect(page.getByRole('heading', { name: 'Uredi zapis' })).toBeHidden();
+
+  await expect(card.getByText('10 km', { exact: true })).toBeVisible();
+  await expect(card.getByText('50:00', { exact: true })).toBeVisible();
+  await expect(card.getByText('5:00 /km', { exact: true })).toBeVisible();
+  await expect(card.getByText('RPE 9', { exact: true })).toBeVisible();
+
+  const client = await clientFor(email);
+  const { data: logs, error } = await client
+    .from('run_logs')
+    .select('distance_km, duration_sec, rpe, notes, avg_pace_sec_per_km')
+    .order('created_at', { ascending: false });
+  expect(error).toBeNull();
+  expect(logs).toHaveLength(1);
+  expect(logs?.[0]).toMatchObject({
+    distance_km: 10,
+    duration_sec: 3000,
+    rpe: 9,
+    notes: 'Prvi zapis',
+    avg_pace_sec_per_km: 300,
+  });
+});
+
 test('nedeljna tabla: kilometraža i broj završenih treninga rastu posle dnevnika', async ({ page }) => {
   await mockSunny(page);
   const email = uniqueEmail('nedelja');

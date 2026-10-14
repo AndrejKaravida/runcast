@@ -25,6 +25,7 @@
   },
   "log": {
     "title": "Zabeleži trening",
+    "editTitle": "Uredi zapis",
     "distance": "Distanca (km)",
     "duration": "Trajanje (h:mm:ss)",
     "rpe": "Težina (RPE)",
@@ -50,7 +51,8 @@
     "title": "Koraci"
   },
   "logged": {
-    "title": "Zabeleženo"
+    "title": "Zabeleženo",
+    "edit": "Uredi zapis"
   },
   "actions": {
     "skip": "Preskoči",

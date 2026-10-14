@@ -171,6 +171,8 @@
     "retired": "Retired",
     "retire": "Retire",
     "reactivate": "Bring back",
+    "renameName": "Rename {{name}}",
+    "save": "Save",
     "deleteName": "Delete {{name}}",
     "deleteTitle": "Delete these shoes?",
     "deleteText": "{{name}} will be removed from your gear. Your runs stay logged, just without shoes.",

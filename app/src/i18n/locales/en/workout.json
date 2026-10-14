@@ -25,6 +25,7 @@
   },
   "log": {
     "title": "Log workout",
+    "editTitle": "Edit log",
     "distance": "Distance (km)",
     "duration": "Duration (h:mm:ss)",
     "rpe": "Effort (RPE)",
@@ -50,7 +51,8 @@
     "title": "Steps"
   },
   "logged": {
-    "title": "Logged"
+    "title": "Logged",
+    "edit": "Edit log"
   },
   "actions": {
     "skip": "Skip",

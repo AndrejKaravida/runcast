@@ -14,7 +14,7 @@ import {
   type WorkoutType,
 } from '@runcast/shared';
 import { clsx } from 'clsx';
-import { ArrowLeft, CalendarClock, CalendarPlus, CheckCircle2, SkipForward, Watch } from 'lucide-react';
+import { ArrowLeft, CalendarClock, CalendarPlus, CheckCircle2, Pencil, SkipForward, Watch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 import { AppBadge } from '@/components/ui/AppBadge';
@@ -129,6 +129,7 @@ export function WorkoutPage() {
   const exportTcx = useExportWorkoutTcx();
   const exportFit = useExportWorkoutFit();
   const [logOpen, setLogOpen] = useState(false);
+  const [editLogOpen, setEditLogOpen] = useState(false);
   const [skipConfirmOpen, setSkipConfirmOpen] = useState(false);
   const [skipError, setSkipError] = useState<string | null>(null);
   const [completeError, setCompleteError] = useState<string | null>(null);
@@ -401,8 +402,15 @@ export function WorkoutPage() {
       <WhyCard explanation={explanation} />
 
       {log ? (
-        <AppCard className="space-y-2 border-l-2 border-l-success-ink">
-          <SectionHeader label={t('workout:logged.title')} />
+        <AppCard data-testid="run-log-card" className="space-y-2 border-l-2 border-l-success-ink">
+          <SectionHeader
+            label={t('workout:logged.title')}
+            action={
+              <AppButton variant="ghost" size="sm" data-testid="edit-log" onClick={() => setEditLogOpen(true)}>
+                <Pencil className="h-4 w-4" aria-hidden /> {t('workout:logged.edit')}
+              </AppButton>
+            }
+          />
           <div className="flex flex-wrap items-center gap-2 text-sm">
             {log.distance_km ? <AppBadge tone="neutral">{log.distance_km} km</AppBadge> : null}
             {log.duration_sec ? <AppBadge tone="neutral">{formatDuration(log.duration_sec)}</AppBadge> : null}
@@ -473,6 +481,7 @@ export function WorkoutPage() {
       ) : null}
 
       <LogWorkoutModal workout={workout} open={logOpen} onClose={() => setLogOpen(false)} />
+      <LogWorkoutModal workout={workout} open={editLogOpen} onClose={() => setEditLogOpen(false)} log={log} />
       <AppModal open={moveOpen} onClose={closeMove} title={t('workout:move.title')}>
         <div className="space-y-4">
           <p className="text-sm text-text-secondary">{t('workout:move.description')}</p>

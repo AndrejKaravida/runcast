@@ -39,6 +39,39 @@ export function useLogWorkout() {
   });
 }
 
+export interface UpdateRunLogInput {
+  id: string;
+  distanceKm: number;
+  durationSec: number;
+  rpe: number;
+  notes?: string;
+  shoeId?: string | null;
+}
+
+export function useUpdateRunLog() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: UpdateRunLogInput) => {
+      const { data, error } = await supabase
+        .from('run_logs')
+        .update({
+          distance_km: input.distanceKm,
+          duration_sec: input.durationSec,
+          avg_pace_sec_per_km: Math.round(input.durationSec / input.distanceKm),
+          rpe: input.rpe,
+          notes: input.notes ?? null,
+          shoe_id: input.shoeId ?? null,
+        })
+        .eq('id', input.id)
+        .select('id')
+        .single();
+      if (error) throw error;
+      if (!data) throw new Error('Run log not updated');
+    },
+    onSuccess: () => invalidateWorkoutData(queryClient),
+  });
+}
+
 export function useSkipWorkout() {
   const { session } = useAuth();
   const queryClient = useQueryClient();

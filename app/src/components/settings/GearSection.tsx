@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { AppBadge } from '@/components/ui/AppBadge';
 import { AppButton } from '@/components/ui/AppButton';
@@ -32,6 +32,8 @@ export function GearSection() {
   const [initialKm, setInitialKm] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ShoesRow | null>(null);
+  const [renameTarget, setRenameTarget] = useState<ShoesRow | null>(null);
+  const [renameValue, setRenameValue] = useState('');
 
   async function handleAdd() {
     const trimmed = name.trim();
@@ -55,6 +57,28 @@ export function GearSection() {
   function handleRetire(shoe: ShoesRow) {
     setError(null);
     updateShoe.mutate({ id: shoe.id, retired: !shoe.retired }, { onError: () => setError(t('gear.saveFailed')) });
+  }
+
+  function openRename(shoe: ShoesRow) {
+    setError(null);
+    setRenameTarget(shoe);
+    setRenameValue(shoe.name);
+  }
+
+  async function handleRename() {
+    if (!renameTarget) return;
+    const trimmed = renameValue.trim();
+    if (!trimmed) {
+      setError(t('gear.nameRequired'));
+      return;
+    }
+    setError(null);
+    try {
+      await updateShoe.mutateAsync({ id: renameTarget.id, name: trimmed });
+      setRenameTarget(null);
+    } catch {
+      setError(t('gear.saveFailed'));
+    }
   }
 
   async function handleDelete() {
@@ -106,27 +130,68 @@ export function GearSection() {
               data-testid="shoe-row"
               className="flex items-center gap-3 rounded-xl bg-surface-elevated px-3 py-2.5"
             >
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="truncate text-sm font-medium">{shoe.name}</p>
-                  {shoe.retired ? <AppBadge tone="neutral">{t('gear.retired')}</AppBadge> : null}
-                </div>
-                <p data-testid="shoe-km" className="num text-caption text-text-muted">
-                  {t('gear.km', { km: shoe.totalKm.toFixed(1) })}
-                </p>
-              </div>
-              <AppButton type="button" variant="ghost" size="sm" onClick={() => handleRetire(shoe)}>
-                {shoe.retired ? t('gear.reactivate') : t('gear.retire')}
-              </AppButton>
-              <AppButton
-                type="button"
-                variant="ghost"
-                size="sm"
-                aria-label={t('gear.deleteName', { name: shoe.name })}
-                onClick={() => setDeleteTarget(shoe)}
-              >
-                <Trash2 className="h-4 w-4" aria-hidden />
-              </AppButton>
+              {renameTarget?.id === shoe.id ? (
+                <>
+                  <div className="min-w-0 flex-1">
+                    <AppInput
+                      aria-label={t('gear.renameName', { name: shoe.name })}
+                      value={renameValue}
+                      onChange={(event) => setRenameValue(event.target.value)}
+                    />
+                  </div>
+                  <AppButton
+                    type="button"
+                    size="sm"
+                    className="w-auto"
+                    loading={updateShoe.isPending}
+                    onClick={() => void handleRename()}
+                  >
+                    {t('gear.save')}
+                  </AppButton>
+                  <AppButton
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="w-auto"
+                    onClick={() => setRenameTarget(null)}
+                  >
+                    {t('cancel')}
+                  </AppButton>
+                </>
+              ) : (
+                <>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm font-medium">{shoe.name}</p>
+                      {shoe.retired ? <AppBadge tone="neutral">{t('gear.retired')}</AppBadge> : null}
+                    </div>
+                    <p data-testid="shoe-km" className="num text-caption text-text-muted">
+                      {t('gear.km', { km: shoe.totalKm.toFixed(1) })}
+                    </p>
+                  </div>
+                  <AppButton
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    aria-label={t('gear.renameName', { name: shoe.name })}
+                    onClick={() => openRename(shoe)}
+                  >
+                    <Pencil className="h-4 w-4" aria-hidden />
+                  </AppButton>
+                  <AppButton type="button" variant="ghost" size="sm" onClick={() => handleRetire(shoe)}>
+                    {shoe.retired ? t('gear.reactivate') : t('gear.retire')}
+                  </AppButton>
+                  <AppButton
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    aria-label={t('gear.deleteName', { name: shoe.name })}
+                    onClick={() => setDeleteTarget(shoe)}
+                  >
+                    <Trash2 className="h-4 w-4" aria-hidden />
+                  </AppButton>
+                </>
+              )}
             </li>
           ))}
         </ul>

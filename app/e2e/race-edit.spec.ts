@@ -81,3 +81,20 @@ test('sporije ciljno vreme posle regeneracije menja tempa u planu', async ({ pag
   expect(before.paces).not.toBeNull();
   expect(after.paces?.thresholdSecPerKm ?? 0).toBeGreaterThan(before.paces?.thresholdSecPerKm ?? 0);
 });
+
+test('izmena trke: hint o tempima posle promene ciljnog vremena', async ({ page }) => {
+  const email = uniqueEmail('race-hint');
+  await register(page, email);
+  await completeOnboarding(page);
+
+  await page.goto('/settings/plan');
+  await page.getByRole('button', { name: 'Uredi' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByText('Izmena trke')).toBeVisible();
+  const hint = dialog.getByTestId('pace-hint');
+  await expect(hint).toBeHidden();
+
+  await dialog.getByLabel(/Ciljno vreme/).fill('4:00:00');
+  await expect(hint).toBeVisible();
+  await expect(hint).toContainText('regeneracije plana');
+});

@@ -171,6 +171,8 @@
     "retired": "U penziji",
     "retire": "Pošalji u penziju",
     "reactivate": "Vrati u upotrebu",
+    "renameName": "Preimenuj {{name}}",
+    "save": "Sačuvaj",
     "deleteName": "Obriši {{name}}",
     "deleteTitle": "Obrisati patike?",
     "deleteText": "{{name}} se briše iz opreme. Trčanja ostaju zabeležena, samo bez patika.",

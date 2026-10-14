@@ -100,6 +100,7 @@
     "targetNew": "Nova trka",
     "targetOption": "{{name}} · {{date}}",
     "setAsGoal": "Postavi kao cilj",
-    "setGoalFailed": "Promena cilja plana nije uspela. Pokušaj ponovo."
+    "setGoalFailed": "Promena cilja plana nije uspela. Pokušaj ponovo.",
+    "paceHint": "Tempa se menjaju tek posle regeneracije plana."
   }
 }

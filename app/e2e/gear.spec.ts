@@ -59,3 +59,27 @@ test('oprema: kilometraža iz treninga, penzija i brisanje', async ({ page }) =>
   await expect(recent).toContainText('5 km');
   await expect(recent).toContainText('3 km');
 });
+
+test('oprema: preimenovanje patika se čuva', async ({ page }) => {
+  const email = uniqueEmail('gear-rename');
+  await register(page, email);
+  await completeOnboarding(page);
+
+  await page.goto('/settings/gear');
+  const gear = page.getByTestId('gear-section');
+  await gear.getByLabel('Naziv patika').fill('Pegasus 41');
+  await gear.getByRole('button', { name: 'Dodaj patike' }).click();
+  const row = gear.getByTestId('shoe-row');
+  await expect(row).toContainText('Pegasus 41');
+
+  await row.getByRole('button', { name: 'Preimenuj Pegasus 41' }).click();
+  const input = row.getByRole('textbox');
+  await expect(input).toHaveValue('Pegasus 41');
+  await input.fill('Pegasus 42');
+  await row.getByRole('button', { name: 'Sačuvaj' }).click();
+  await expect(row).toContainText('Pegasus 42');
+  await expect(row.getByRole('button', { name: 'Preimenuj Pegasus 42' })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByTestId('shoe-row')).toContainText('Pegasus 42');
+});

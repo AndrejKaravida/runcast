@@ -100,6 +100,7 @@
     "targetNew": "New race",
     "targetOption": "{{name}} · {{date}}",
     "setAsGoal": "Set as goal",
-    "setGoalFailed": "Changing the plan goal failed. Please try again."
+    "setGoalFailed": "Changing the plan goal failed. Please try again.",
+    "paceHint": "Pace targets update when you regenerate the plan."
   }
 }

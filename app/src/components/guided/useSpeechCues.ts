@@ -10,6 +10,16 @@ export interface SpeechCues {
   beep: (frequency: number, durationMs?: number) => void;
 }
 
+const MUTED_KEY = 'runcast.guided.muted';
+
+function storedMuted(): boolean {
+  try {
+    return localStorage.getItem(MUTED_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
 function voicePrefix(language: string): string {
   return language.toLowerCase().startsWith('en') ? 'en' : 'sr';
 }
@@ -42,13 +52,13 @@ function subscribeVoices(callback: () => void): () => void {
 export function useSpeechCues(): SpeechCues {
   const { i18n } = useTranslation();
   const language = i18n.language;
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(storedMuted);
   const speechAvailable = useSyncExternalStore(
     subscribeVoices,
     () => findVoice(language) !== null,
     () => false,
   );
-  const mutedRef = useRef(false);
+  const mutedRef = useRef(muted);
   const audioContextRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
@@ -93,6 +103,11 @@ export function useSpeechCues(): SpeechCues {
       } catch {
         return;
       }
+    }
+    try {
+      localStorage.setItem(MUTED_KEY, String(next));
+    } catch {
+      return;
     }
   }, []);
 

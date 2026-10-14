@@ -99,3 +99,23 @@ test('audio navođenje: BRIEF na startu, COACH na skipu i mute', async ({ page }
   await page.waitForTimeout(700);
   expect((await spokenLines(page)).length).toBe(countAfterMute);
 });
+
+test('mute se pamti i posle novog pokretanja vođenog trčanja', async ({ page }) => {
+  await register(page, uniqueEmail('guided-mute'));
+  await completeOnboarding(page);
+  const workoutId = await openGuidedWorkoutId(page);
+  expect(workoutId).not.toBe('');
+
+  await page.goto(`/run/${workoutId}?timeScale=30`);
+  await page.getByTestId('guided-start').click();
+  const mute = page.getByTestId('guided-mute');
+  await expect(mute).toHaveAttribute('aria-pressed', 'false');
+  await mute.click();
+  await expect(mute).toHaveAttribute('aria-pressed', 'true');
+
+  await page.reload();
+  await expect(page.getByTestId('guided-start')).toBeVisible();
+  await page.getByTestId('guided-start').click();
+  await expect(page.getByTestId('guided-mute')).toHaveAttribute('aria-pressed', 'true');
+  expect(await page.evaluate(() => localStorage.getItem('runcast.guided.muted'))).toBe('true');
+});
