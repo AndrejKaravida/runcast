@@ -41,7 +41,11 @@ Testovi: 269 unit + 59 E2E (consent, account deletion/export, licenses).
 1. **Kontakt email i entitet**: zameni placeholdere u `app/src/features/legal/legal.ts`
    (`LEGAL_CONTACT_EMAIL = support@runcast.app`, `LEGAL_ENTITY`) stvarnim podacima.
 2. **Custom SMTP u Supabase**: podrazumevani SMTP ne dostavlja mejlove običnim korisnicima
-   (samo timski mejlovi, nizak rate limit). Podesi Resend/SES pre objave.
+   (samo timski mejlovi, nizak rate limit). Podesi Resend/SES pre objave. Brendirani šabloni
+   (potvrda, reset lozinke, magic link, promena emaila) žive u `supabase/templates/*.html` i
+   lokalni CLI ih čita preko `config.toml`; hosted dashboard ih ne preuzima automatski, pa iste
+   šablone (i subject-e iz `config.toml`) posle podešavanja SMTP-a nalepi ručno u
+   **dashboard → Auth → Email Templates**.
 3. **Custom domen**: `runcast-2ju.pages.dev` zameni pravim domenom i ažuriraj URL-ove u store
    listinzima i pravnoj dokumentaciji.
 4. **Supabase region**: proveri da je projekat u EU regionu (GDPR transfer).

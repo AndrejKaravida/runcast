@@ -91,12 +91,15 @@ Extensions:
 12. `premium.spec.ts`: a free user sees no target race select in the plan form and keeps the current plan race after regeneration.
 13. `race-edit.spec.ts`: a slower goal time after regeneration produces a slower plan threshold pace.
 
+## Previously listed gaps, now resolved (wave 10)
+
+- Log editing exists; `today-deep.spec.ts` edits distance, duration, RPE and notes and asserts card and database state. A pain field is still not part of the modal.
+- Guided run mute persists across reload via `localStorage`; `guided-audio.spec.ts` asserts the stored flag and the restored toggle.
+- Gear rename is supported; `gear.spec.ts` renames a shoe and asserts persistence after reload.
+- The race edit form shows a pace hint after a goal time change; `race-edit.spec.ts` asserts it appears and mentions plan regeneration.
+
 ## Known gaps left intentionally
 
-- Log editing and a pain field do not exist in the UI, the modal only creates a log (distance, duration, RPE, notes, shoe).
-- Guided run mute is component state only, so it does not persist across reload; only in-session silence is asserted.
-- Gear rename is not supported, only add, retire, reactivate and delete.
-- The race edit form has no pace hint, paces only change after a plan regeneration, which `race-edit.spec.ts` covers.
 - Premium purchase is not implemented, the dialog announces it as coming soon.
 - Native Capacitor flows (push subscription on device, Health Connect) are not reachable in the browser; web fallbacks are covered.
 - Feed pagination beyond the first 20 items and multi-user concurrency are out of scope.

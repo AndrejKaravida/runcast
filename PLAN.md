@@ -124,6 +124,28 @@ je zatvoren.
    podešen sa secret-ima). Default SMTP ima mali dnevni limit — za produkciju razmotriti Resend.
    E2E u CI-ju nije uključen (zahteva `supabase start` u job-u); pokreće se lokalno.
 
+## v2.2 — hardening talas
+
+Overnight talas 1–11, svaka celina ima svoj dokument u `docs/`:
+
+- **Bezbednost** (1): server-side limiti za zahteve i pretragu, trigger koji zamrzava par u
+  `friendships`, sužena RLS za pending zahteve, `run_logs.shoe_id` ownership guard, uklonjene
+  anon privilegije; `docs/SECURITY-AUDIT.md` i `docs/SECURITY-CLIENT.md`.
+- **E2E u CI** (2): `ci.yml` dobio `e2e` job sa `supabase start` i Playwright-om; konfiguracija
+  otpornija na paralelno opterećenje.
+- **Pristupačnost i kontrast** (3a, 3b): `aria` opisi polja, fokus i live regioni; kontrast tokena
+  proveren skriptom, bez AA padova; `docs/A11Y-AUDIT.md`, `docs/CONTRAST-AUDIT.md`.
+- **Lokalizacija** (4): parity checker za `sr`/`en` (`npm run check:i18n`), konzistentnost kopija i
+  uklonjeni hardkodovani stringovi.
+- **Performanse i PWA** (5): bundle budžet i chunking, font payload, manifest i offline režim;
+  `docs/PERFORMANCE.md`.
+- **Otpornost i baza** (6, 7): route error boundary i guard fail-safe za sve tokove; kompozitni
+  indeksi i EXPLAIN audit uz seed za 100k treninga; `docs/RESILIENCE.md`, `docs/DB-PERFORMANCE.md`.
+- **Datumi i vreme** (8): health uvoz po zonama, lokalni datum recalibracije, DST-safe izvoz;
+  `docs/DATE-TIME.md`.
+- **E2E dubina, UX i mejlovi** (9, 10, 11): onboarding varijante i dublji plan/danas/social testovi;
+  izmena zapisa, trajni mute, preimenovanje patika i pace hint; brendirani auth mejl šabloni.
+
 ## v2.1 — premium arhitektura, korisnička imena, UI audit
 
 - **Premium arhitektura** (F28): registar premium feature-a + `usePremium` + `PremiumLock`/
