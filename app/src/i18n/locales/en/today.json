@@ -51,7 +51,7 @@
   },
   "tomorrow": "tomorrow",
   "weather": {
-    "best": "Best window today: {{from}}–{{to}}h · score {{score}}",
+    "best": "Best window today: {{from}}-{{to}}h · score {{score}}",
     "earlier": "Suggestion: run before {{hour}}h",
     "conditions": "{{pct}}% rain · wind {{wind}} km/h",
     "attribution": "Data:"

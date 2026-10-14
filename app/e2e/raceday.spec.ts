@@ -13,7 +13,7 @@ test('dan trke — čip sa Today vodi na plan tempa i checklistu', async ({ page
 
   const plan = page.getByTestId('pace-plan');
   await expect(plan).toBeVisible();
-  await expect(plan.getByText('5–10 km')).toBeVisible();
+  await expect(plan.getByText('5-10 km')).toBeVisible();
 
   const firstPace = page.getByTestId('split-row').first().locator('td').nth(1);
   const evenPace = await firstPace.innerText();

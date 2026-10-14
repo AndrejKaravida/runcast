@@ -28,7 +28,7 @@
       "runDays": "Dani za trčanje",
       "runDaysHint": "Klikni dan da ga uključiš ili isključiš. Dugo trčanje je označeno bojom.",
       "longRunNote": "Dugi trk nosi nedelju: ostale dane raspoređujemo oko njega.",
-      "windowNote": "Za jutro gledamo prognozu 06–09 h, za veče 17–21 h."
+      "windowNote": "Za jutro gledamo prognozu 06-09 h, za veče 17-21 h."
     },
     "location": {
       "title": "Gde trčiš?"
@@ -68,8 +68,8 @@
   },
   "volume": {
     "lt20": "do 20 km",
-    "from20to40": "20–40 km",
-    "from40to60": "40–60 km",
+    "from20to40": "20-40 km",
+    "from40to60": "40-60 km",
     "over60": "preko 60 km"
   },
   "experience": {

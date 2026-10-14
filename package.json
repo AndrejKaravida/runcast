@@ -19,6 +19,7 @@
     "lint": "npm run lint -w app",
     "db:types": "./node_modules/.bin/supabase gen types typescript --local --schema public > app/src/types/database.ts",
     "licenses:generate": "node scripts/generate-licenses.mjs",
+    "check:i18n": "node scripts/check-i18n.mjs",
     "format": "prettier --write ."
   },
   "devDependencies": {

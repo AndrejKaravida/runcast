@@ -84,7 +84,7 @@
     "add": "Dodaj trku",
     "addTitle": "Nova trka",
     "added": "Trka je dodata.",
-    "addFailed": "Dodavanje trke nije uspelo. Proveri podatke i probaj ponovo.",
+    "addFailed": "Dodavanje trke nije uspelo. Proveri podatke i pokušaj ponovo.",
     "planTarget": "Cilj plana",
     "inDaysOne": "za {{days}} dan",
     "inDaysMany": "za {{days}} dana",
@@ -94,12 +94,12 @@
     "deleteTitle": "Obriši trku?",
     "deleteText": "Trka {{name}} se briše iz kalendara. Ova radnja ne može da se vrati.",
     "deleted": "Trka je obrisana.",
-    "deleteBlocked": "Ova trka je cilj aktivnog plana i ne može da se obriše. Izaberi drugu trku kao cilj plana, pa probaj ponovo.",
-    "deleteFailed": "Brisanje trke nije uspelo. Probaj ponovo.",
+    "deleteBlocked": "Ova trka je cilj aktivnog plana i ne može da se obriše. Izaberi drugu trku kao cilj plana, pa pokušaj ponovo.",
+    "deleteFailed": "Brisanje trke nije uspelo. Pokušaj ponovo.",
     "targetLabel": "Ciljna trka",
     "targetNew": "Nova trka",
     "targetOption": "{{name}} · {{date}}",
     "setAsGoal": "Postavi kao cilj",
-    "setGoalFailed": "Promena cilja plana nije uspela. Probaj ponovo."
+    "setGoalFailed": "Promena cilja plana nije uspela. Pokušaj ponovo."
   }
 }

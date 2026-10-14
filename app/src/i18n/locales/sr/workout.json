@@ -44,7 +44,7 @@
   },
   "meta": {
     "phase": "Faza {{phase}}",
-    "week": "Nedelja {{week}}/{{weeks}}"
+    "week": "Nedelja {{week}} / {{weeks}}"
   },
   "steps": {
     "title": "Koraci"
@@ -96,8 +96,8 @@
     "sun": "ned"
   },
   "weather": {
-    "title": "Vreme za termin {{from}}–{{to}} h",
-    "titleDay": "Vreme za {{day}} termin {{from}}–{{to}} h",
+    "title": "Vreme za termin {{from}}-{{to}} h",
+    "titleDay": "Vreme za {{day}} termin {{from}}-{{to}} h",
     "updated": "Ažurirano: {{time}}",
     "source": "Vreme: Open-Meteo",
     "refresh": "Osveži prognozu",
@@ -108,7 +108,7 @@
   "assessment": {
     "storm": {
       "title": "Grmljavina u terminu treninga",
-      "description": "Predlog: prebaci trening ili odradi indoor varijantu."
+      "description": "Predlog: prebaci trening ili odradi ga u zatvorenom."
     },
     "rain": {
       "title": "Kiša, {{pct}}% šanse",
@@ -120,7 +120,7 @@
     },
     "cold": {
       "title": "Hladno, osećaj {{temp}}°C",
-      "description": "Predlog: indoor trening ili dodatni sloj."
+      "description": "Predlog: trening u zatvorenom ili dodatni sloj."
     },
     "wind": {
       "title": "Jak vetar, udari do {{gust}} km/h",
@@ -128,7 +128,7 @@
     },
     "air": {
       "title": "Loš vazduh, PM2.5 {{pm25}}",
-      "description": "Predlog: indoor ili drugi termin."
+      "description": "Predlog: trening u zatvorenom ili drugi termin."
     }
   }
 }

@@ -28,7 +28,7 @@
       "runDays": "Run days",
       "runDaysHint": "Tap a day to include or exclude it. The long run is colour-coded.",
       "longRunNote": "The long run anchors your week: the other days are arranged around it.",
-      "windowNote": "For mornings we check the forecast for 06–09 h, for evenings 17–21 h."
+      "windowNote": "For mornings we check the forecast for 06-09 h, for evenings 17-21 h."
     },
     "location": {
       "title": "Where do you run?"
@@ -68,8 +68,8 @@
   },
   "volume": {
     "lt20": "up to 20 km",
-    "from20to40": "20–40 km",
-    "from40to60": "40–60 km",
+    "from20to40": "20-40 km",
+    "from40to60": "40-60 km",
     "over60": "over 60 km"
   },
   "experience": {

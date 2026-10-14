@@ -44,7 +44,7 @@
   },
   "meta": {
     "phase": "{{phase}} phase",
-    "week": "Week {{week}}/{{weeks}}"
+    "week": "Week {{week}} / {{weeks}}"
   },
   "steps": {
     "title": "Steps"
@@ -96,8 +96,8 @@
     "sun": "Sun"
   },
   "weather": {
-    "title": "Weather for your {{from}}–{{to}} h window",
-    "titleDay": "Weather for {{day}}, {{from}}–{{to}} h window",
+    "title": "Weather for your {{from}}-{{to}} h window",
+    "titleDay": "Weather for {{day}}, {{from}}-{{to}} h window",
     "updated": "Updated: {{time}}",
     "source": "Weather: Open-Meteo",
     "refresh": "Refresh forecast",

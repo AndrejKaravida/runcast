@@ -134,7 +134,7 @@ test('workout detalj, preskoči, profil i regeneracija plana', async ({ page }) 
   await page.locator('a[aria-label*="Dugi trk"]').first().click();
   await page.waitForURL('**/workout/**');
   await expect(page.getByText('Koraci')).toBeVisible();
-  await expect(page.getByText(/Vreme za termin 06–09 h/)).toBeVisible();
+  await expect(page.getByText(/Vreme za termin 06-09 h/)).toBeVisible();
 
   await page.getByRole('button', { name: 'Preskoči' }).click();
   await expect(page.getByText('Preskoči trening?')).toBeVisible();

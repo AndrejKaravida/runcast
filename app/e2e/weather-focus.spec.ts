@@ -14,7 +14,7 @@ test('weather hero prikazuje najbolji termin i uslove', async ({ page }) => {
   await completeOnboarding(page);
 
   await expect(page.getByTestId('weather-hero')).toBeVisible();
-  await expect(page.getByTestId('weather-hero-window')).toHaveText('Najbolji termin danas: 6–8h · skor 100');
+  await expect(page.getByTestId('weather-hero-window')).toHaveText('Najbolji termin danas: 6-8h · skor 100');
   await expect(page.getByTestId('weather-hero-conditions')).toHaveText('0% kiše · vetar 6 km/h');
   await expect(page.getByTestId('weather-hero').getByText('16°').first()).toBeVisible();
 });

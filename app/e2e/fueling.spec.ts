@@ -68,7 +68,7 @@ test('gorivo — kartica sa gel rasporedom na dugom trku', async ({ page }) => {
   await expect(card).toBeVisible();
   await expect(card.getByText('Gorivo', { exact: true })).toBeVisible();
   await expect(card.getByText(/Gel 1/)).toBeVisible();
-  await expect(card.getByText(/700–800/)).toBeVisible();
+  await expect(card.getByText(/700-800/)).toBeVisible();
 
   await page.setViewportSize({ width: 320, height: 568 });
   await assertNoHorizontalOverflow(page, 'fueling workout 320');

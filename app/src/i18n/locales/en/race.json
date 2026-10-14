@@ -9,7 +9,7 @@
     "time": "Time",
     "total": "Total",
     "firstKm": "First kilometre",
-    "noteLong": "First 5 km 5–10 s/km slower than goal. Save energy for the finish.",
+    "noteLong": "First 5 km 5-10 s/km slower than goal. Save energy for the finish.",
     "noteMid": "First 3 km ~5 s slower, goal pace from km 4, last km all out.",
     "noteShort": "Controlled and strong from the start, no sprinting. Last km all out."
   },
@@ -39,7 +39,7 @@
     "tip3": "Spread carbs across meals instead of one big meal.",
     "tip4": "Sort the logistics: route to the start, bib pickup and drop bag.",
     "tip5": "Sleep well the two nights before. The night before is often restless, and that's fine.",
-    "tip6": "Shakeout the day before if you like: 15–20 min easy plus a few strides."
+    "tip6": "Shakeout the day before if you like: 15-20 min easy plus a few strides."
   },
   "empty": {
     "title": "No active race",

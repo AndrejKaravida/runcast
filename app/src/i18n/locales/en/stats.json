@@ -81,7 +81,7 @@
     "yourRace": "Your race",
     "goalNote": "Based on your goal pace. It reflects the goal, not your current fitness.",
     "anchorNote": "Based on a result: {{distance}} {{time}}.",
-    "method": "Estimate using the Daniels VDOT model. Error grows with the distance difference (±2–4%).",
+    "method": "Estimate using the Daniels VDOT model. Error grows with the distance difference (±2-4%).",
     "benchmarkCta": "Run a benchmark"
   },
   "distance": {

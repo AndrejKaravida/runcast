@@ -9,7 +9,7 @@
     "time": "Vreme",
     "total": "Ukupno",
     "firstKm": "Prvi kilometar",
-    "noteLong": "Prvih 5 km 5–10 s/km sporije od cilja. Čuvaj energiju za kraj.",
+    "noteLong": "Prvih 5 km 5-10 s/km sporije od cilja. Čuvaj energiju za kraj.",
     "noteMid": "Prva 3 km ~5 s sporije, od 4. km ciljni tempo, zadnji km sve.",
     "noteShort": "Kontrolisano jako od starta, bez sprinta. Zadnji km sve."
   },
@@ -39,7 +39,7 @@
     "tip3": "Ugljene hidrate raspodeli kroz obroke umesto jednog velikog obroka.",
     "tip4": "Reši logistiku: ruta do starta, preuzimanje broja i drop-bag.",
     "tip5": "Spavaj dobro dve noći pre. Noć pred trku je često nervozna i to je u redu.",
-    "tip6": "Šejkaut dan pre po želji: 15–20 min lagano i par ubrzanja."
+    "tip6": "Šejkaut dan pre po želji: 15-20 min lagano i par ubrzanja."
   },
   "empty": {
     "title": "Nema aktivne trke",

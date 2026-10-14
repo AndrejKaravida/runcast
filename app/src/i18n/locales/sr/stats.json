@@ -81,7 +81,7 @@
     "yourRace": "Tvoja trka",
     "goalNote": "Bazirano na ciljnom tempu. Odražava cilj, ne garantuje trenutnu formu.",
     "anchorNote": "Bazirano na rezultatu: {{distance}} {{time}}.",
-    "method": "Procena po Daniels VDOT modelu. Greška raste sa razlikom distanci (±2–4%).",
+    "method": "Procena po Daniels VDOT modelu. Greška raste sa razlikom distanci (±2-4%).",
     "benchmarkCta": "Uradi test trku"
   },
   "distance": {

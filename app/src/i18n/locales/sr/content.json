@@ -17,7 +17,7 @@
         "why": "Lagano trčanje gradi aerobnu bazu i oporavlja te između teških treninga. Zato je sporo namerno.",
         "how": ["Drži razgovorni tempo cele deonice.", "Ako uletiš brže, uspori: plafon je brzina, ne cilj."],
         "mistake": "„Laki\" dan na umerenom tempu (RPE 6). Tada nijedan dan nije ni lak ni težak.",
-        "effortLabel": "RPE 3–4",
+        "effortLabel": "RPE 3-4",
         "effortCue": "pričaš u punim rečenicama bez gubljenja daha."
       },
       "LONG": {
@@ -25,7 +25,7 @@
         "whyWithDistance": "Dugi trk {{km, number(maximumFractionDigits: 1)}} km: gradi izdržljivost, ekonomičnost i mentalnu čvrstinu za završnicu trke.",
         "how": ["Kreni mirno, prvih 5 km najsporije.", "Hidriraj se i testiraj opremu kao na trci."],
         "mistake": "Prebrz početak te iscedi pred kraj. Trk treba da ti da samopouzdanje, ne da te slomi.",
-        "effortLabel": "RPE 4–5 (kraj do 6)",
+        "effortLabel": "RPE 4-5 (kraj do 6)",
         "effortCue": "pričaš u rečenicama, dišeš kontrolisano."
       },
       "TEMPO": {
@@ -35,17 +35,17 @@
           "Ako pređeš u govor u jednom slovu, preterao si."
         ],
         "mistake": "Tempo na 5 km brzini nije tempo: postaje VO2max sesija i traži previše oporavka.",
-        "effortLabel": "RPE 6–7",
+        "effortLabel": "RPE 6-7",
         "effortCue": "komotno teško, govoriš u kratkim frazama."
       },
       "INTERVALS": {
         "why": "Intervali podižu VO2max: plafon aerobne snage i brzinu koju možeš da održiš.",
         "how": [
-          "Prva 1–2 ponavljanja mirnije, poslednje jako kao prvo.",
+          "Prva 1-2 ponavljanja mirnije, poslednje jako kao prvo.",
           "Oporavak: lagan trk ili hod, smiri disanje."
         ],
         "mistake": "Prejak start → besmislen umor umesto produktivnog; rezultati opadaju iz repa u rep.",
-        "effortLabel": "RPE 8–9",
+        "effortLabel": "RPE 8-9",
         "effortCue": "teško ali kontrolisano, tehnika se ne raspada."
       },
       "REPETITIONS": {
@@ -57,26 +57,26 @@
       },
       "REST": {
         "why": "Odmor nije pauza od treninga. Adaptacija se dešava dok se telo oporavlja.",
-        "how": ["Šetnja, mobilnost ili lagano istezanje 15–20 min.", "Prioritet: san 7–9 h i normalna ishrana."],
+        "how": ["Šetnja, mobilnost ili lagano istezanje 15-20 min.", "Prioritet: san 7-9 h i normalna ishrana."],
         "mistake": "Popunjavanje dana junk kilometrima ili osećaj krivice. Odmor je deo plana.",
-        "effortLabel": "RPE 0–2",
+        "effortLabel": "RPE 0-2",
         "effortCue": "danas ne treniraš, danas se gradiš."
       },
       "RACE": {
         "why": "Dan za koji je ceo plan rađen: provera forme, taktike i glave.",
         "how": ["Prvu polovinu kontrolisano, bez jurnjave za tuđim tempom.", "Drži se svog plana tempa do kraja."],
         "mistake": "Prebrz start sagoreva energiju, najčešći razlog pada u drugoj polovini.",
-        "effortLabel": "RPE 8–10",
+        "effortLabel": "RPE 8-10",
         "effortCue": "jako, ali po planu; poslednja trećina sme da boli."
       },
       "STRENGTH": {
-        "why": "Snaga stabilizuje zglobove i ispravlja disbalanse: manje povreda i ekonomičniji trk (+8–12% za 1–2 sesije nedeljno).",
+        "why": "Snaga stabilizuje zglobove i ispravlja disbalanse: manje povreda i ekonomičniji trk (+8-12% za 1-2 sesije nedeljno).",
         "how": [
-          "Kontrolisana forma iznad težine; zadnja 1–2 ponavljanja izazovna ali čista.",
+          "Kontrolisana forma iznad težine; zadnja 1-2 ponavljanja izazovna ali čista.",
           "Težak rad nogu ne ostavljaj za dan pre ključne trčne sesije."
         ],
         "mistake": "Preteško i preblizu kvalitetnog trčanja: snaga tada krade oporavak umesto da ga podrži.",
-        "effortLabel": "RPE 6–8",
+        "effortLabel": "RPE 6-8",
         "effortCue": "osećaš rad mišića, forma ostaje čista."
       }
     }
@@ -116,16 +116,16 @@
   "fueling": {
     "nextGel": "Sledeći gel: ~{{minutes, number}} min",
     "hydration": {
-      "default": "400–800 ml/h (po žeđi i uslovima)",
-      "cold": "400–500 ml/h",
-      "cool": "500–600 ml/h",
-      "warm": "600–700 ml/h",
-      "hot": "700–800 ml/h + elektroliti"
+      "default": "400-800 ml/h (po žeđi i uslovima)",
+      "cold": "400-500 ml/h",
+      "cool": "500-600 ml/h",
+      "warm": "600-700 ml/h",
+      "hot": "700-800 ml/h + elektroliti"
     },
     "pre": {
-      "meal": "Obrok 2–3 h pre trčanja: bogat UH (pasta, ovsena kaša), malo masti i proteina.",
-      "snackLong": "Užina 2–3 h pre: 75+ g UH + malo proteina.",
-      "snackMedium": "Užina 60–90 min pre: 50+ g UH + malo proteina.",
+      "meal": "Obrok 2-3 h pre trčanja: bogat UH (pasta, ovsena kaša), malo masti i proteina.",
+      "snackLong": "Užina 2-3 h pre: 75+ g UH + malo proteina.",
+      "snackMedium": "Užina 60-90 min pre: 50+ g UH + malo proteina.",
       "snackShort": "Užina pred polazak: 25+ g UH (banana, tost sa medom).",
       "water": "Popij ~500 ml vode 2 h pre starta.",
       "race": "Gelove i tajming probaj na treningu. Na dan trke ništa novo."
@@ -134,13 +134,13 @@
       "gel": "Gel {{index, number}}: popij ~200 ml vode."
     },
     "post": {
-      "recovery": "U roku od 1–2 h: protein + UH (čokoladno mleko, jogurt + voće, sendvič).",
+      "recovery": "U roku od 1-2 h: protein + UH (čokoladno mleko, jogurt + voće, sendvič).",
       "rehydrate": "Rehidratacija: ~1,5 L tečnosti po kg izgubljene mase, uz natrijum."
     }
   },
   "raceday": {
     "split": {
-      "range": "{{from, number(maximumFractionDigits: 1)}}–{{to, number(maximumFractionDigits: 1)}} km",
+      "range": "{{from, number(maximumFractionDigits: 1)}}-{{to, number(maximumFractionDigits: 1)}} km",
       "single": "{{index, number}}. km"
     },
     "checklist": {
@@ -151,15 +151,15 @@
       "logistics": "Proveri rutu do starta i preuzimanje broja",
       "dropBag": "Spakuj drop-bag: suvu majicu, užinu i patike za posle",
       "alarm": "Postavi dva alarma",
-      "breakfast": "Doručak 2–3 h pre starta (probano u treningu)",
-      "hydrate": "Popij 200–300 ml vode 60–90 min pre starta",
+      "breakfast": "Doručak 2-3 h pre starta (probano u treningu)",
+      "hydrate": "Popij 200-300 ml vode 60-90 min pre starta",
       "antichafe": "Anti-chafe na butine, pazuh i stopala",
-      "toilet": "WC 30–45 min pre starta",
+      "toilet": "WC 30-45 min pre starta",
       "warmupLong": "Kratko zagrevanje 10 min + par ubrzanja",
-      "warmupShort": "Zagrevanje 10–15 min + 2–4 ubrzanja",
-      "firstKmLong": "Prvi km disciplinovano: 5–10 s/km sporije od cilja",
+      "warmupShort": "Zagrevanje 10-15 min + 2-4 ubrzanja",
+      "firstKmLong": "Prvi km disciplinovano: 5-10 s/km sporije od cilja",
       "firstKmShort": "Kontrolisano jako od starta, bez sprinta",
-      "gelPlan": "Gel svakih 30–35 min + voda na svakoj stanici",
+      "gelPlan": "Gel svakih 30-35 min + voda na svakoj stanici",
       "effort": "Po vetru i uzbrdici trči po naporu, ne po satu",
       "finishLong": "Zadnja 2 km pusti ako imaš",
       "finishShort": "Zadnji km pusti sve"
@@ -266,7 +266,7 @@
       "description": "{{weeks}} uzastopne nedelje sa bar jednim trčanjem."
     },
     "long": {
-      "title": "Prvi long {{km}} km",
+      "title": "Prvi dugi trk {{km}} km",
       "description": "Dugi trk od {{km}} km. Izdržljivost se gradi kilometrima."
     },
     "tempo": {

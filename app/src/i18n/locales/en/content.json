@@ -20,7 +20,7 @@
           "If you speed up, ease back: the ceiling is a speed, not a target."
         ],
         "mistake": "An \"easy\" day at a moderate pace (RPE 6). Then no day is truly easy or hard.",
-        "effortLabel": "RPE 3–4",
+        "effortLabel": "RPE 3-4",
         "effortCue": "you can talk in full sentences without losing your breath."
       },
       "LONG": {
@@ -28,7 +28,7 @@
         "whyWithDistance": "Long run {{km, number(maximumFractionDigits: 1)}} km: builds endurance, efficiency and mental toughness for the closing stages of a race.",
         "how": ["Start calmly, the first 5 km the slowest.", "Hydrate and test your kit the way you will on race day."],
         "mistake": "Starting too fast drains you before the end. The long run should give you confidence, not break you.",
-        "effortLabel": "RPE 4–5 (up to 6 at the end)",
+        "effortLabel": "RPE 4-5 (up to 6 at the end)",
         "effortCue": "you talk in sentences and breathe under control."
       },
       "TEMPO": {
@@ -38,17 +38,17 @@
           "If you can only speak in single words, you've gone too far."
         ],
         "mistake": "Tempo at 5 km pace isn't tempo: it becomes a VO2max session and demands too much recovery.",
-        "effortLabel": "RPE 6–7",
+        "effortLabel": "RPE 6-7",
         "effortCue": "comfortably hard, you speak in short phrases."
       },
       "INTERVALS": {
         "why": "Intervals raise your VO2max: the ceiling of aerobic power and the speed you can sustain.",
         "how": [
-          "Keep the first 1–2 reps calmer, make the last as strong as the first.",
+          "Keep the first 1-2 reps calmer, make the last as strong as the first.",
           "Recovery: easy jog or walk, bring your breathing down."
         ],
         "mistake": "Going out too hard → pointless fatigue instead of a productive stimulus; reps get slower and slower.",
-        "effortLabel": "RPE 8–9",
+        "effortLabel": "RPE 8-9",
         "effortCue": "hard but controlled, technique holds together."
       },
       "REPETITIONS": {
@@ -63,9 +63,9 @@
       },
       "REST": {
         "why": "Rest isn't a break from training. Adaptation happens while your body recovers.",
-        "how": ["A walk, mobility or light stretching for 15–20 min.", "Priority: 7–9 h of sleep and normal eating."],
+        "how": ["A walk, mobility or light stretching for 15-20 min.", "Priority: 7-9 h of sleep and normal eating."],
         "mistake": "Filling the day with junk kilometres or feeling guilty. Rest is part of the plan.",
-        "effortLabel": "RPE 0–2",
+        "effortLabel": "RPE 0-2",
         "effortCue": "today you don't train, today you're building."
       },
       "RACE": {
@@ -75,17 +75,17 @@
           "Stick to your pace plan to the end."
         ],
         "mistake": "A fast start burns your energy. It's the most common reason for fading in the second half.",
-        "effortLabel": "RPE 8–10",
+        "effortLabel": "RPE 8-10",
         "effortCue": "hard, but to plan; the last third is allowed to hurt."
       },
       "STRENGTH": {
-        "why": "Strength stabilises joints and corrects imbalances: fewer injuries and a more efficient stride (+8–12% for 1–2 sessions a week).",
+        "why": "Strength stabilises joints and corrects imbalances: fewer injuries and a more efficient stride (+8-12% for 1-2 sessions a week).",
         "how": [
-          "Controlled form above weight; the last 1–2 reps challenging but clean.",
+          "Controlled form above weight; the last 1-2 reps challenging but clean.",
           "Don't leave heavy leg work for the day before a key run session."
         ],
         "mistake": "Too heavy and too close to quality running: strength then steals recovery instead of supporting it.",
-        "effortLabel": "RPE 6–8",
+        "effortLabel": "RPE 6-8",
         "effortCue": "you feel the muscles working, form stays clean."
       }
     }
@@ -125,16 +125,16 @@
   "fueling": {
     "nextGel": "Next gel: ~{{minutes, number}} min",
     "hydration": {
-      "default": "400–800 ml/h (by thirst and conditions)",
-      "cold": "400–500 ml/h",
-      "cool": "500–600 ml/h",
-      "warm": "600–700 ml/h",
-      "hot": "700–800 ml/h + electrolytes"
+      "default": "400-800 ml/h (by thirst and conditions)",
+      "cold": "400-500 ml/h",
+      "cool": "500-600 ml/h",
+      "warm": "600-700 ml/h",
+      "hot": "700-800 ml/h + electrolytes"
     },
     "pre": {
-      "meal": "Meal 2–3 h before running: rich in carbs (pasta, oatmeal), a little fat and protein.",
-      "snackLong": "Snack 2–3 h before: 75+ g carbs + some protein.",
-      "snackMedium": "Snack 60–90 min before: 50+ g carbs + some protein.",
+      "meal": "Meal 2-3 h before running: rich in carbs (pasta, oatmeal), a little fat and protein.",
+      "snackLong": "Snack 2-3 h before: 75+ g carbs + some protein.",
+      "snackMedium": "Snack 60-90 min before: 50+ g carbs + some protein.",
       "snackShort": "Snack before heading out: 25+ g carbs (banana, toast with honey).",
       "water": "Drink ~500 ml of water 2 h before the start.",
       "race": "Test your gels and timing in training. Nothing new on race day."
@@ -143,13 +143,13 @@
       "gel": "Gel {{index, number}}: drink ~200 ml of water."
     },
     "post": {
-      "recovery": "Within 1–2 h: protein + carbs (chocolate milk, yoghurt + fruit, a sandwich).",
+      "recovery": "Within 1-2 h: protein + carbs (chocolate milk, yoghurt + fruit, a sandwich).",
       "rehydrate": "Rehydration: ~1.5 L of fluid per kg of lost weight, with sodium."
     }
   },
   "raceday": {
     "split": {
-      "range": "{{from, number(maximumFractionDigits: 1)}}–{{to, number(maximumFractionDigits: 1)}} km",
+      "range": "{{from, number(maximumFractionDigits: 1)}}-{{to, number(maximumFractionDigits: 1)}} km",
       "single": "{{index, number}}. km"
     },
     "checklist": {
@@ -160,15 +160,15 @@
       "logistics": "Check the route to the start and bib pickup",
       "dropBag": "Pack a drop bag: dry shirt, snack and shoes for after",
       "alarm": "Set two alarms",
-      "breakfast": "Breakfast 2–3 h before the start (tested in training)",
-      "hydrate": "Drink 200–300 ml of water 60–90 min before the start",
+      "breakfast": "Breakfast 2-3 h before the start (tested in training)",
+      "hydrate": "Drink 200-300 ml of water 60-90 min before the start",
       "antichafe": "Anti-chafe on thighs, underarms and feet",
-      "toilet": "Toilet 30–45 min before the start",
+      "toilet": "Toilet 30-45 min before the start",
       "warmupLong": "Short 10 min warm-up + a few strides",
-      "warmupShort": "Warm-up 10–15 min + 2–4 strides",
-      "firstKmLong": "First km disciplined: 5–10 s/km slower than goal",
+      "warmupShort": "Warm-up 10-15 min + 2-4 strides",
+      "firstKmLong": "First km disciplined: 5-10 s/km slower than goal",
       "firstKmShort": "Controlled and strong from the start, no sprinting",
-      "gelPlan": "A gel every 30–35 min + water at every station",
+      "gelPlan": "A gel every 30-35 min + water at every station",
       "effort": "Run by effort through wind and hills, not by the watch",
       "finishLong": "Let it rip in the last 2 km if you have it",
       "finishShort": "Let it rip in the last km"
