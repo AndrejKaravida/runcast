@@ -81,3 +81,29 @@ test('premium: zaključana sekcija Trke, pa otključavanje i promena cilja plana
   await page.goto('/today');
   await expect(page.getByTestId('race-chip')).toContainText('E2E 10K');
 });
+
+test('premium: slobodan korisnik nema izbor ciljne trke i zadržava cilj plana', async ({ page }) => {
+  const email = uniqueEmail('premium-target');
+  await register(page, email);
+  await completeOnboarding(page);
+
+  await page.goto('/settings/plan');
+  await expect(page.getByTestId('premium-lock')).toBeVisible();
+  await expect(page.getByLabel('Ciljna trka')).toHaveCount(0);
+
+  const supabase = await clientFor(email);
+  const { data: race } = await supabase.from('races').select('id').single();
+
+  await page.getByRole('button', { name: /Generiši novi plan/ }).click();
+  await expect(page.getByLabel('Ciljna trka')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Generiši', exact: true }).click();
+  await expect(page.getByText('Novi plan je spreman, stari je arhiviran.')).toBeVisible();
+
+  const { data: plan, error } = await supabase.from('plans').select('race_id').eq('status', 'ACTIVE').single();
+  expect(error).toBeNull();
+  expect(plan?.race_id).toBe(race?.id);
+
+  const { data: races, error: racesError } = await supabase.from('races').select('id');
+  expect(racesError).toBeNull();
+  expect(races).toHaveLength(1);
+});

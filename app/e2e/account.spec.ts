@@ -63,3 +63,42 @@ test('potvrda brisanja je onemogućena dok se ne unese tačan tekst', async ({ p
   await dialog.getByLabel('OBRIŠI').fill('OBRIŠI');
   await expect(confirmButton).toBeEnabled();
 });
+
+test('izvoz posle treninga sadrži dnevnik sa RPE, tempom i beleškom', async ({ page }) => {
+  const email = uniqueEmail('export-log');
+  await register(page, email);
+  await completeOnboarding(page);
+
+  await page.getByTestId('log-done').click();
+  await expect(page.getByRole('heading', { name: 'Zabeleži trening' })).toBeVisible();
+  await page.getByLabel('Distanca (km)').fill('7');
+  await page.getByLabel(/Trajanje/).fill('42:00');
+  const rpe = page.locator('#log-rpe');
+  await rpe.focus();
+  for (let step = 0; step < 2; step++) await page.keyboard.press('ArrowRight');
+  await expect(rpe).toHaveValue('7');
+  await page.getByLabel(/Beleška/).fill('Izvoz test');
+  await page.getByRole('button', { name: 'Sačuvaj' }).click();
+  await expect(page.getByRole('heading', { name: 'Zabeleži trening' })).toBeHidden();
+
+  await page.goto('/settings/account');
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Preuzmi moje podatke' }).click();
+  const download = await downloadPromise;
+  const filePath = await download.path();
+  if (!filePath) throw new Error('Preuzimanje nije dalo putanju');
+  const payload = JSON.parse(await readFile(filePath, 'utf8')) as {
+    profile: unknown;
+    run_logs: Array<Record<string, unknown>>;
+  };
+
+  expect(payload.profile).toMatchObject({ onboarding_completed: true });
+  expect(payload.run_logs).toHaveLength(1);
+  expect(payload.run_logs[0]).toMatchObject({
+    distance_km: 7,
+    duration_sec: 2520,
+    rpe: 7,
+    notes: 'Izvoz test',
+    avg_pace_sec_per_km: 360,
+  });
+});

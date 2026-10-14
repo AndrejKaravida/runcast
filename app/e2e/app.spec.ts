@@ -182,3 +182,18 @@ test.describe('reduced motion', () => {
     await expect(page.getByText(/dana do trke/)).toBeVisible();
   });
 });
+
+test('nepoznata ruta daje 404, pogrešna lozinka grešku na prijavi', async ({ page }) => {
+  await page.goto('/nema-ovakve-stranice');
+  await expect(page.getByText('404')).toBeVisible();
+  await expect(page.getByText('Ova stranica ne postoji.')).toBeVisible();
+
+  await page.getByRole('link', { name: 'Nazad na Danas' }).click();
+  await page.waitForURL('**/login');
+
+  await page.getByLabel('Email', { exact: true }).fill(uniqueEmail('wrongpass'));
+  await page.getByLabel('Lozinka', { exact: true }).fill('pogresnalozinka1');
+  await page.getByRole('button', { name: 'Prijavi se' }).click();
+  await expect(page.getByText('Pogrešan email ili lozinka')).toBeVisible();
+  await expect(page).toHaveURL(/\/login$/);
+});
