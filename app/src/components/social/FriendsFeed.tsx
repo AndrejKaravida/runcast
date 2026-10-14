@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ThumbsUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatDuration, formatPace } from '@runcast/shared';
@@ -15,6 +16,7 @@ interface FriendsFeedProps {
 export function FriendsFeed({ items }: FriendsFeedProps) {
   const { t } = useTranslation('social');
   const kudos = useKudos();
+  const [error, setError] = useState<string | null>(null);
 
   if (items.length === 0) {
     return <EmptyState title={t('feed.emptyTitle')} description={t('feed.emptyDescription')} />;
@@ -22,6 +24,11 @@ export function FriendsFeed({ items }: FriendsFeedProps) {
 
   return (
     <div className="space-y-3">
+      {error ? (
+        <p role="alert" data-testid="kudos-error" className="text-sm text-danger-ink">
+          {error}
+        </p>
+      ) : null}
       {items.map((item) => (
         <AppCard key={item.id} className="space-y-3" data-testid="feed-card">
           <div className="flex items-center gap-3">
@@ -46,7 +53,13 @@ export function FriendsFeed({ items }: FriendsFeedProps) {
               variant={item.kudosByMe ? 'primary' : 'secondary'}
               aria-pressed={item.kudosByMe}
               loading={kudos.isPending && kudos.variables?.runLogId === item.id}
-              onClick={() => kudos.mutate({ runLogId: item.id, liked: item.kudosByMe })}
+              onClick={() => {
+                setError(null);
+                kudos.mutate(
+                  { runLogId: item.id, liked: item.kudosByMe },
+                  { onError: () => setError(t('feed.kudosError')) },
+                );
+              }}
               data-testid="kudos-button"
             >
               <ThumbsUp className="h-4 w-4" aria-hidden />

@@ -59,6 +59,12 @@
     "text": "Ova stranica ne postoji.",
     "back": "Nazad na Danas"
   },
+  "errorScreen": {
+    "title": "Nešto je pošlo naopako",
+    "message": "Došlo je do greške pri prikazu ove stranice. Pokušaj ponovo.",
+    "chunk": "Nova verzija je dostupna, osveži stranicu",
+    "home": "Nazad na Danas"
+  },
   "avatar": "Avatar",
   "pwa": {
     "updateAvailable": "Nova verzija je spremna",

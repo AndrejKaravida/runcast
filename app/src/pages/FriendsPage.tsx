@@ -43,8 +43,11 @@ export function FriendsPage() {
   const [name, setName] = useState('');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [respondError, setRespondError] = useState<string | null>(null);
   const [removeTarget, setRemoveTarget] = useState<FriendEntry | null>(null);
+  const [removeError, setRemoveError] = useState<string | null>(null);
   const [blockTarget, setBlockTarget] = useState<FriendEntry | null>(null);
+  const [blockError, setBlockError] = useState<string | null>(null);
 
   async function handleSend() {
     setError(null);
@@ -58,23 +61,36 @@ export function FriendsPage() {
     }
   }
 
+  async function handleRespond(friendshipId: string, accept: boolean) {
+    setRespondError(null);
+    try {
+      await respondRequest.mutateAsync({ friendshipId, accept });
+    } catch {
+      setRespondError(t('requests.respondFailed'));
+    }
+  }
+
   async function handleRemove() {
     const target = removeTarget;
     if (!target) return;
+    setRemoveError(null);
     try {
       await removeFriend.mutateAsync(target.friendshipId);
-    } finally {
       setRemoveTarget(null);
+    } catch {
+      setRemoveError(t('friends.actionFailed'));
     }
   }
 
   async function handleBlock() {
     const target = blockTarget;
     if (!target) return;
+    setBlockError(null);
     try {
       await blockUser.mutateAsync(target.id);
-    } finally {
       setBlockTarget(null);
+    } catch {
+      setBlockError(t('friends.actionFailed'));
     }
   }
 
@@ -106,7 +122,7 @@ export function FriendsPage() {
                   size="sm"
                   data-testid="friend-request-accept"
                   loading={respondRequest.isPending && respondRequest.variables?.friendshipId === request.friendshipId}
-                  onClick={() => void respondRequest.mutateAsync({ friendshipId: request.friendshipId, accept: true })}
+                  onClick={() => void handleRespond(request.friendshipId, true)}
                 >
                   {t('requests.accept')}
                 </AppButton>
@@ -114,7 +130,7 @@ export function FriendsPage() {
                   size="sm"
                   variant="ghost"
                   data-testid="friend-request-decline"
-                  onClick={() => void respondRequest.mutateAsync({ friendshipId: request.friendshipId, accept: false })}
+                  onClick={() => void handleRespond(request.friendshipId, false)}
                 >
                   {t('requests.decline')}
                 </AppButton>
@@ -123,6 +139,15 @@ export function FriendsPage() {
           ) : (
             <p className="text-sm text-text-muted">{t('requests.empty')}</p>
           )}
+          {respondError ? (
+            <p
+              role="alert"
+              data-testid="friend-respond-error"
+              className="rounded-xl border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-ink"
+            >
+              {respondError}
+            </p>
+          ) : null}
         </div>
 
         <AppCard className="space-y-3">
@@ -218,8 +243,12 @@ export function FriendsPage() {
           confirmLabel={t('friends.remove')}
           tone="danger"
           loading={removeFriend.isPending}
+          error={removeError ?? undefined}
           onConfirm={() => void handleRemove()}
-          onClose={() => setRemoveTarget(null)}
+          onClose={() => {
+            setRemoveTarget(null);
+            setRemoveError(null);
+          }}
         />
 
         <ConfirmDialog
@@ -229,8 +258,12 @@ export function FriendsPage() {
           confirmLabel={t('friends.block')}
           tone="danger"
           loading={blockUser.isPending}
+          error={blockError ?? undefined}
           onConfirm={() => void handleBlock()}
-          onClose={() => setBlockTarget(null)}
+          onClose={() => {
+            setBlockTarget(null);
+            setBlockError(null);
+          }}
         />
       </SettingsSubpage>
     </div>

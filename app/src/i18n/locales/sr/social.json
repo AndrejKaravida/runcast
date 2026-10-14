@@ -7,7 +7,8 @@
     "title": "Zahtevi",
     "empty": "Nema novih zahteva.",
     "accept": "Prihvati",
-    "decline": "Odbij"
+    "decline": "Odbij",
+    "respondFailed": "Nije uspelo. Pokušaj ponovo."
   },
   "add": {
     "title": "Dodaj prijatelja",
@@ -36,13 +37,15 @@
     "removeDescription": "{{name}} više neće videti tvoje treninge.",
     "block": "Blokiraj",
     "blockTitle": "Blokirati korisnika?",
-    "blockDescription": "{{name}} neće videti tvoje treninge i neće moći da ti pošalje zahtev. Osoba neće biti obaveštena."
+    "blockDescription": "{{name}} neće videti tvoje treninge i neće moći da ti pošalje zahtev. Osoba neće biti obaveštena.",
+    "actionFailed": "Nije uspelo. Pokušaj ponovo."
   },
   "feed": {
     "title": "Feed",
     "emptyTitle": "Feed je još prazan",
     "emptyDescription": "Trening prijatelja pojaviće se ovde čim ga zabeleži.",
     "anonymous": "Trkač",
-    "kudos": "Kudos"
+    "kudos": "Kudos",
+    "kudosError": "Kudos nije sačuvan. Pokušaj ponovo."
   }
 }

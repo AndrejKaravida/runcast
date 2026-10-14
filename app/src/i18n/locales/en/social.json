@@ -7,7 +7,8 @@
     "title": "Requests",
     "empty": "No new requests.",
     "accept": "Accept",
-    "decline": "Decline"
+    "decline": "Decline",
+    "respondFailed": "It didn't work. Try again."
   },
   "add": {
     "title": "Add a friend",
@@ -36,13 +37,15 @@
     "removeDescription": "{{name}} will no longer see your workouts.",
     "block": "Block",
     "blockTitle": "Block this user?",
-    "blockDescription": "{{name}} will not see your workouts and cannot send you a request. They will not be notified."
+    "blockDescription": "{{name}} will not see your workouts and cannot send you a request. They will not be notified.",
+    "actionFailed": "It didn't work. Try again."
   },
   "feed": {
     "title": "Feed",
     "emptyTitle": "The feed is still empty",
     "emptyDescription": "A friend's workout will appear here as soon as they log it.",
     "anonymous": "Runner",
-    "kudos": "Kudos"
+    "kudos": "Kudos",
+    "kudosError": "Kudos wasn't saved. Try again."
   }
 }

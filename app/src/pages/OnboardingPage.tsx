@@ -202,8 +202,8 @@ export function OnboardingPage() {
       setError(t('errors.generateFailed'));
       return;
     }
-    await updateProfile
-      .mutateAsync({
+    try {
+      await updateProfile.mutateAsync({
         onboarding_completed: true,
         city: state.city,
         lat: state.lat,
@@ -216,8 +216,11 @@ export function OnboardingPage() {
         weight_kg: state.weightKg ? Number(state.weightKg) : null,
         birth_year: state.birthYear ? Number(state.birthYear) : null,
         sex: state.sex === '' ? null : state.sex,
-      })
-      .catch(() => undefined);
+      });
+    } catch {
+      setError(t('errors.profileSaveFailed'));
+      return;
+    }
     navigate('/today', { replace: true });
   }
 

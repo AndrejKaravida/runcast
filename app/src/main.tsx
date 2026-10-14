@@ -7,11 +7,14 @@ import { AuthProvider } from '@/auth/AuthProvider';
 import { AppSplash } from '@/components/layout/AppSplash';
 import { PwaUpdatePrompt } from '@/components/layout/PwaUpdatePrompt';
 import i18n from '@/i18n';
+import { installErrorReporting } from '@/lib/error-reporting';
 import { initNativeShell } from '@/lib/native';
 import { queryClient } from '@/lib/queryClient';
 import { router } from '@/router';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 import './styles/theme.css';
+
+installErrorReporting();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

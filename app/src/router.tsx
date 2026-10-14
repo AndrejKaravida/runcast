@@ -1,11 +1,13 @@
 import { createBrowserRouter, Navigate } from 'react-router';
 import { RedirectIfAuthed, RequireAuth, RequireOnboarding } from '@/auth/guards';
+import { ErrorScreen } from '@/components/layout/ErrorScreen';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import { TabLayout } from '@/components/layout/TabLayout';
 
 export const router = createBrowserRouter([
   {
     element: <ScrollToTop />,
+    errorElement: <ErrorScreen />,
     children: [
       {
         element: <RedirectIfAuthed />,
@@ -43,9 +45,11 @@ export const router = createBrowserRouter([
           },
           {
             element: <RequireOnboarding />,
+            errorElement: <ErrorScreen />,
             children: [
               {
                 element: <TabLayout />,
+                errorElement: <ErrorScreen />,
                 children: [
                   { path: '/today', lazy: async () => ({ Component: (await import('@/pages/TodayPage')).TodayPage }) },
                   { path: '/plan', lazy: async () => ({ Component: (await import('@/pages/PlanPage')).PlanPage }) },

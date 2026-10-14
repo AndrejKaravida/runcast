@@ -122,6 +122,7 @@
     "daysCount": "Pick exactly {{count}} training days.",
     "longRunDayMissing": "The long run day must be one of the selected days.",
     "cityRequired": "Pick a city from the search results",
-    "generateFailed": "Plan generation failed. Please try again"
+    "generateFailed": "Plan generation failed. Please try again",
+    "profileSaveFailed": "Saving the profile failed. Please try again"
   }
 }

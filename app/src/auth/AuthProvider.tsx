@@ -28,10 +28,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(nextSession);
       setLoading(false);
     }
-    supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      applySession(data.session);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!active) return;
+        applySession(data.session);
+      })
+      .catch(() => {
+        if (!active) return;
+        applySession(null);
+      });
     const { data } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (!active) return;
       applySession(nextSession, event);

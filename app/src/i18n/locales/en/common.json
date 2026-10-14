@@ -59,6 +59,12 @@
     "text": "This page doesn't exist.",
     "back": "Back to Today"
   },
+  "errorScreen": {
+    "title": "Something went wrong",
+    "message": "Something went wrong while showing this page. Try again.",
+    "chunk": "A new version is available, refresh the page",
+    "home": "Back to Today"
+  },
   "avatar": "Avatar",
   "pwa": {
     "updateAvailable": "A new version is ready",

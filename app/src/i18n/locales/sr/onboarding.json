@@ -122,6 +122,7 @@
     "daysCount": "Izaberi tačno {{count}} dana za trening.",
     "longRunDayMissing": "Dan dugog trčanja mora biti među izabranim danima.",
     "cityRequired": "Izaberi grad iz rezultata pretrage",
-    "generateFailed": "Generisanje plana nije uspelo. Pokušaj ponovo"
+    "generateFailed": "Generisanje plana nije uspelo. Pokušaj ponovo",
+    "profileSaveFailed": "Čuvanje profila nije uspelo. Pokušaj ponovo"
   }
 }
