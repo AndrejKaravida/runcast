@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { buildWorkoutFit } from '@runcast/shared';
 import { planPaces } from '@/features/plans/plan-data';
 import { workoutSteps } from '@/features/workouts/utils';
+import { localMidnightInstant } from '@/lib/dates';
 import { downloadBlob } from '@/lib/download';
 import type { PlansRow, WorkoutsRow } from '@/types';
 
@@ -35,6 +36,7 @@ export function useExportWorkoutFit() {
           steps: workoutSteps(workout),
         },
         paces: planPaces(plan),
+        startAt: localMidnightInstant(workout.workout_date),
       });
       downloadBlob(
         `${workout.workout_date}-${slugify(workout.title)}.fit`,

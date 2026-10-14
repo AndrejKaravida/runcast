@@ -414,6 +414,7 @@ export function useRecalibratePlan() {
         p_anchor: input.anchor as unknown as Json,
         p_paces: input.paces as unknown as Json,
         p_pace_map: input.paceMap as unknown as Json,
+        p_today: todayIso(),
       });
       if (error) throw error;
     },

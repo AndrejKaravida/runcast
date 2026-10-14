@@ -1,10 +1,18 @@
 import i18n, { localeForLanguage } from '@/i18n';
 
+export function deviceTimeZone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Belgrade';
+}
+
 export function todayIso(): string {
   const now = new Date();
   const month = String(now.getMonth() + 1).padStart(2, '0');
   const day = String(now.getDate()).padStart(2, '0');
   return `${now.getFullYear()}-${month}-${day}`;
+}
+
+export function localMidnightInstant(iso: string): string {
+  return new Date(`${iso}T00:00:00`).toISOString();
 }
 
 export function addDaysIso(iso: string, days: number): string {

@@ -84,6 +84,13 @@ describe('buildWorkoutTcx', () => {
     expect(tcx).toContain('<Lap StartTime="2026-10-20T00:10:00Z" Order="2">');
   });
 
+  it('koristi startAt za Id i start lapova', () => {
+    const tcx = buildWorkoutTcx({ workout: workout(), startAt: '2026-10-19T22:00:00.000Z' });
+    expect(tcx).toContain('<Id>2026-10-19T22:00:00Z</Id>');
+    expect(tcx).toContain('<Lap StartTime="2026-10-19T22:00:00Z" Order="1">');
+    expect(tcx).toContain('<Lap StartTime="2026-10-19T22:10:00Z" Order="2">');
+  });
+
   it('ne grupiše ponovljene korake, svaki je zaseban lap', () => {
     const steps = Array.from({ length: 4 }, () => ({ label: '1000 m @ I (400 m jog)', distanceKm: 1, pace: '4:20' }));
     const tcx = buildWorkoutTcx({ workout: workout({ steps }) });

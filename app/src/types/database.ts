@@ -595,7 +595,10 @@ export type Database = {
         };
         Returns: undefined;
       };
-      recalibrate_plan: { Args: { p_anchor: Json; p_pace_map: Json; p_paces: Json }; Returns: undefined };
+      recalibrate_plan: {
+        Args: { p_anchor: Json; p_pace_map: Json; p_paces: Json; p_today?: string };
+        Returns: undefined;
+      };
       scale_week_volume: { Args: { p_factor: number; p_week_start: string }; Returns: undefined };
       swap_workouts: { Args: { p_first: string; p_second: string }; Returns: undefined };
       weekly_leaderboard: {

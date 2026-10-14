@@ -13,7 +13,7 @@ import {
 import { useAuth } from '@/auth/AuthProvider';
 import { getHealthSource, type HealthAvailability } from '@/features/health/adapter';
 import { invalidateWorkoutData } from '@/features/logs/queries';
-import { addDaysIso, todayIso } from '@/lib/dates';
+import { addDaysIso, deviceTimeZone, localMidnightInstant, todayIso } from '@/lib/dates';
 import { isNativePlatform } from '@/lib/native';
 import { supabase } from '@/lib/supabase';
 import type { RunLogsInsert } from '@/types';
@@ -82,10 +82,6 @@ function writeHealthLastSync(value: HealthLastSync): void {
   }
 }
 
-function deviceTimeZone(): string {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Belgrade';
-}
-
 export function useHealthIntegration() {
   const [available, setAvailable] = useState<HealthAvailability | null>(null);
   const [autosync, setAutosync] = useState(readHealthAutosync);
@@ -126,7 +122,7 @@ export function useImportHealthRuns() {
       const source = getHealthSource();
       const lastSync = readHealthLastSync();
       const at = new Date().toISOString();
-      const since = lastSync?.at ?? `${addDaysIso(todayIso(), -HISTORY_DAYS)}T00:00:00.000Z`;
+      const since = lastSync?.at ?? localMidnightInstant(addDaysIso(todayIso(), -HISTORY_DAYS));
       const runs = await source.fetchRuns(since);
 
       const { data: logs, error: logsError } = await supabase
@@ -144,7 +140,8 @@ export function useImportHealthRuns() {
       const importedExternalIds = logs
         .map((log) => log.external_id)
         .filter((externalId): externalId is string => Boolean(externalId));
-      const toImport = runs.filter((run) => classifyRun(run, { existing, importedExternalIds }) === 'import');
+      const timeZone = deviceTimeZone();
+      const toImport = runs.filter((run) => classifyRun(run, { existing, importedExternalIds }, timeZone) === 'import');
 
       let linked = 0;
       if (toImport.length > 0) {
@@ -169,11 +166,10 @@ export function useImportHealthRuns() {
           workouts = data;
         }
 
-        const timeZone = deviceTimeZone();
         const workoutById = new Map(workouts.map((workout) => [workout.id, workout]));
         const plannedIds: string[] = [];
         const rows: RunLogsInsert[] = toImport.map((run) => {
-          const workoutId = matchWorkoutId(run, workouts);
+          const workoutId = matchWorkoutId(run, workouts, timeZone);
           if (workoutId && workoutById.get(workoutId)?.status === 'PLANNED') plannedIds.push(workoutId);
           return {
             user_id: userId,

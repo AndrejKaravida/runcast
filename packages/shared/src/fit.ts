@@ -13,6 +13,7 @@ export interface FitWorkout {
 export interface FitBuildInput {
   workout: FitWorkout;
   paces?: PlanPaces | null;
+  startAt?: string;
 }
 
 interface FitFieldDefinition {
@@ -108,8 +109,8 @@ function fitCrc(bytes: readonly number[]): number {
   return crc;
 }
 
-function fitTimestamp(date: string): number {
-  const milliseconds = Date.parse(`${date}T00:00:00Z`);
+function fitTimestamp(instant: string): number {
+  const milliseconds = Date.parse(instant);
   if (Number.isNaN(milliseconds)) return 0;
   return Math.max(0, Math.round(milliseconds / 1000) - FIT_EPOCH_OFFSET_SECONDS);
 }
@@ -198,7 +199,7 @@ class FitWriter {
   }
 }
 
-export function buildWorkoutFit({ workout, paces = null }: FitBuildInput): Uint8Array<ArrayBuffer> {
+export function buildWorkoutFit({ workout, paces = null, startAt }: FitBuildInput): Uint8Array<ArrayBuffer> {
   const steps = workout.steps.length > 0 ? workout.steps.map(resolveStep) : [fallbackStep(workout, paces)];
   const writer = new FitWriter();
 
@@ -206,7 +207,7 @@ export function buildWorkoutFit({ workout, paces = null }: FitBuildInput): Uint8
   writer.u8(LOCAL_FILE_ID);
   writer.u8(FILE_TYPE_WORKOUT);
   writer.u16(MANUFACTURER_DEVELOPMENT);
-  writer.u32(fitTimestamp(workout.date));
+  writer.u32(fitTimestamp(startAt ?? `${workout.date}T00:00:00Z`));
 
   writer.definition(LOCAL_WORKOUT, WORKOUT_MESSAGE, WORKOUT_FIELDS);
   writer.u8(LOCAL_WORKOUT);

@@ -170,6 +170,12 @@ describe('buildWorkoutFit', () => {
     expect(steps[1].fields.get(7)).toBe(0);
   });
 
+  it('upisuje startAt kao vremensku instancu datuma', () => {
+    const bytes = buildWorkoutFit({ workout: workout(), startAt: '2026-10-20T04:00:00.000Z' });
+    const { records } = readFit(bytes);
+    expect(records[0].fields.get(4)).toBe(Math.round(Date.parse('2026-10-20T04:00:00Z') / 1000) - 631065600);
+  });
+
   it('prevodi pace u mm/s (5:00/km → 3333 mm/s)', () => {
     const bytes = buildWorkoutFit({
       workout: workout({ steps: [{ label: 'Tempo', durationSec: 600, pace: '5:00' }] }),

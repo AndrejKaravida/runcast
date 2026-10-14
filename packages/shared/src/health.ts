@@ -44,8 +44,8 @@ export function toLogDate(run: HealthRun, timeZone: string): string {
   return formatter.format(new Date(run.date));
 }
 
-function runLogDate(run: HealthRun): string {
-  return toLogDate(run, deviceTimeZone());
+function runLogDate(run: HealthRun, timeZone?: string): string {
+  return toLogDate(run, timeZone ?? deviceTimeZone());
 }
 
 function durationMatches(run: HealthRun, log: HealthLogRef): boolean {
@@ -58,9 +58,13 @@ function distanceMatches(run: HealthRun, log: HealthLogRef): boolean {
   return Math.abs(log.distance_km - run.distanceKm) <= DISTANCE_TOLERANCE_KM + 1e-9;
 }
 
-export function classifyRun(run: HealthRun, context: ImportContext): 'import' | 'duplicate' | 'imported' {
+export function classifyRun(
+  run: HealthRun,
+  context: ImportContext,
+  timeZone?: string,
+): 'import' | 'duplicate' | 'imported' {
   if (context.importedExternalIds.includes(run.externalId)) return 'imported';
-  const logDate = runLogDate(run);
+  const logDate = runLogDate(run, timeZone);
   for (const log of context.existing) {
     if (log.log_date !== logDate) continue;
     if (durationMatches(run, log) && distanceMatches(run, log)) return 'duplicate';
@@ -68,8 +72,8 @@ export function classifyRun(run: HealthRun, context: ImportContext): 'import' | 
   return 'import';
 }
 
-export function matchWorkoutId(run: HealthRun, workouts: WorkoutRef[]): string | null {
-  const logDate = runLogDate(run);
+export function matchWorkoutId(run: HealthRun, workouts: WorkoutRef[], timeZone?: string): string | null {
+  const logDate = runLogDate(run, timeZone);
   const candidates = workouts.filter(
     (workout) =>
       workout.workout_date === logDate &&

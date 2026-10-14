@@ -19,6 +19,7 @@ import {
   urlBase64ToUint8Array,
   type PushPermission,
 } from '@/features/push/push';
+import { deviceTimeZone } from '@/lib/dates';
 import type { PushSubscriptionsUpdate } from '@/types';
 
 const TOGGLE_OPTIONS = [
@@ -38,10 +39,6 @@ const REMINDERS = [
 type ReminderKey = (typeof REMINDERS)[number]['key'];
 
 const HOURS = Array.from({ length: 18 }, (_, index) => index + 5);
-
-function deviceTimeZone(): string {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Belgrade';
-}
 
 function PushSkeleton() {
   return (

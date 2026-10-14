@@ -118,6 +118,15 @@ describe('buildIcs', () => {
     expect(ics).not.toContain('TZID');
     expect(ics).not.toMatch(/DTSTART:[^\r\n]*Z/);
   });
+
+  it('prelazi na sledeći dan bez Z kada trening pređe ponoć', () => {
+    const evening: IcsEvent = { ...EVENT, startHour: 23, durationMinutes: 120 };
+    const ics = buildIcs([evening], { now: new Date('2026-01-02T03:04:05Z') });
+    expect(ics).toContain('DTSTART:20261020T230000');
+    expect(ics).toContain('DTEND:20261021T010000');
+    expect(ics).not.toMatch(/DTEND:[^\r\n]*Z/);
+    expect(new URL(buildGoogleCalendarUrl(evening)).searchParams.get('dates')).toBe('20261020T230000/20261021T010000');
+  });
 });
 
 describe('buildPlanEvents', () => {

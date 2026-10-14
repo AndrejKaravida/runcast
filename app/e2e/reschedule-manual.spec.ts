@@ -7,7 +7,8 @@ const FAKE_TODAY = '2026-01-07';
 const FAKE_RACE_DATE = '2026-05-11';
 
 function dayIso(offsetDays: number): string {
-  return new Date(Date.now() + offsetDays * MS_PER_DAY).toLocaleDateString('sv-SE');
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate() + offsetDays).toLocaleDateString('sv-SE');
 }
 
 async function mockWeather(page: Page) {

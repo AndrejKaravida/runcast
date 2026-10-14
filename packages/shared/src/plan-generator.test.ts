@@ -290,6 +290,36 @@ describe('generatePlan weekday alignment', () => {
     }
   });
 
+  it('keeps a one week plan intact when the race falls on the spring DST night', () => {
+    const plan = generatePlan({ ...fullConfig, startDate: '2026-03-23', raceDate: '2026-03-29' });
+    expect(plan.weeks).toBe(1);
+    expect(plan.workouts[0].date).toBe('2026-03-23');
+    expect(plan.workouts.at(-1)?.date).toBe('2026-03-29');
+    expect(plan.workouts.at(-1)?.type).toBe('RACE');
+    const dates = plan.workouts.map((workout) => workout.date);
+    expect(dates).toEqual([
+      '2026-03-23',
+      '2026-03-24',
+      '2026-03-25',
+      '2026-03-26',
+      '2026-03-27',
+      '2026-03-28',
+      '2026-03-29',
+    ]);
+    expect(plan.workouts.filter((workout) => workout.type === 'RACE')).toHaveLength(1);
+  });
+
+  it('keeps a long plan stable across both DST transitions', () => {
+    const plan = generatePlan({ ...fullConfig, startDate: '2026-03-02', raceDate: '2026-10-25' });
+    expect(plan.workouts[0].date).toBe('2026-03-02');
+    expect(plan.workouts.at(-1)?.date).toBe('2026-10-25');
+    expect(plan.workouts.at(-1)?.type).toBe('RACE');
+    const dates = plan.workouts.map((workout) => workout.date);
+    expect(new Set(dates).size).toBe(dates.length);
+    expect(dates).toEqual([...dates].sort());
+    expect(dayDiff('2026-03-02', '2026-10-25')).toBe(237);
+  });
+
   it('never places quality sessions adjacent to the long run', () => {
     for (let longRunDay = 0; longRunDay < 7; longRunDay++) {
       const plan = generatePlan({ ...fullConfig, longRunDay });

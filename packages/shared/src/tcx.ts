@@ -12,6 +12,7 @@ export interface TcxWorkout {
 export interface TcxBuildInput {
   workout: TcxWorkout;
   paces?: PlanPaces | null;
+  startAt?: string;
 }
 
 export interface TcxSpeedZone {
@@ -97,15 +98,16 @@ function fallbackLap(workout: TcxWorkout, paces: PlanPaces | null): TcxLap {
   };
 }
 
-export function buildWorkoutTcx({ workout, paces = null }: TcxBuildInput): string {
+export function buildWorkoutTcx({ workout, paces = null, startAt }: TcxBuildInput): string {
   const laps = workout.steps.length > 0 ? workout.steps.map(stepLap) : [fallbackLap(workout, paces)];
-  const startMs = Date.parse(`${workout.date}T00:00:00Z`);
+  const startMs = Date.parse(startAt ?? `${workout.date}T00:00:00Z`);
+  const startIso = new Date(startMs).toISOString().replace('.000Z', 'Z');
   const lines = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2">',
     '  <Activities>',
     '    <Activity Sport="Running">',
-    `      <Id>${workout.date}T00:00:00Z</Id>`,
+    `      <Id>${startIso}</Id>`,
   ];
   let cursorSec = 0;
   laps.forEach((lap, index) => {
