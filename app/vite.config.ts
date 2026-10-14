@@ -5,8 +5,11 @@ import { defineConfig, type Plugin } from 'vite';
 import { VitePWA, type ManifestOptions } from 'vite-plugin-pwa';
 
 const appManifest: Partial<ManifestOptions> = {
+  id: '/',
   name: 'RunCast',
   short_name: 'RunCast',
+  description:
+    'Plan trčanja koji sluša vremensku prognozu: dnevni treninzi, prilagođavanje kiši i vrućini, praćenje napretka i priprema za maraton.',
   theme_color: '#0b0f1a',
   background_color: '#0b0f1a',
   display: 'standalone',
@@ -48,11 +51,12 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       devOptions: { enabled: false },
+      includeManifestIcons: false,
       manifest: appManifest,
-      includeAssets: ['icons/*.png', 'theme-init.js'],
       workbox: {
-        globPatterns: ['**/*.{js,css,html,woff2,png,svg,webmanifest}'],
+        globPatterns: ['**/*.{js,css,html,woff2,png,svg}'],
         navigateFallback: '/index.html',
+        clientsClaim: true,
         runtimeCaching: [],
         importScripts: ['push-sw.js'],
       },

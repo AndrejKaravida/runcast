@@ -12,8 +12,10 @@ test('PWA manifest, ikone i theme-color su dostupni', async ({ page, request }) 
   expect(manifestResponse.headers()['content-type']).toContain('application/manifest+json');
 
   const manifest = await manifestResponse.json();
+  expect(manifest.id).toBe('/');
   expect(manifest.name).toBe('RunCast');
   expect(manifest.short_name).toBe('RunCast');
+  expect(manifest.description).toBeTruthy();
   expect(manifest.display).toBe('standalone');
   expect(manifest.start_url).toBe('/');
   expect(manifest.theme_color).toBe('#0b0f1a');
